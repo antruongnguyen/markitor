@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { EditorSelection } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
+import { Plus, Minus, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import {
   parseTableAtCursor,
   generateTable,
@@ -144,9 +145,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         className="flex h-6 items-center rounded px-1.5 text-[10px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         onClick={handleAddRowAbove}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-        </svg>
+        <Plus size={12} strokeWidth={1.5} />
         <span className="ml-0.5">↑Row</span>
       </button>
       <button
@@ -155,9 +154,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         className="flex h-6 items-center rounded px-1.5 text-[10px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         onClick={handleAddRowBelow}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-        </svg>
+        <Plus size={12} strokeWidth={1.5} />
         <span className="ml-0.5">↓Row</span>
       </button>
       <button
@@ -167,9 +164,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         onClick={handleDeleteRow}
         disabled={table.cursorRow < 0 || table.rows.length <= 1}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z" />
-        </svg>
+        <Minus size={12} strokeWidth={1.5} />
         <span className="ml-0.5">Row</span>
       </button>
 
@@ -182,9 +177,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         className="flex h-6 items-center rounded px-1.5 text-[10px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         onClick={handleAddColLeft}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-        </svg>
+        <Plus size={12} strokeWidth={1.5} />
         <span className="ml-0.5">←Col</span>
       </button>
       <button
@@ -193,9 +186,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         className="flex h-6 items-center rounded px-1.5 text-[10px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         onClick={handleAddColRight}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-        </svg>
+        <Plus size={12} strokeWidth={1.5} />
         <span className="ml-0.5">→Col</span>
       </button>
       <button
@@ -205,9 +196,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         onClick={handleDeleteCol}
         disabled={table.headers.length <= 1}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z" />
-        </svg>
+        <Minus size={12} strokeWidth={1.5} />
         <span className="ml-0.5">Col</span>
       </button>
 
@@ -224,9 +213,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         }`}
         onClick={() => handleAlign('left')}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path fillRule="evenodd" d="M2 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
-        </svg>
+        <AlignLeft size={12} strokeWidth={1.5} />
       </button>
       <button
         type="button"
@@ -238,9 +225,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         }`}
         onClick={() => handleAlign('center')}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path fillRule="evenodd" d="M4 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
-        </svg>
+        <AlignCenter size={12} strokeWidth={1.5} />
       </button>
       <button
         type="button"
@@ -252,9 +237,7 @@ export function TableToolbar({ getView }: TableToolbarProps) {
         }`}
         onClick={() => handleAlign('right')}
       >
-        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-          <path fillRule="evenodd" d="M6 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm4-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
-        </svg>
+        <AlignRight size={12} strokeWidth={1.5} />
       </button>
     </div>
   )

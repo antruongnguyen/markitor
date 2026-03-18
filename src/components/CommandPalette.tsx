@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Search } from 'lucide-react'
 import { useCommandPaletteStore } from '../store/commandPaletteStore'
 import { useThemeStore } from '../store/themeStore'
 import { useTocStore } from '../store/tocStore'
@@ -403,9 +404,7 @@ function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
       >
         {/* Search input */}
         <div className="flex items-center gap-2 border-b border-gray-200 px-4 dark:border-gray-700">
-          <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <Search size={16} strokeWidth={1.5} className="shrink-0 text-gray-400" />
           <input
             ref={inputRef}
             type="text"

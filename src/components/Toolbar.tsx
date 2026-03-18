@@ -1,6 +1,25 @@
 import { useCallback, useState } from 'react'
 import type { EditorView } from '@codemirror/view'
 import { openSearchPanel } from '@codemirror/search'
+import type { LucideIcon } from 'lucide-react'
+import {
+  Bold,
+  Italic,
+  Strikethrough,
+  Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Quote,
+  Link,
+  Image,
+  FileCode,
+  Minus,
+  Search,
+  Table,
+} from 'lucide-react'
 import {
   toggleBold,
   toggleItalic,
@@ -20,31 +39,31 @@ import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
 
 type ToolbarButton = {
-  label: string
+  icon: LucideIcon
   title: string
   action: (view: EditorView) => boolean
 }
 
 const buttons: (ToolbarButton | 'separator')[] = [
-  { label: 'B', title: 'Bold (Ctrl+B)', action: toggleBold },
-  { label: 'I', title: 'Italic (Ctrl+I)', action: toggleItalic },
-  { label: 'S', title: 'Strikethrough (Ctrl+Shift+X)', action: toggleStrikethrough },
-  { label: '</>', title: 'Inline code (Ctrl+E)', action: toggleInlineCode },
+  { icon: Bold, title: 'Bold (Ctrl+B)', action: toggleBold },
+  { icon: Italic, title: 'Italic (Ctrl+I)', action: toggleItalic },
+  { icon: Strikethrough, title: 'Strikethrough (Ctrl+Shift+X)', action: toggleStrikethrough },
+  { icon: Code, title: 'Inline code (Ctrl+E)', action: toggleInlineCode },
   'separator',
-  { label: 'H1', title: 'Heading 1 (Ctrl+1)', action: (v) => toggleHeading(v, 1) },
-  { label: 'H2', title: 'Heading 2 (Ctrl+2)', action: (v) => toggleHeading(v, 2) },
-  { label: 'H3', title: 'Heading 3 (Ctrl+3)', action: (v) => toggleHeading(v, 3) },
+  { icon: Heading1, title: 'Heading 1 (Ctrl+1)', action: (v) => toggleHeading(v, 1) },
+  { icon: Heading2, title: 'Heading 2 (Ctrl+2)', action: (v) => toggleHeading(v, 2) },
+  { icon: Heading3, title: 'Heading 3 (Ctrl+3)', action: (v) => toggleHeading(v, 3) },
   'separator',
-  { label: '•', title: 'Unordered list (Ctrl+L)', action: toggleUnorderedList },
-  { label: '1.', title: 'Ordered list (Ctrl+Shift+L)', action: toggleOrderedList },
-  { label: '❝', title: 'Blockquote (Ctrl+Shift+Q)', action: insertBlockquote },
+  { icon: List, title: 'Unordered list (Ctrl+L)', action: toggleUnorderedList },
+  { icon: ListOrdered, title: 'Ordered list (Ctrl+Shift+L)', action: toggleOrderedList },
+  { icon: Quote, title: 'Blockquote (Ctrl+Shift+Q)', action: insertBlockquote },
   'separator',
-  { label: '🔗', title: 'Link (Ctrl+K)', action: toggleLink },
-  { label: '🖼', title: 'Image', action: toggleImage },
-  { label: '{ }', title: 'Code block (Ctrl+Shift+K)', action: toggleCodeBlock },
-  { label: '—', title: 'Horizontal rule', action: insertHorizontalRule },
+  { icon: Link, title: 'Link (Ctrl+K)', action: toggleLink },
+  { icon: Image, title: 'Image', action: toggleImage },
+  { icon: FileCode, title: 'Code block (Ctrl+Shift+K)', action: toggleCodeBlock },
+  { icon: Minus, title: 'Horizontal rule', action: insertHorizontalRule },
   'separator',
-  { label: '🔍', title: 'Find & Replace (Ctrl+F)', action: openSearchPanel },
+  { icon: Search, title: 'Find & Replace (Ctrl+F)', action: openSearchPanel },
 ]
 
 type ToolbarProps = {
@@ -87,37 +106,20 @@ export function Toolbar({ getView }: ToolbarProps) {
           )
         }
 
-        const isStyled =
-          item.label === 'B' ||
-          item.label === 'I' ||
-          item.label === 'S'
+        const Icon = item.icon
 
         return (
           <button
             key={item.title}
             type="button"
             title={item.title}
-            className={`flex h-7 min-w-[28px] items-center justify-center rounded px-1.5 text-xs transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
-              isStyled ? 'text-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400'
-            }`}
+            className="flex h-7 min-w-[28px] items-center justify-center rounded px-1.5 text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
             onMouseDown={(e) => {
               e.preventDefault()
               handleClick(item.action)
             }}
           >
-            <span
-              className={
-                item.label === 'B'
-                  ? 'font-bold'
-                  : item.label === 'I'
-                    ? 'italic font-serif'
-                    : item.label === 'S'
-                      ? 'line-through'
-                      : ''
-              }
-            >
-              {item.label}
-            </span>
+            <Icon size={18} strokeWidth={1.5} />
           </button>
         )
       })}
@@ -127,15 +129,13 @@ export function Toolbar({ getView }: ToolbarProps) {
         <button
           type="button"
           title="Insert table"
-          className="flex h-7 min-w-[28px] items-center justify-center rounded px-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+          className="flex h-7 min-w-[28px] items-center justify-center rounded px-1.5 text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
           onMouseDown={(e) => {
             e.preventDefault()
             setShowTablePicker((prev) => !prev)
           }}
         >
-          <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm1 1v4h6V3H1zm7 0v4h7V3H8zM1 8v4h6V8H1zm7 0v4h7V8H8zM1 13v1a1 1 0 0 0 1 1h5v-2H1zm7 0v2h6a1 1 0 0 0 1-1v-1H8zM1 2a1 1 0 0 1 1-1h5v1H1zm7-1h6a1 1 0 0 1 1 1H8V1z" />
-          </svg>
+          <Table size={18} strokeWidth={1.5} />
         </button>
         {showTablePicker && (
           <TableGridPicker

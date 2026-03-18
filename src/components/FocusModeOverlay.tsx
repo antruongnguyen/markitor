@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Type, Minimize2 } from 'lucide-react'
 import { useFocusModeStore } from '../store/focusModeStore'
 
 export function FocusModeOverlay() {
@@ -41,7 +42,7 @@ export function FocusModeOverlay() {
     >
       <button
         type="button"
-        className={`pointer-events-auto rounded-full px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-sm transition-colors ${
+        className={`pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-sm transition-colors ${
           typewriterMode
             ? 'bg-blue-600/80 text-white hover:bg-blue-500/80'
             : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
@@ -49,14 +50,16 @@ export function FocusModeOverlay() {
         onClick={toggleTypewriter}
         title="Toggle typewriter mode"
       >
+        <Type size={14} strokeWidth={1.5} />
         Typewriter
       </button>
       <button
         type="button"
-        className="pointer-events-auto rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white/70 shadow-lg backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+        className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white/70 shadow-lg backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
         onClick={exit}
         title="Exit focus mode (Escape)"
       >
+        <Minimize2 size={14} strokeWidth={1.5} />
         Exit Focus
       </button>
     </div>
