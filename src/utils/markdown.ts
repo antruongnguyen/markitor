@@ -1,6 +1,7 @@
 import MarkdownIt from 'markdown-it'
 // @ts-expect-error -- no type declarations for this package
 import taskLists from 'markdown-it-task-lists'
+import { mathPlugin } from './mathPlugin'
 import hljs from 'highlight.js/lib/core'
 import bash from 'highlight.js/lib/languages/bash'
 import css from 'highlight.js/lib/languages/css'
@@ -59,4 +60,5 @@ export const md = MarkdownIt({
   },
 })
   .use(taskLists, { enabled: true })
+  .use(mathPlugin)
   .use(sourceLinePlugin)

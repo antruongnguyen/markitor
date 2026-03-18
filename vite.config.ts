@@ -17,6 +17,10 @@ export default defineConfig({
             return 'vendor-markdown'
           }
 
+          if (id.includes('node_modules/katex')) {
+            return 'vendor-katex'
+          }
+
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/scheduler')) {
             return 'vendor-react'
           }

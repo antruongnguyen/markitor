@@ -6,6 +6,9 @@
 /* highlight.js theme — GitHub-style for light preview */
 @import "highlight.js/styles/github.css";
 
+/* KaTeX math rendering styles */
+@import "katex/dist/katex.min.css";
+
 /* ── Preview prose typography (light mode) ── */
 
 .preview-content {
@@ -554,6 +557,46 @@
   border-color: #7f1d1d;
   background: #1c1012;
   color: #fca5a5;
+}
+
+/* ── Math (KaTeX) rendering ── */
+
+.math-block {
+  margin: 1em 0;
+  overflow-x: auto;
+}
+
+.preview-content .katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.math-error {
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.85em;
+}
+
+.math-error pre {
+  margin: 0;
+  padding: 0.5em;
+  white-space: pre-wrap;
+  font-size: 0.85em;
+}
+
+.dark .math-error {
+  border-color: #7f1d1d;
+  background: #1c1012;
+  color: #fca5a5;
+}
+
+/* Ensure KaTeX inherits text color for theme support */
+.preview-content .katex {
+  color: inherit;
 }
 
 /* ── Print styles ── */
