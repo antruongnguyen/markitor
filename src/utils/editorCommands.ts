@@ -1,6 +1,7 @@
 import { EditorSelection } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
 import { createEmptyTable } from './tableUtils'
+import { formatMarkdown } from './markdownFormatter'
 
 type WrapSelectionOptions = {
   prefix: string
@@ -239,6 +240,36 @@ export function insertHorizontalRule(view: EditorView): boolean {
   view.dispatch({
     changes: { from: line.to, to: line.to, insert },
     selection: EditorSelection.single(cursorPos, cursorPos),
+    scrollIntoView: true,
+  })
+
+  return true
+}
+
+/**
+ * Format the entire document using the markdown formatter.
+ * Replaces the full content via a CodeMirror transaction so undo history is
+ * preserved. Attempts to keep the cursor position as close as possible.
+ */
+export function formatDocument(view: EditorView): boolean {
+  const { state } = view
+  const oldText = state.doc.toString()
+  const formatted = formatMarkdown(oldText)
+
+  // Nothing to change.
+  if (formatted === oldText) return true
+
+  // Preserve cursor position relative to document length.
+  const cursorPos = state.selection.main.head
+  const ratio = oldText.length > 0 ? cursorPos / oldText.length : 0
+  const newCursorPos = Math.min(
+    Math.round(ratio * formatted.length),
+    formatted.length,
+  )
+
+  view.dispatch({
+    changes: { from: 0, to: oldText.length, insert: formatted },
+    selection: EditorSelection.single(newCursorPos),
     scrollIntoView: true,
   })
 

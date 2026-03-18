@@ -19,6 +19,7 @@ import {
   Minus,
   Search,
   Table,
+  AlignLeft,
 } from 'lucide-react'
 import {
   toggleBold,
@@ -34,7 +35,10 @@ import {
   insertBlockquote,
   insertHorizontalRule,
   insertTable,
+  formatDocument,
 } from '../utils/editorCommands'
+import { useToastStore } from '../store/toastStore'
+import { useEditorStore } from '../store/editorStore'
 import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
 
@@ -64,6 +68,8 @@ const buttons: (ToolbarButton | 'separator')[] = [
   { icon: Minus, title: 'Horizontal rule', action: insertHorizontalRule },
   'separator',
   { icon: Search, title: 'Find & Replace (Ctrl+F)', action: openSearchPanel },
+  'separator',
+  { icon: AlignLeft, title: 'Format Document (Alt+Shift+F)', action: formatDocument },
 ]
 
 type ToolbarProps = {
@@ -72,6 +78,7 @@ type ToolbarProps = {
 
 export function Toolbar({ getView }: ToolbarProps) {
   const [showTablePicker, setShowTablePicker] = useState(false)
+  const showToast = useToastStore((s) => s.show)
 
   const handleClick = useCallback(
     (action: (view: EditorView) => boolean) => {
@@ -79,8 +86,12 @@ export function Toolbar({ getView }: ToolbarProps) {
       if (!view) return
       action(view)
       view.focus()
+      if (action === formatDocument) {
+        useEditorStore.getState().setDirty(true)
+        showToast('Document formatted')
+      }
     },
-    [getView],
+    [getView, showToast],
   )
 
   const handleTableInsert = useCallback(

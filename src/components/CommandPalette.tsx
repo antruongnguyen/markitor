@@ -24,7 +24,9 @@ import {
   toggleOrderedList,
   insertBlockquote,
   insertHorizontalRule,
+  formatDocument,
 } from '../utils/editorCommands'
+import { useToastStore } from '../store/toastStore'
 
 
 type Command = {
@@ -204,6 +206,21 @@ function buildCommands(handlers: {
       label: 'Horizontal Rule',
       category: 'Format',
       execute: editorCmd(insertHorizontalRule),
+    },
+    {
+      id: 'format.document',
+      label: 'Format Document',
+      category: 'Format',
+      shortcut: 'Alt+Shift+F',
+      execute: () => {
+        const view = editorViewRef.current
+        if (view) {
+          formatDocument(view)
+          useEditorStore.getState().setDirty(true)
+          useToastStore.getState().show('Document formatted')
+          view.focus()
+        }
+      },
     },
 
     // View commands

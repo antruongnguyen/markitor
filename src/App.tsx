@@ -23,6 +23,7 @@ import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
 import { TabBar } from './components/TabBar'
 import { TableOfContents } from './components/TableOfContents'
+import { ToastContainer } from './components/Toast'
 import { useAIStore } from './store/aiStore'
 import { useCommandPaletteStore } from './store/commandPaletteStore'
 import { useEditorStore } from './store/editorStore'
@@ -429,6 +430,7 @@ function App() {
         <FocusModeOverlay />
         <CommandPalette onOpen={handleOpen} onSave={handleSave} />
         <SettingsDialog />
+        <ToastContainer />
       </div>
     )
   }
@@ -498,6 +500,7 @@ function App() {
       <StatusBar />
       <CommandPalette onOpen={handleOpen} onSave={handleSave} />
       <SettingsDialog />
+      <ToastContainer />
     </div>
   )
 }

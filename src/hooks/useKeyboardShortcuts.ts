@@ -12,7 +12,10 @@ import {
   toggleUnorderedList,
   toggleOrderedList,
   insertBlockquote,
+  formatDocument,
 } from '../utils/editorCommands'
+import { useToastStore } from '../store/toastStore'
+import { useEditorStore } from '../store/editorStore'
 
 type ShortcutHandlers = {
   onSave?: () => void | Promise<void>
@@ -33,6 +36,17 @@ function makeShortcutBindings(handlers: ShortcutHandlers): KeyBinding[] {
     { key: 'Mod-l', run: toggleUnorderedList },
     { key: 'Mod-Shift-l', run: toggleOrderedList },
     { key: 'Mod-Shift-q', run: insertBlockquote },
+    {
+      key: 'Alt-Shift-f',
+      run: (view) => {
+        const result = formatDocument(view)
+        if (result) {
+          useEditorStore.getState().setDirty(true)
+          useToastStore.getState().show('Document formatted')
+        }
+        return result
+      },
+    },
     {
       key: 'Mod-s',
       run: () => {
