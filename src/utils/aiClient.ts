@@ -1,13 +1,12 @@
 /**
- * OpenAI-compatible chat completions client.
+ * AI chat client using official SDK libraries.
  *
- * Sends requests using the /v1/chat/completions format which is supported by
- * OpenAI, Ollama, LM Studio, Together AI, vLLM, and many other providers.
- *
- * For Anthropic, we detect the provider and use the native /v1/messages API
- * with anthropic-specific headers to preserve full compatibility.
+ * - Anthropic SDK for native Anthropic API (supports browser via dangerouslyAllowBrowser)
+ * - OpenAI SDK for all OpenAI-compatible providers (OpenAI, Ollama, LM Studio, Together AI, etc.)
  */
 
+import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import type { ProviderId } from '../store/aiStore'
 
 export type StreamCallback = (chunk: string) => void
@@ -16,52 +15,14 @@ function isAnthropicProvider(provider: ProviderId, baseUrl: string): boolean {
   return provider === 'anthropic' || baseUrl.includes('anthropic.com')
 }
 
-async function streamAnthropicNative(opts: {
-  apiKey: string
-  baseUrl: string
-  model: string
-  maxTokens: number
-  system: string
-  userMessage: string
-  onChunk: StreamCallback
-  signal?: AbortSignal
-}): Promise<string> {
-  const { apiKey, baseUrl, model, maxTokens, system, userMessage, onChunk, signal } = opts
-  const url = `${baseUrl.replace(/\/+$/, '')}/v1/messages`
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: maxTokens,
-      stream: true,
-      system,
-      messages: [{ role: 'user', content: userMessage }],
-    }),
-    signal,
-  })
-
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`API error ${res.status}: ${body}`)
-  }
-
-  return parseSSE(res, (data) => {
-    const event = JSON.parse(data)
-    if (event.type === 'content_block_delta' && event.delta?.text) {
-      return event.delta.text
-    }
-    return null
-  }, onChunk)
+/** Ensure the base URL ends with /v1 for the OpenAI SDK (it appends /chat/completions). */
+function toOpenAIBaseURL(baseUrl: string): string {
+  const cleaned = baseUrl.replace(/\/+$/, '')
+  if (/\/v\d+$/.test(cleaned)) return cleaned
+  return `${cleaned}/v1`
 }
 
-async function streamOpenAICompatible(opts: {
+async function streamWithAnthropic(opts: {
   apiKey: string
   baseUrl: string
   model: string
@@ -71,77 +32,67 @@ async function streamOpenAICompatible(opts: {
   onChunk: StreamCallback
   signal?: AbortSignal
 }): Promise<string> {
-  const { apiKey, baseUrl, model, maxTokens, system, userMessage, onChunk, signal } = opts
-  const url = `${baseUrl.replace(/\/+$/, '')}/v1/chat/completions`
+  const client = new Anthropic({
+    apiKey: opts.apiKey,
+    baseURL: opts.baseUrl.replace(/\/+$/, ''),
+    dangerouslyAllowBrowser: true,
+  })
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-  if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`
-  }
+  const stream = client.messages.stream(
+    {
+      model: opts.model,
+      max_tokens: opts.maxTokens,
+      system: opts.system,
+      messages: [{ role: 'user' as const, content: opts.userMessage }],
+    },
+    { signal: opts.signal },
+  )
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model,
-      max_tokens: maxTokens,
+  let full = ''
+  stream.on('text', (text) => {
+    full += text
+    opts.onChunk(text)
+  })
+
+  await stream.finalMessage()
+  return full
+}
+
+async function streamWithOpenAI(opts: {
+  apiKey: string
+  baseUrl: string
+  model: string
+  maxTokens: number
+  system: string
+  userMessage: string
+  onChunk: StreamCallback
+  signal?: AbortSignal
+}): Promise<string> {
+  const client = new OpenAI({
+    apiKey: opts.apiKey || 'not-required',
+    baseURL: toOpenAIBaseURL(opts.baseUrl),
+    dangerouslyAllowBrowser: true,
+  })
+
+  const stream = await client.chat.completions.create(
+    {
+      model: opts.model,
+      max_tokens: opts.maxTokens,
       stream: true,
       messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: userMessage },
+        { role: 'system' as const, content: opts.system },
+        { role: 'user' as const, content: opts.userMessage },
       ],
-    }),
-    signal,
-  })
+    },
+    { signal: opts.signal },
+  )
 
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`API error ${res.status}: ${body}`)
-  }
-
-  return parseSSE(res, (data) => {
-    const event = JSON.parse(data)
-    const delta = event.choices?.[0]?.delta?.content
-    return delta ?? null
-  }, onChunk)
-}
-
-async function parseSSE(
-  res: Response,
-  extractText: (data: string) => string | null,
-  onChunk: StreamCallback,
-): Promise<string> {
-  const reader = res.body!.getReader()
-  const decoder = new TextDecoder()
   let full = ''
-  let buffer = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    buffer += decoder.decode(value, { stream: true })
-
-    const lines = buffer.split('\n')
-    buffer = lines.pop()!
-
-    for (const rawLine of lines) {
-      const line = rawLine.replace(/\r$/, '')
-      if (!line.startsWith('data: ')) continue
-      const data = line.slice(6)
-      if (data === '[DONE]') continue
-
-      try {
-        const text = extractText(data)
-        if (text) {
-          full += text
-          onChunk(text)
-        }
-      } catch {
-        // skip malformed JSON lines
-      }
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content
+    if (content) {
+      full += content
+      opts.onChunk(content)
     }
   }
 
@@ -161,23 +112,25 @@ export async function sendMessage(opts: {
 }): Promise<string> {
   try {
     if (isAnthropicProvider(opts.provider, opts.baseUrl)) {
-      return await streamAnthropicNative(opts)
+      return await streamWithAnthropic(opts)
     }
-    return await streamOpenAICompatible(opts)
-  } catch (err) {
-    // Provide helpful error messages for common failures
-    if (err instanceof TypeError && /fetch|network/i.test(err.message)) {
-      const isLocal = /localhost|127\.0\.0\.1/i.test(opts.baseUrl)
-      if (isLocal) {
-        throw new Error(
-          `Could not connect to ${opts.baseUrl}. Make sure the local server (e.g. Ollama) is running.`,
-        )
-      }
-      throw new Error(
-        `Network error connecting to ${opts.baseUrl}. This is likely a CORS issue — most AI providers (including OpenAI) block direct browser requests. ` +
-          `Use Anthropic (which supports browser access) or a local provider like Ollama, or route through a CORS proxy.`,
-      )
-    }
+    return await streamWithOpenAI(opts)
+  } catch (err: unknown) {
+    if (err instanceof DOMException && err.name === 'AbortError') throw err
+
+    // Surface SDK error messages clearly
+    const msg =
+      err instanceof Anthropic.APIConnectionError || err instanceof OpenAI.APIConnectionError
+        ? `Connection failed to ${opts.baseUrl}. ${/localhost|127\.0\.0\.1/i.test(opts.baseUrl) ? 'Make sure the local server (e.g. Ollama) is running.' : 'This may be a CORS issue — use Anthropic (supports browser access) or a local provider like Ollama.'}`
+        : err instanceof Anthropic.APIError
+          ? `Anthropic API error ${err.status}: ${err.message}`
+          : err instanceof OpenAI.APIError
+            ? `API error ${err.status}: ${err.message}`
+            : err instanceof TypeError && /fetch|network/i.test(err.message)
+              ? `Network error connecting to ${opts.baseUrl}. Check your connection and provider settings.`
+              : null
+
+    if (msg) throw new Error(msg)
     throw err
   }
 }
