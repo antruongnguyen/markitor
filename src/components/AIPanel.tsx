@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useEffect } from 'react'
+import { useCallback, useRef, useState, useEffect, useSyncExternalStore } from 'react'
 import { Trash2, Settings, Send, ChevronDown } from 'lucide-react'
 import { useAIStore } from '../store/aiStore'
 import { useEditorStore } from '../store/editorStore'
@@ -28,6 +28,46 @@ function getContextAroundCursor(): string {
   const pos = view.state.selection.main.head
   const start = Math.max(0, pos - 500)
   return doc.slice(start, pos)
+}
+
+// Reactive selection tracking via polling (CodeMirror doesn't emit DOM events on selection change)
+let _selectionListeners = new Set<() => void>()
+let _hasSelection = false
+let _pollTimer: ReturnType<typeof setInterval> | null = null
+
+function startSelectionPolling() {
+  if (_pollTimer) return
+  _pollTimer = setInterval(() => {
+    const next = !!getSelectedText()
+    if (next !== _hasSelection) {
+      _hasSelection = next
+      _selectionListeners.forEach((l) => l())
+    }
+  }, 250)
+}
+
+function stopSelectionPolling() {
+  if (_pollTimer) {
+    clearInterval(_pollTimer)
+    _pollTimer = null
+  }
+}
+
+function subscribeSelection(listener: () => void) {
+  _selectionListeners.add(listener)
+  startSelectionPolling()
+  return () => {
+    _selectionListeners.delete(listener)
+    if (_selectionListeners.size === 0) stopSelectionPolling()
+  }
+}
+
+function getSelectionSnapshot() {
+  return _hasSelection
+}
+
+function useHasSelection() {
+  return useSyncExternalStore(subscribeSelection, getSelectionSnapshot)
 }
 
 export function AIPanel() {
@@ -133,7 +173,7 @@ export function AIPanel() {
         addMessage({
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: full,
+          content: full || '(Empty response from AI — check your model and API settings)',
           action,
           timestamp: Date.now(),
         })
@@ -179,7 +219,7 @@ export function AIPanel() {
     [customPrompt, runAction],
   )
 
-  const hasSelection = !!getSelectedText()
+  const hasSelection = useHasSelection()
 
   const toggleCategory = useCallback((catId: string) => {
     setExpandedCategory((prev) => (prev === catId ? null : catId))

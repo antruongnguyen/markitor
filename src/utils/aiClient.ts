@@ -127,7 +127,8 @@ async function parseSSE(
     const lines = buffer.split('\n')
     buffer = lines.pop()!
 
-    for (const line of lines) {
+    for (const rawLine of lines) {
+      const line = rawLine.replace(/\r$/, '')
       if (!line.startsWith('data: ')) continue
       const data = line.slice(6)
       if (data === '[DONE]') continue
@@ -158,10 +159,27 @@ export async function sendMessage(opts: {
   onChunk: StreamCallback
   signal?: AbortSignal
 }): Promise<string> {
-  if (isAnthropicProvider(opts.provider, opts.baseUrl)) {
-    return streamAnthropicNative(opts)
+  try {
+    if (isAnthropicProvider(opts.provider, opts.baseUrl)) {
+      return await streamAnthropicNative(opts)
+    }
+    return await streamOpenAICompatible(opts)
+  } catch (err) {
+    // Provide helpful error messages for common failures
+    if (err instanceof TypeError && /fetch|network/i.test(err.message)) {
+      const isLocal = /localhost|127\.0\.0\.1/i.test(opts.baseUrl)
+      if (isLocal) {
+        throw new Error(
+          `Could not connect to ${opts.baseUrl}. Make sure the local server (e.g. Ollama) is running.`,
+        )
+      }
+      throw new Error(
+        `Network error connecting to ${opts.baseUrl}. This is likely a CORS issue — most AI providers (including OpenAI) block direct browser requests. ` +
+          `Use Anthropic (which supports browser access) or a local provider like Ollama, or route through a CORS proxy.`,
+      )
+    }
+    throw err
   }
-  return streamOpenAICompatible(opts)
 }
 
 export function buildSystemPrompt(documentContent: string): string {
