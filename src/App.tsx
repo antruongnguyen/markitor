@@ -18,6 +18,7 @@ import {
 import { AIPanel } from './components/AIPanel'
 import { CommandPalette } from './components/CommandPalette'
 import { FocusModeOverlay } from './components/FocusModeOverlay'
+import { InstallBanner } from './components/InstallBanner'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
@@ -33,6 +34,7 @@ import { useThemeStore, type ThemeMode } from './store/themeStore'
 import { useTocStore } from './store/tocStore'
 import { useScrollSyncStore } from './store/scrollSyncStore'
 import { useLayoutStore, type LayoutMode } from './store/layoutStore'
+import { usePWAStore } from './store/pwaStore'
 import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
 
@@ -425,6 +427,9 @@ function App() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  // Initialize PWA store (online/offline + install prompt listeners)
+  useEffect(() => usePWAStore.getState()._init(), [])
+
   if (focusMode) {
     return (
       <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#faf9f6] transition-colors duration-300 dark:bg-[#0d1117]">
@@ -487,6 +492,7 @@ function App() {
         </div>
       </header>
 
+      <InstallBanner />
       <TabBar />
 
       <div className="flex min-h-0 flex-1">

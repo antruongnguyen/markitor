@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState, useEffect, useSyncExternalStore } from 'react'
-import { Trash2, Settings, Send, ChevronDown } from 'lucide-react'
+import { Trash2, Settings, Send, ChevronDown, WifiOff } from 'lucide-react'
 import { useAIStore } from '../store/aiStore'
 import { useEditorStore } from '../store/editorStore'
+import { usePWAStore } from '../store/pwaStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import {
   sendMessage,
@@ -87,6 +88,7 @@ export function AIPanel() {
   const clearMessages = useAIStore((s) => s.clearMessages)
   const setSettingsOpen = useAIStore((s) => s.setSettingsOpen)
   const content = useEditorStore((s) => s.content)
+  const online = usePWAStore((s) => s.online)
 
   const [customPrompt, setCustomPrompt] = useState('')
   const [expandedCategory, setExpandedCategory] = useState<string | null>('writing')
@@ -111,6 +113,16 @@ export function AIPanel() {
 
   const runAction = useCallback(
     async (action: ActionId) => {
+      if (!navigator.onLine) {
+        addMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: 'You are offline. AI features require an internet connection.',
+          timestamp: Date.now(),
+        })
+        return
+      }
+
       const preset = provider
       const needsKey = preset === 'anthropic' || preset === 'openai'
       if (needsKey && !apiKey) {
@@ -254,6 +266,14 @@ export function AIPanel() {
           </button>
         </div>
       </div>
+
+      {/* Offline notice */}
+      {!online && (
+        <div className="flex items-center gap-2 border-b border-amber-200/60 bg-amber-50/80 px-3 py-2 dark:border-amber-500/20 dark:bg-amber-500/10">
+          <WifiOff size={12} strokeWidth={1.5} className="shrink-0 text-amber-600 dark:text-amber-400" />
+          <span className="text-[11px] text-amber-700 dark:text-amber-300">Offline — AI features unavailable</span>
+        </div>
+      )}
 
       {/* Actions by category — collapsible */}
       <div className="border-b border-gray-200/80 dark:border-gray-700/60">

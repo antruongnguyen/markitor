@@ -9,6 +9,8 @@ import { useFocusModeStore } from '../store/focusModeStore'
 import { useEditorStore } from '../store/editorStore'
 import { useTabStore } from '../store/tabStore'
 import { useLayoutStore } from '../store/layoutStore'
+import { usePWAStore } from '../store/pwaStore'
+import { useTemplateGalleryStore } from '../store/templateGalleryStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { exportHTML, exportPDF } from '../utils/exportDocument'
 import {
@@ -65,6 +67,14 @@ function buildCommands(handlers: {
       category: 'File',
       execute: () => {
         useTabStore.getState().addTab()
+      },
+    },
+    {
+      id: 'file.new-from-template',
+      label: 'New from Template',
+      category: 'File',
+      execute: () => {
+        useTemplateGalleryStore.getState().setOpen(true)
       },
     },
     {
@@ -302,6 +312,18 @@ function buildCommands(handlers: {
       shortcut: `${mod()}+Shift+3`,
       execute: () => useLayoutStore.getState().setMode('preview'),
     },
+
+    // App commands
+    ...(usePWAStore.getState().installable
+      ? [
+          {
+            id: 'app.install',
+            label: 'Install App',
+            category: 'App',
+            execute: () => usePWAStore.getState().promptInstall(),
+          },
+        ]
+      : []),
   ]
 }
 

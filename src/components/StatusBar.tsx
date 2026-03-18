@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
+import { WifiOff } from 'lucide-react'
 import { useEditorStore } from '../store/editorStore'
 import { useLayoutStore } from '../store/layoutStore'
+import { usePWAStore } from '../store/pwaStore'
 
 const layoutModeLabels = {
   editor: 'Editor',
@@ -22,6 +24,7 @@ export function StatusBar() {
   const cursorColumn = useEditorStore((s) => s.cursorColumn)
   const layoutMode = useLayoutStore((s) => s.mode)
   const cycleMode = useLayoutStore((s) => s.cycleMode)
+  const online = usePWAStore((s) => s.online)
 
   const { words, characters, lines, readingTime } = useMemo(() => computeStats(content), [content])
 
@@ -37,6 +40,15 @@ export function StatusBar() {
         <span>{readingTime} min read</span>
       </div>
       <div className="flex items-center gap-2.5">
+        {!online && (
+          <>
+            <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400" title="You are offline — AI features unavailable">
+              <WifiOff size={12} strokeWidth={1.5} />
+              Offline
+            </span>
+            <span className="text-gray-300 dark:text-gray-600">·</span>
+          </>
+        )}
         <span>Ln {cursorLine}, Col {cursorColumn}</span>
         <span className="text-gray-300 dark:text-gray-600">·</span>
         <button
