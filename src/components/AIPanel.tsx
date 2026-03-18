@@ -46,6 +46,7 @@ export function AIPanel() {
   const loading = useAIStore((s) => s.loading)
   const streamingContent = useAIStore((s) => s.streamingContent)
   const apiKey = useAIStore((s) => s.apiKey)
+  const baseUrl = useAIStore((s) => s.baseUrl)
   const model = useAIStore((s) => s.model)
   const maxTokens = useAIStore((s) => s.maxTokens)
   const addMessage = useAIStore((s) => s.addMessage)
@@ -98,6 +99,7 @@ export function AIPanel() {
       try {
         const full = await sendMessage({
           apiKey,
+          baseUrl,
           model,
           maxTokens,
           system: buildSystemPrompt(content),
@@ -128,7 +130,7 @@ export function AIPanel() {
         abortRef.current = null
       }
     },
-    [apiKey, model, maxTokens, content, customPrompt, addMessage, setLoading, setStreamingContent, appendStreamingContent, setSettingsOpen],
+    [apiKey, baseUrl, model, maxTokens, content, customPrompt, addMessage, setLoading, setStreamingContent, appendStreamingContent, setSettingsOpen],
   )
 
   const handleApply = useCallback((text: string) => {

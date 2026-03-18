@@ -1,34 +1,63 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
-import { useAIStore, type AIModel } from '../store/aiStore'
+import { useAIStore, MODEL_SUGGESTIONS } from '../store/aiStore'
 
 function SettingsDialogInner({ onClose }: { onClose: () => void }) {
   const apiKey = useAIStore((s) => s.apiKey)
   const setApiKey = useAIStore((s) => s.setApiKey)
+  const baseUrl = useAIStore((s) => s.baseUrl)
+  const setBaseUrl = useAIStore((s) => s.setBaseUrl)
   const model = useAIStore((s) => s.model)
   const setModel = useAIStore((s) => s.setModel)
   const maxTokens = useAIStore((s) => s.maxTokens)
   const setMaxTokens = useAIStore((s) => s.setMaxTokens)
 
   const [localKey, setLocalKey] = useState(apiKey)
+  const [localBaseUrl, setLocalBaseUrl] = useState(baseUrl)
+  const [localModel, setLocalModel] = useState(model)
   const [localTokens, setLocalTokens] = useState(maxTokens)
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const modelInputRef = useRef<HTMLInputElement>(null)
+  const suggestionsRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
     dialogRef.current?.showModal()
   }, [])
 
+  const filteredModels = localModel
+    ? MODEL_SUGGESTIONS.filter((m) => m.includes(localModel.toLowerCase()))
+    : MODEL_SUGGESTIONS
+
   const handleSave = useCallback(() => {
     setApiKey(localKey.trim())
-    setMaxTokens(localTokens)
+    setBaseUrl(localBaseUrl.trim() || 'https://api.anthropic.com')
+    setModel(localModel.trim())
+    setMaxTokens(Math.max(1, localTokens))
     onClose()
-  }, [localKey, localTokens, setApiKey, setMaxTokens, onClose])
+  }, [localKey, localBaseUrl, localModel, localTokens, setApiKey, setBaseUrl, setModel, setMaxTokens, onClose])
 
-  const handleModelChange = useCallback(
-    (m: AIModel) => {
-      setModel(m)
-    },
-    [setModel],
-  )
+  const handleSelectModel = useCallback((m: string) => {
+    setLocalModel(m)
+    setShowSuggestions(false)
+    modelInputRef.current?.focus()
+  }, [])
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    if (!showSuggestions) return
+    const onClick = (e: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(e.target as Node) &&
+        modelInputRef.current &&
+        !modelInputRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [showSuggestions])
 
   return (
     <dialog
@@ -50,6 +79,7 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="flex flex-col gap-4 px-5 py-4">
+        {/* API Key */}
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-gray-600 dark:text-gray-400">API Key</span>
           <input
@@ -60,57 +90,74 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
             className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
           />
           <span className="text-[11px] text-gray-400 dark:text-gray-500">
-            Your key is stored in localStorage and never sent to our servers.
+            Stored in localStorage, never sent to our servers.
           </span>
         </label>
 
+        {/* Base URL */}
         <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Model</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className={`flex-1 rounded border px-3 py-1.5 text-xs font-medium transition-colors ${
-                model === 'claude-haiku-4-5-20251001'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-300'
-                  : 'border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700'
-              }`}
-              onClick={() => handleModelChange('claude-haiku-4-5-20251001')}
-            >
-              Haiku 4.5
-              <span className="block text-[10px] font-normal opacity-70">Fast</span>
-            </button>
-            <button
-              type="button"
-              className={`flex-1 rounded border px-3 py-1.5 text-xs font-medium transition-colors ${
-                model === 'claude-sonnet-4-6-20250131'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-300'
-                  : 'border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700'
-              }`}
-              onClick={() => handleModelChange('claude-sonnet-4-6-20250131')}
-            >
-              Sonnet 4.6
-              <span className="block text-[10px] font-normal opacity-70">Quality</span>
-            </button>
-          </div>
-        </label>
-
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-            Max Tokens: {localTokens}
-          </span>
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Base URL</span>
           <input
-            type="range"
-            min={256}
-            max={4096}
-            step={256}
+            type="text"
+            value={localBaseUrl}
+            onChange={(e) => setLocalBaseUrl(e.target.value)}
+            placeholder="https://api.anthropic.com"
+            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+          />
+          <span className="text-[11px] text-gray-400 dark:text-gray-500">
+            Change for Anthropic-compatible proxy providers. /v1/messages is appended automatically.
+          </span>
+        </label>
+
+        {/* Model with autocomplete */}
+        <div className="relative flex flex-col gap-1.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Model</span>
+          <input
+            ref={modelInputRef}
+            type="text"
+            value={localModel}
+            onChange={(e) => {
+              setLocalModel(e.target.value)
+              setShowSuggestions(true)
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            placeholder="claude-haiku-4-5-20251001"
+            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+          />
+          {showSuggestions && filteredModels.length > 0 && (
+            <ul
+              ref={suggestionsRef}
+              className="absolute left-0 top-full z-10 mt-0.5 max-h-40 w-full overflow-y-auto rounded border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
+            >
+              {filteredModels.map((m) => (
+                <li key={m}>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-blue-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleSelectModel(m)}
+                  >
+                    {m}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <span className="text-[11px] text-gray-400 dark:text-gray-500">
+            Type any model name or pick from suggestions.
+          </span>
+        </div>
+
+        {/* Max Tokens — number input */}
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Max Tokens</span>
+          <input
+            type="number"
+            min={1}
             value={localTokens}
             onChange={(e) => setLocalTokens(Number(e.target.value))}
-            className="w-full accent-blue-600 dark:accent-blue-400"
+            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
           />
-          <div className="flex justify-between text-[10px] text-gray-400">
-            <span>256</span>
-            <span>4096</span>
-          </div>
         </label>
       </div>
 

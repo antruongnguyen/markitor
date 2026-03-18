@@ -7,12 +7,13 @@
  * requests through a local proxy (e.g. a simple CORS-anywhere server).
  */
 
-const API_URL = 'https://api.anthropic.com/v1/messages'
+const DEFAULT_BASE_URL = 'https://api.anthropic.com'
 
 export type StreamCallback = (chunk: string) => void
 
 export async function sendMessage(opts: {
   apiKey: string
+  baseUrl?: string
   model: string
   maxTokens: number
   system: string
@@ -20,9 +21,10 @@ export async function sendMessage(opts: {
   onChunk: StreamCallback
   signal?: AbortSignal
 }): Promise<string> {
-  const { apiKey, model, maxTokens, system, userMessage, onChunk, signal } = opts
+  const { apiKey, baseUrl, model, maxTokens, system, userMessage, onChunk, signal } = opts
+  const url = `${(baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, '')}/v1/messages`
 
-  const res = await fetch(API_URL, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
