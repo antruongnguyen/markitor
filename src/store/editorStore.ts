@@ -35,6 +35,7 @@ type EditorStore = {
   setFileMeta: (meta: { fileName: string; fileHandle: FileSystemFileHandle | null }) => void
   setCursorPosition: (line: number, column: number) => void
   markSaved: () => void
+  setDirty: (dirty: boolean) => void
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -61,4 +62,5 @@ export const useEditorStore = create<EditorStore>((set) => ({
     }),
   setCursorPosition: (line, column) => set({ cursorLine: line, cursorColumn: column }),
   markSaved: () => set({ isDirty: false }),
+  setDirty: (dirty) => set({ isDirty: dirty }),
 }))

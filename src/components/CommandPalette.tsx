@@ -6,6 +6,7 @@ import { useAIStore } from '../store/aiStore'
 import { useScrollSyncStore } from '../store/scrollSyncStore'
 import { useFocusModeStore } from '../store/focusModeStore'
 import { useEditorStore } from '../store/editorStore'
+import { useTabStore } from '../store/tabStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { exportHTML, exportPDF } from '../utils/exportDocument'
 import {
@@ -56,11 +57,20 @@ function buildCommands(handlers: {
     // File commands
     {
       id: 'file.new',
-      label: 'New File',
+      label: 'New Tab',
       category: 'File',
       execute: () => {
-        useEditorStore.getState().setContentFromFile('')
-        useEditorStore.getState().setFileMeta({ fileName: 'untitled.md', fileHandle: null })
+        useTabStore.getState().addTab()
+      },
+    },
+    {
+      id: 'file.close-tab',
+      label: 'Close Tab',
+      category: 'File',
+      shortcut: `${mod()}+W`,
+      execute: () => {
+        const { activeTabId, closeTab } = useTabStore.getState()
+        closeTab(activeTabId)
       },
     },
     {

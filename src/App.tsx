@@ -5,11 +5,13 @@ import { FocusModeOverlay } from './components/FocusModeOverlay'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
+import { TabBar } from './components/TabBar'
 import { TableOfContents } from './components/TableOfContents'
 import { useAIStore } from './store/aiStore'
 import { useCommandPaletteStore } from './store/commandPaletteStore'
 import { useEditorStore } from './store/editorStore'
 import { useFocusModeStore } from './store/focusModeStore'
+import { useTabStore } from './store/tabStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
 import { useTocStore } from './store/tocStore'
 import { useScrollSyncStore } from './store/scrollSyncStore'
@@ -232,7 +234,6 @@ function FocusModeToggle() {
 function App() {
   const fileName = useEditorStore((s) => s.fileName)
   const isDirty = useEditorStore((s) => s.isDirty)
-  const setContentFromFile = useEditorStore((s) => s.setContentFromFile)
   const setFileMeta = useEditorStore((s) => s.setFileMeta)
   const markSaved = useEditorStore((s) => s.markSaved)
   const tocOpen = useTocStore((s) => s.open)
@@ -241,6 +242,8 @@ function App() {
   const exitFocus = useFocusModeStore((s) => s.exit)
   const toggleFocus = useFocusModeStore((s) => s.toggle)
   const toggleCommandPalette = useCommandPaletteStore((s) => s.toggle)
+  const closeTab = useTabStore((s) => s.closeTab)
+  const activeTabId = useTabStore((s) => s.activeTabId)
 
   const displayFileName = useMemo(() => (isDirty ? `${fileName} *` : fileName), [fileName, isDirty])
 
@@ -250,12 +253,22 @@ function App() {
       return
     }
 
-    setContentFromFile(result.content)
-    setFileMeta({
+    // If this file is already open in a tab, switch to it
+    if (result.fileHandle) {
+      const existing = useTabStore.getState().findTabByFileHandle(result.fileHandle)
+      if (existing) {
+        useTabStore.getState().switchTab(existing.id)
+        return
+      }
+    }
+
+    // Open in a new tab
+    useTabStore.getState().addTab({
       fileName: result.fileName,
+      content: result.content,
       fileHandle: result.fileHandle,
     })
-  }, [setContentFromFile, setFileMeta])
+  }, [])
 
   const handleSave = useCallback(async () => {
     const currentState = useEditorStore.getState()
@@ -278,7 +291,9 @@ function App() {
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isDirty) {
+      // Check if any tab has unsaved changes
+      const hasUnsaved = useTabStore.getState().tabs.some((t) => t.isDirty) || isDirty
+      if (!hasUnsaved) {
         return
       }
 
@@ -318,6 +333,18 @@ function App() {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [toggleCommandPalette])
+
+  // Close tab: Cmd/Ctrl+W
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'w') {
+        e.preventDefault()
+        closeTab(activeTabId)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [closeTab, activeTabId])
 
   if (focusMode) {
     return (
@@ -377,6 +404,8 @@ function App() {
           <ExportMenu />
         </div>
       </header>
+
+      <TabBar />
 
       <div className="flex min-h-0 flex-1">
         {tocOpen && <TableOfContents />}
