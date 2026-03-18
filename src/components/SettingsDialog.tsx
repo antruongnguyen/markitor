@@ -1,46 +1,80 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
-import { useAIStore, MODEL_SUGGESTIONS } from '../store/aiStore'
+import { useAIStore, PROVIDER_PRESETS, getPreset, type ProviderId, type CustomFunction } from '../store/aiStore'
 
 function SettingsDialogInner({ onClose }: { onClose: () => void }) {
+  const provider = useAIStore((s) => s.provider)
   const apiKey = useAIStore((s) => s.apiKey)
-  const setApiKey = useAIStore((s) => s.setApiKey)
   const baseUrl = useAIStore((s) => s.baseUrl)
-  const setBaseUrl = useAIStore((s) => s.setBaseUrl)
   const model = useAIStore((s) => s.model)
-  const setModel = useAIStore((s) => s.setModel)
   const maxTokens = useAIStore((s) => s.maxTokens)
+  const customFunctions = useAIStore((s) => s.customFunctions)
+  const setProvider = useAIStore((s) => s.setProvider)
+  const setApiKey = useAIStore((s) => s.setApiKey)
+  const setBaseUrl = useAIStore((s) => s.setBaseUrl)
+  const setModel = useAIStore((s) => s.setModel)
   const setMaxTokens = useAIStore((s) => s.setMaxTokens)
+  const addCustomFunction = useAIStore((s) => s.addCustomFunction)
+  const removeCustomFunction = useAIStore((s) => s.removeCustomFunction)
 
+  const [localProvider, setLocalProvider] = useState(provider)
   const [localKey, setLocalKey] = useState(apiKey)
   const [localBaseUrl, setLocalBaseUrl] = useState(baseUrl)
   const [localModel, setLocalModel] = useState(model)
   const [localTokens, setLocalTokens] = useState(maxTokens)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [tab, setTab] = useState<'provider' | 'functions'>('provider')
+  const [newFnName, setNewFnName] = useState('')
+  const [newFnPrompt, setNewFnPrompt] = useState('')
+  const [newFnNeedsSelection, setNewFnNeedsSelection] = useState(true)
   const dialogRef = useRef<HTMLDialogElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLUListElement>(null)
+
+  const preset = getPreset(localProvider)
+  const modelSuggestions = localModel
+    ? preset.models.filter((m) => m.toLowerCase().includes(localModel.toLowerCase()))
+    : preset.models
 
   useEffect(() => {
     dialogRef.current?.showModal()
   }, [])
 
-  const filteredModels = localModel
-    ? MODEL_SUGGESTIONS.filter((m) => m.includes(localModel.toLowerCase()))
-    : MODEL_SUGGESTIONS
+  const handleProviderChange = useCallback((id: ProviderId) => {
+    const p = getPreset(id)
+    setLocalProvider(id)
+    setLocalBaseUrl(p.defaultBaseUrl)
+    setLocalModel(p.defaultModel)
+  }, [])
 
   const handleSave = useCallback(() => {
+    setProvider(localProvider)
     setApiKey(localKey.trim())
-    setBaseUrl(localBaseUrl.trim() || 'https://api.anthropic.com')
+    setBaseUrl(localBaseUrl.trim() || getPreset(localProvider).defaultBaseUrl)
     setModel(localModel.trim())
     setMaxTokens(Math.max(1, localTokens))
     onClose()
-  }, [localKey, localBaseUrl, localModel, localTokens, setApiKey, setBaseUrl, setModel, setMaxTokens, onClose])
+  }, [localProvider, localKey, localBaseUrl, localModel, localTokens, setProvider, setApiKey, setBaseUrl, setModel, setMaxTokens, onClose])
 
   const handleSelectModel = useCallback((m: string) => {
     setLocalModel(m)
     setShowSuggestions(false)
     modelInputRef.current?.focus()
   }, [])
+
+  const handleAddFunction = useCallback(() => {
+    if (!newFnName.trim() || !newFnPrompt.trim()) return
+    const fn: CustomFunction = {
+      id: crypto.randomUUID(),
+      name: newFnName.trim(),
+      prompt: newFnPrompt.trim(),
+      category: 'custom',
+      needsSelection: newFnNeedsSelection,
+    }
+    addCustomFunction(fn)
+    setNewFnName('')
+    setNewFnPrompt('')
+    setNewFnNeedsSelection(true)
+  }, [newFnName, newFnPrompt, newFnNeedsSelection, addCustomFunction])
 
   // Close suggestions on outside click
   useEffect(() => {
@@ -59,12 +93,17 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener('mousedown', onClick)
   }, [showSuggestions])
 
+  const inputCls = 'rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400'
+  const labelCls = 'text-xs font-medium text-gray-600 dark:text-gray-400'
+  const hintCls = 'text-[11px] text-gray-400 dark:text-gray-500'
+
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 z-50 m-auto w-[420px] rounded-lg border border-gray-200 bg-white p-0 shadow-xl backdrop:bg-black/40 dark:border-gray-700 dark:bg-gray-800"
+      className="fixed inset-0 z-50 m-auto w-[460px] rounded-lg border border-gray-200 bg-white p-0 shadow-xl backdrop:bg-black/40 dark:border-gray-700 dark:bg-gray-800"
       onClose={onClose}
     >
+      {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3 dark:border-gray-700">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">AI Settings</h2>
         <button
@@ -78,88 +117,192 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 px-5 py-4">
-        {/* API Key */}
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">API Key</span>
-          <input
-            type="password"
-            value={localKey}
-            onChange={(e) => setLocalKey(e.target.value)}
-            placeholder="sk-ant-..."
-            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
-          />
-          <span className="text-[11px] text-gray-400 dark:text-gray-500">
-            Stored in localStorage, never sent to our servers.
-          </span>
-        </label>
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${tab === 'provider' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+          onClick={() => setTab('provider')}
+        >
+          Provider & Model
+        </button>
+        <button
+          type="button"
+          className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${tab === 'functions' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+          onClick={() => setTab('functions')}
+        >
+          Custom Functions
+        </button>
+      </div>
 
-        {/* Base URL */}
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Base URL</span>
-          <input
-            type="text"
-            value={localBaseUrl}
-            onChange={(e) => setLocalBaseUrl(e.target.value)}
-            placeholder="https://api.anthropic.com"
-            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
-          />
-          <span className="text-[11px] text-gray-400 dark:text-gray-500">
-            Change for Anthropic-compatible proxy providers. /v1/messages is appended automatically.
-          </span>
-        </label>
-
-        {/* Model with autocomplete */}
-        <div className="relative flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Model</span>
-          <input
-            ref={modelInputRef}
-            type="text"
-            value={localModel}
-            onChange={(e) => {
-              setLocalModel(e.target.value)
-              setShowSuggestions(true)
-            }}
-            onFocus={() => setShowSuggestions(true)}
-            placeholder="claude-haiku-4-5-20251001"
-            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
-          />
-          {showSuggestions && filteredModels.length > 0 && (
-            <ul
-              ref={suggestionsRef}
-              className="absolute left-0 top-full z-10 mt-0.5 max-h-40 w-full overflow-y-auto rounded border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
+      {tab === 'provider' && (
+        <div className="flex flex-col gap-4 px-5 py-4">
+          {/* Provider */}
+          <label className="flex flex-col gap-1.5">
+            <span className={labelCls}>Provider</span>
+            <select
+              value={localProvider}
+              onChange={(e) => handleProviderChange(e.target.value as ProviderId)}
+              className={inputCls}
             >
-              {filteredModels.map((m) => (
-                <li key={m}>
+              {PROVIDER_PRESETS.map((p) => (
+                <option key={p.id} value={p.id}>{p.label}</option>
+              ))}
+            </select>
+          </label>
+
+          {/* API Key */}
+          <label className="flex flex-col gap-1.5">
+            <span className={labelCls}>API Key {!preset.keyRequired && <span className="font-normal text-gray-400">(optional)</span>}</span>
+            <input
+              type="password"
+              value={localKey}
+              onChange={(e) => setLocalKey(e.target.value)}
+              placeholder={preset.keyPlaceholder}
+              className={inputCls}
+            />
+            <span className={hintCls}>
+              Stored in localStorage, never sent to our servers.
+            </span>
+          </label>
+
+          {/* Base URL */}
+          <label className="flex flex-col gap-1.5">
+            <span className={labelCls}>Base URL</span>
+            <input
+              type="text"
+              value={localBaseUrl}
+              onChange={(e) => setLocalBaseUrl(e.target.value)}
+              placeholder={preset.defaultBaseUrl || 'https://your-api.example.com'}
+              className={inputCls}
+            />
+            <span className={hintCls}>
+              {localProvider === 'anthropic'
+                ? 'Uses /v1/messages (Anthropic native). Change for proxy providers.'
+                : 'Uses /v1/chat/completions (OpenAI-compatible format).'}
+            </span>
+          </label>
+
+          {/* Model with autocomplete */}
+          <div className="relative flex flex-col gap-1.5">
+            <span className={labelCls}>Model</span>
+            <input
+              ref={modelInputRef}
+              type="text"
+              value={localModel}
+              onChange={(e) => {
+                setLocalModel(e.target.value)
+                setShowSuggestions(true)
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              placeholder={preset.defaultModel || 'model-name'}
+              className={inputCls}
+            />
+            {showSuggestions && modelSuggestions.length > 0 && (
+              <ul
+                ref={suggestionsRef}
+                className="absolute left-0 top-full z-10 mt-0.5 max-h-40 w-full overflow-y-auto rounded border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
+              >
+                {modelSuggestions.map((m) => (
+                  <li key={m}>
+                    <button
+                      type="button"
+                      className="w-full px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-blue-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handleSelectModel(m)}
+                    >
+                      {m}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <span className={hintCls}>
+              Type any model name or pick from suggestions.
+            </span>
+          </div>
+
+          {/* Max Tokens */}
+          <label className="flex flex-col gap-1.5">
+            <span className={labelCls}>Max Tokens</span>
+            <input
+              type="number"
+              min={1}
+              value={localTokens}
+              onChange={(e) => setLocalTokens(Number(e.target.value))}
+              className={inputCls}
+            />
+          </label>
+        </div>
+      )}
+
+      {tab === 'functions' && (
+        <div className="flex flex-col gap-4 px-5 py-4">
+          {/* Existing custom functions */}
+          {customFunctions.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <span className={labelCls}>Saved Functions</span>
+              {customFunctions.map((fn) => (
+                <div key={fn.id} className="flex items-start gap-2 rounded border border-gray-200 p-2 dark:border-gray-600">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-medium text-gray-800 dark:text-gray-200">{fn.name}</div>
+                    <div className="mt-0.5 line-clamp-2 text-[11px] text-gray-500 dark:text-gray-400">{fn.prompt}</div>
+                    <div className="mt-0.5 text-[10px] text-gray-400">
+                      {fn.needsSelection ? 'Requires selection' : 'No selection needed'}
+                    </div>
+                  </div>
                   <button
                     type="button"
-                    className="w-full px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-blue-50 dark:text-gray-300 dark:hover:bg-gray-700"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handleSelectModel(m)}
+                    className="shrink-0 rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                    onClick={() => removeCustomFunction(fn.id)}
+                    title="Delete"
                   >
-                    {m}
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-          <span className="text-[11px] text-gray-400 dark:text-gray-500">
-            Type any model name or pick from suggestions.
-          </span>
-        </div>
 
-        {/* Max Tokens — number input */}
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Max Tokens</span>
-          <input
-            type="number"
-            min={1}
-            value={localTokens}
-            onChange={(e) => setLocalTokens(Number(e.target.value))}
-            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
-          />
-        </label>
-      </div>
+          {/* New function form */}
+          <div className="flex flex-col gap-2">
+            <span className={labelCls}>Add New Function</span>
+            <input
+              type="text"
+              value={newFnName}
+              onChange={(e) => setNewFnName(e.target.value)}
+              placeholder="Function name (e.g. Make it punchy)"
+              className={inputCls}
+            />
+            <textarea
+              value={newFnPrompt}
+              onChange={(e) => setNewFnPrompt(e.target.value)}
+              placeholder="Prompt template (e.g. Rewrite the following text to be punchy and engaging)"
+              rows={3}
+              className={`${inputCls} resize-none`}
+            />
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={newFnNeedsSelection}
+                onChange={(e) => setNewFnNeedsSelection(e.target.checked)}
+                className="rounded border-gray-300 dark:border-gray-600"
+              />
+              <span className="text-xs text-gray-600 dark:text-gray-400">Requires text selection</span>
+            </label>
+            <button
+              type="button"
+              disabled={!newFnName.trim() || !newFnPrompt.trim()}
+              className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-40"
+              onClick={handleAddFunction}
+            >
+              Add Function
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-end gap-2 border-t border-gray-200 px-5 py-3 dark:border-gray-700">
         <button
@@ -169,13 +312,15 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
         >
           Cancel
         </button>
-        <button
-          type="button"
-          className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-500"
-          onClick={handleSave}
-        >
-          Save
-        </button>
+        {tab === 'provider' && (
+          <button
+            type="button"
+            className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-500"
+            onClick={handleSave}
+          >
+            Save
+          </button>
+        )}
       </div>
     </dialog>
   )

@@ -1,19 +1,24 @@
 /**
- * Thin wrapper around the Anthropic Messages API.
+ * OpenAI-compatible chat completions client.
  *
- * Calls the API directly from the browser using the user's own API key.
- * The `anthropic-dangerous-direct-browser-access` header is required for
- * browser-side usage. If CORS is blocked, the user may need to route
- * requests through a local proxy (e.g. a simple CORS-anywhere server).
+ * Sends requests using the /v1/chat/completions format which is supported by
+ * OpenAI, Ollama, LM Studio, Together AI, vLLM, and many other providers.
+ *
+ * For Anthropic, we detect the provider and use the native /v1/messages API
+ * with anthropic-specific headers to preserve full compatibility.
  */
 
-const DEFAULT_BASE_URL = 'https://api.anthropic.com'
+import type { ProviderId } from '../store/aiStore'
 
 export type StreamCallback = (chunk: string) => void
 
-export async function sendMessage(opts: {
+function isAnthropicProvider(provider: ProviderId, baseUrl: string): boolean {
+  return provider === 'anthropic' || baseUrl.includes('anthropic.com')
+}
+
+async function streamAnthropicNative(opts: {
   apiKey: string
-  baseUrl?: string
+  baseUrl: string
   model: string
   maxTokens: number
   system: string
@@ -22,7 +27,7 @@ export async function sendMessage(opts: {
   signal?: AbortSignal
 }): Promise<string> {
   const { apiKey, baseUrl, model, maxTokens, system, userMessage, onChunk, signal } = opts
-  const url = `${(baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, '')}/v1/messages`
+  const url = `${baseUrl.replace(/\/+$/, '')}/v1/messages`
 
   const res = await fetch(url, {
     method: 'POST',
@@ -47,6 +52,67 @@ export async function sendMessage(opts: {
     throw new Error(`API error ${res.status}: ${body}`)
   }
 
+  return parseSSE(res, (data) => {
+    const event = JSON.parse(data)
+    if (event.type === 'content_block_delta' && event.delta?.text) {
+      return event.delta.text
+    }
+    return null
+  }, onChunk)
+}
+
+async function streamOpenAICompatible(opts: {
+  apiKey: string
+  baseUrl: string
+  model: string
+  maxTokens: number
+  system: string
+  userMessage: string
+  onChunk: StreamCallback
+  signal?: AbortSignal
+}): Promise<string> {
+  const { apiKey, baseUrl, model, maxTokens, system, userMessage, onChunk, signal } = opts
+  const url = `${baseUrl.replace(/\/+$/, '')}/v1/chat/completions`
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (apiKey) {
+    headers['Authorization'] = `Bearer ${apiKey}`
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model,
+      max_tokens: maxTokens,
+      stream: true,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: userMessage },
+      ],
+    }),
+    signal,
+  })
+
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`API error ${res.status}: ${body}`)
+  }
+
+  return parseSSE(res, (data) => {
+    const event = JSON.parse(data)
+    const delta = event.choices?.[0]?.delta?.content
+    return delta ?? null
+  }, onChunk)
+}
+
+async function parseSSE(
+  res: Response,
+  extractText: (data: string) => string | null,
+  onChunk: StreamCallback,
+): Promise<string> {
   const reader = res.body!.getReader()
   const decoder = new TextDecoder()
   let full = ''
@@ -67,10 +133,10 @@ export async function sendMessage(opts: {
       if (data === '[DONE]') continue
 
       try {
-        const event = JSON.parse(data)
-        if (event.type === 'content_block_delta' && event.delta?.text) {
-          full += event.delta.text
-          onChunk(event.delta.text)
+        const text = extractText(data)
+        if (text) {
+          full += text
+          onChunk(text)
         }
       } catch {
         // skip malformed JSON lines
@@ -79,6 +145,23 @@ export async function sendMessage(opts: {
   }
 
   return full
+}
+
+export async function sendMessage(opts: {
+  provider: ProviderId
+  apiKey: string
+  baseUrl: string
+  model: string
+  maxTokens: number
+  system: string
+  userMessage: string
+  onChunk: StreamCallback
+  signal?: AbortSignal
+}): Promise<string> {
+  if (isAnthropicProvider(opts.provider, opts.baseUrl)) {
+    return streamAnthropicNative(opts)
+  }
+  return streamOpenAICompatible(opts)
 }
 
 export function buildSystemPrompt(documentContent: string): string {
@@ -95,6 +178,60 @@ Guidelines:
 - Use markdown formatting when appropriate
 - Be concise and direct`
 }
+
+export type ActionId =
+  | 'rewrite-concise'
+  | 'rewrite-formal'
+  | 'rewrite-casual'
+  | 'rewrite-clearer'
+  | 'continue'
+  | 'explain'
+  | 'grammar'
+  | 'summarize'
+  | 'expand'
+  | 'translate'
+  | 'simplify'
+  | 'outline'
+  | 'fix-code'
+  | 'comment-code'
+  | 'custom'
+  | `custom-fn-${string}`
+
+export type ActionCategory = 'writing' | 'rewriting' | 'code' | 'custom'
+
+export type ActionDef = {
+  id: ActionId
+  label: string
+  category: ActionCategory
+  needsSelection: boolean
+}
+
+export const BUILTIN_ACTIONS: ActionDef[] = [
+  // Writing
+  { id: 'continue', label: 'Continue writing', category: 'writing', needsSelection: false },
+  { id: 'explain', label: 'Explain / Expand', category: 'writing', needsSelection: true },
+  { id: 'summarize', label: 'Summarize', category: 'writing', needsSelection: true },
+  { id: 'expand', label: 'Expand', category: 'writing', needsSelection: true },
+  { id: 'outline', label: 'Generate outline', category: 'writing', needsSelection: true },
+  { id: 'translate', label: 'Translate to English', category: 'writing', needsSelection: true },
+  // Rewriting
+  { id: 'rewrite-concise', label: 'More concise', category: 'rewriting', needsSelection: true },
+  { id: 'rewrite-formal', label: 'More formal', category: 'rewriting', needsSelection: true },
+  { id: 'rewrite-casual', label: 'More casual', category: 'rewriting', needsSelection: true },
+  { id: 'rewrite-clearer', label: 'Clearer', category: 'rewriting', needsSelection: true },
+  { id: 'simplify', label: 'Simplify', category: 'rewriting', needsSelection: true },
+  { id: 'grammar', label: 'Fix grammar', category: 'rewriting', needsSelection: true },
+  // Code
+  { id: 'fix-code', label: 'Fix code', category: 'code', needsSelection: true },
+  { id: 'comment-code', label: 'Add comments', category: 'code', needsSelection: true },
+]
+
+export const ACTION_CATEGORIES: { id: ActionCategory; label: string }[] = [
+  { id: 'writing', label: 'Writing' },
+  { id: 'rewriting', label: 'Rewriting' },
+  { id: 'code', label: 'Code' },
+  { id: 'custom', label: 'Custom' },
+]
 
 export function buildActionPrompt(
   action: string,
@@ -116,6 +253,20 @@ export function buildActionPrompt(
       return `Expand and explain the following text in more detail:\n\n${selectedText}`
     case 'grammar':
       return `Fix any grammar, spelling, and punctuation errors in the following text. Return only the corrected text:\n\n${selectedText}`
+    case 'summarize':
+      return `Summarize the following text concisely, capturing the key points:\n\n${selectedText}`
+    case 'expand':
+      return `Expand the following text with more detail, examples, and explanations:\n\n${selectedText}`
+    case 'translate':
+      return `Translate the following text to English. If it's already in English, improve the translation quality:\n\n${selectedText}`
+    case 'simplify':
+      return `Simplify the following text so it's easy to understand. Use shorter sentences and simpler words:\n\n${selectedText}`
+    case 'outline':
+      return `Generate a structured outline from the following text, using markdown headings and bullet points:\n\n${selectedText}`
+    case 'fix-code':
+      return `Fix any bugs, errors, or issues in the following code. Return only the corrected code:\n\n\`\`\`\n${selectedText}\n\`\`\``
+    case 'comment-code':
+      return `Add clear, helpful comments to the following code. Return the code with comments added:\n\n\`\`\`\n${selectedText}\n\`\`\``
     case 'custom':
       return `${customPrompt}\n\nText:\n${selectedText}`
     default:
