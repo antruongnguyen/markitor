@@ -5,6 +5,7 @@ import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { search, searchKeymap, highlightSelectionMatches } from '@codemirror/search'
+import { markdownAutocomplete } from '../utils/autocomplete'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
 import { useThemeStore } from '../store/themeStore'
@@ -69,6 +70,7 @@ export function Editor({ onOpen, onSave }: EditorProps) {
         search({ top: true }),
         highlightSelectionMatches(),
         keymap.of(searchKeymap),
+        markdownAutocomplete(),
         themeCompRef.current.of(themeExt),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         shortcuts,
