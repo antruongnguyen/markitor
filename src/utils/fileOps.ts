@@ -177,8 +177,10 @@ export async function saveFile(options: SaveFileOptions): Promise<SaveFileResult
       await writable.write(content)
       await writable.close()
 
+      const savedFile = await newFileHandle.getFile()
+
       return {
-        fileName,
+        fileName: savedFile.name,
         fileHandle: newFileHandle,
       }
     } catch (error) {
