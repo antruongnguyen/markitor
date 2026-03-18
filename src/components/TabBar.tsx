@@ -1,6 +1,8 @@
 import { useCallback, useRef } from 'react'
 import { X, Plus } from 'lucide-react'
 import { useTabStore, type Tab } from '../store/tabStore'
+import { useTemplateGalleryStore } from '../store/templateGalleryStore'
+import { TemplateGallery } from './TemplateGallery'
 
 function TabItem({
   tab,
@@ -53,8 +55,9 @@ export function TabBar() {
   const activeTabId = useTabStore((s) => s.activeTabId)
   const switchTab = useTabStore((s) => s.switchTab)
   const closeTab = useTabStore((s) => s.closeTab)
-  const addTab = useTabStore((s) => s.addTab)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const showTemplates = useTemplateGalleryStore((s) => s.open)
+  const setShowTemplates = useTemplateGalleryStore((s) => s.setOpen)
 
   const handleClose = useCallback(
     (e: React.MouseEvent, tabId: string) => {
@@ -65,30 +68,35 @@ export function TabBar() {
   )
 
   const handleNewTab = useCallback(() => {
-    addTab()
-  }, [addTab])
+    setShowTemplates(true)
+  }, [setShowTemplates])
 
   return (
-    <div className="flex h-8 shrink-0 items-stretch border-b border-gray-200/80 bg-gray-100/80 dark:border-gray-700/60 dark:bg-gray-800/80">
-      <div ref={scrollRef} className="flex flex-1 items-stretch overflow-x-auto">
-        {tabs.map((tab) => (
-          <TabItem
-            key={tab.id}
-            tab={tab}
-            isActive={tab.id === activeTabId}
-            onSwitch={() => switchTab(tab.id)}
-            onClose={(e) => handleClose(e, tab.id)}
-          />
-        ))}
+    <>
+      <div className="flex h-8 shrink-0 items-stretch border-b border-gray-200/80 bg-gray-100/80 dark:border-gray-700/60 dark:bg-gray-800/80">
+        <div ref={scrollRef} className="flex flex-1 items-stretch overflow-x-auto">
+          {tabs.map((tab) => (
+            <TabItem
+              key={tab.id}
+              tab={tab}
+              isActive={tab.id === activeTabId}
+              onSwitch={() => switchTab(tab.id)}
+              onClose={(e) => handleClose(e, tab.id)}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          className="flex w-8 shrink-0 items-center justify-center border-l border-gray-200/80 text-gray-400 transition-all duration-150 hover:bg-gray-50 hover:text-gray-600 dark:border-gray-700/60 dark:hover:bg-white/5 dark:hover:text-gray-300"
+          onClick={handleNewTab}
+          title="New tab from template"
+        >
+          <Plus size={16} strokeWidth={1.5} />
+        </button>
       </div>
-      <button
-        type="button"
-        className="flex w-8 shrink-0 items-center justify-center border-l border-gray-200/80 text-gray-400 transition-all duration-150 hover:bg-gray-50 hover:text-gray-600 dark:border-gray-700/60 dark:hover:bg-white/5 dark:hover:text-gray-300"
-        onClick={handleNewTab}
-        title="New tab"
-      >
-        <Plus size={16} strokeWidth={1.5} />
-      </button>
-    </div>
+      {showTemplates && (
+        <TemplateGallery onClose={() => setShowTemplates(false)} />
+      )}
+    </>
   )
 }
