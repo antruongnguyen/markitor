@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type TableGridPickerProps = {
   onSelect: (rows: number, cols: number) => void
@@ -29,12 +29,6 @@ export function TableGridPicker({ onSelect, onClose }: TableGridPickerProps) {
       document.removeEventListener('keydown', onEscape)
     }
   }, [onClose])
-
-  const handleSelect = useCallback(() => {
-    if (hoverRow > 0 && hoverCol > 0) {
-      onSelect(hoverRow, hoverCol)
-    }
-  }, [hoverRow, hoverCol, onSelect])
 
   return (
     <div
@@ -67,12 +61,8 @@ export function TableGridPicker({ onSelect, onClose }: TableGridPickerProps) {
                 setHoverRow(row)
                 setHoverCol(col)
               }}
-              onMouseDown={(e) => {
-                e.preventDefault()
-                setHoverRow(row)
-                setHoverCol(col)
-              }}
-              onMouseUp={handleSelect}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onSelect(row, col)}
             />
           )
         })}
