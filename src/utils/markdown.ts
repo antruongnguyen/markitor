@@ -33,6 +33,20 @@ hljs.registerLanguage('ts', typescript)
 hljs.registerLanguage('html', xml)
 hljs.registerLanguage('xml', xml)
 
+/** markdown-it plugin: inject data-source-line on block-level open tokens */
+function sourceLinePlugin(mdi: MarkdownIt) {
+  const defaultOpen =
+    mdi.renderer.renderToken.bind(mdi.renderer)
+
+  mdi.renderer.renderToken = function (tokens, idx, options) {
+    const token = tokens[idx]
+    if (token.map && token.nesting === 1) {
+      token.attrSet('data-source-line', String(token.map[0]))
+    }
+    return defaultOpen(tokens, idx, options)
+  }
+}
+
 export const md = MarkdownIt({
   html: true,
   linkify: true,
@@ -43,4 +57,6 @@ export const md = MarkdownIt({
     }
     return ''
   },
-}).use(taskLists, { enabled: true })
+})
+  .use(taskLists, { enabled: true })
+  .use(sourceLinePlugin)
