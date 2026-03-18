@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo } from 'react'
 import { SplitPane } from './components/SplitPane'
-import { Editor } from './components/Editor'
-import { Preview } from './components/Preview'
+import { StatusBar } from './components/StatusBar'
 import { useEditorStore } from './store/editorStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
 import { openFile, saveFile } from './utils/fileOps'
+
+const Editor = lazy(() => import('./components/Editor').then((module) => ({ default: module.Editor })))
+const Preview = lazy(() => import('./components/Preview').then((module) => ({ default: module.Preview })))
 
 const nextMode: Record<ThemeMode, ThemeMode> = {
   system: 'light',
@@ -106,8 +108,8 @@ function App() {
   }, [isDirty])
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
-      <header className="flex h-12 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 transition-colors dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-white text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
+      <header className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 transition-colors dark:border-gray-700 dark:bg-gray-800">
         <div className="truncate text-sm font-medium" title={displayFileName}>
           {displayFileName}
         </div>
@@ -130,10 +132,22 @@ function App() {
         </div>
       </header>
 
-      <SplitPane
-        left={<Editor onOpen={handleOpen} onSave={handleSave} />}
-        right={<Preview />}
-      />
+      <div className="min-h-0 flex-1">
+        <SplitPane
+          left={(
+            <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
+              <Editor onOpen={handleOpen} onSave={handleSave} />
+            </Suspense>
+          )}
+          right={(
+            <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
+              <Preview />
+            </Suspense>
+          )}
+        />
+      </div>
+
+      <StatusBar />
     </div>
   )
 }

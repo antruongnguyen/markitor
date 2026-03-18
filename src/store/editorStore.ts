@@ -28,9 +28,12 @@ type EditorStore = {
   fileName: string
   fileHandle: FileSystemFileHandle | null
   isDirty: boolean
+  cursorLine: number
+  cursorColumn: number
   setContent: (s: string) => void
   setContentFromFile: (s: string) => void
   setFileMeta: (meta: { fileName: string; fileHandle: FileSystemFileHandle | null }) => void
+  setCursorPosition: (line: number, column: number) => void
   markSaved: () => void
 }
 
@@ -39,6 +42,8 @@ export const useEditorStore = create<EditorStore>((set) => ({
   fileName: 'untitled.md',
   fileHandle: null,
   isDirty: false,
+  cursorLine: 1,
+  cursorColumn: 1,
   setContent: (s) =>
     set((state) => ({
       content: s,
@@ -54,5 +59,6 @@ export const useEditorStore = create<EditorStore>((set) => ({
       fileName,
       fileHandle,
     }),
+  setCursorPosition: (line, column) => set({ cursorLine: line, cursorColumn: column }),
   markSaved: () => set({ isDirty: false }),
 }))

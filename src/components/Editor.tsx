@@ -29,6 +29,7 @@ export function Editor({ onOpen, onSave }: EditorProps) {
   const themeCompRef = useRef(new Compartment())
   const content = useEditorStore((s) => s.content)
   const setContent = useEditorStore((s) => s.setContent)
+  const setCursorPosition = useEditorStore((s) => s.setCursorPosition)
   const resolved = useThemeStore((s) => s.resolved)
   const shortcuts = useKeyboardShortcuts({ onOpen, onSave })
 
@@ -38,8 +39,13 @@ export function Editor({ onOpen, onSave }: EditorProps) {
         if (update.docChanged) {
           setContent(update.state.doc.toString())
         }
+        if (update.selectionSet || update.docChanged) {
+          const pos = update.state.selection.main.head
+          const line = update.state.doc.lineAt(pos)
+          setCursorPosition(line.number, pos - line.from + 1)
+        }
       }),
-    [setContent],
+    [setContent, setCursorPosition],
   )
 
   useEffect(() => {
