@@ -11,6 +11,7 @@ initMermaid(useThemeStore.getState().resolved)
 export function Preview() {
   const content = useEditorStore((s) => s.content)
   const resolved = useThemeStore((s) => s.resolved)
+  const editorTheme = useThemeStore((s) => s.editorTheme)
   const html = useMemo(() => md.render(content), [content])
   const containerRef = useRef<HTMLDivElement>(null)
   const articleRef = useRef<HTMLElement>(null)
@@ -74,6 +75,7 @@ export function Preview() {
     <div
       ref={containerRef}
       className="h-full w-full overflow-auto bg-white p-8 transition-colors dark:bg-gray-900"
+      data-hljs-theme={editorTheme}
     >
       <article
         ref={articleRef}
