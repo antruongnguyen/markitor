@@ -1,11 +1,13 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AIPanel } from './components/AIPanel'
+import { FocusModeOverlay } from './components/FocusModeOverlay'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
 import { TableOfContents } from './components/TableOfContents'
 import { useAIStore } from './store/aiStore'
 import { useEditorStore } from './store/editorStore'
+import { useFocusModeStore } from './store/focusModeStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
 import { useTocStore } from './store/tocStore'
 import { useScrollSyncStore } from './store/scrollSyncStore'
@@ -205,6 +207,26 @@ function ExportMenu() {
   )
 }
 
+function FocusModeToggle() {
+  const focusEnabled = useFocusModeStore((s) => s.enabled)
+  const toggle = useFocusModeStore((s) => s.toggle)
+
+  return (
+    <button
+      type="button"
+      className={`flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
+        focusEnabled ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+      }`}
+      onClick={toggle}
+      title={focusEnabled ? 'Exit focus mode (Ctrl+Shift+F)' : 'Enter focus mode (Ctrl+Shift+F)'}
+    >
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+      </svg>
+    </button>
+  )
+}
+
 function App() {
   const fileName = useEditorStore((s) => s.fileName)
   const isDirty = useEditorStore((s) => s.isDirty)
@@ -213,6 +235,9 @@ function App() {
   const markSaved = useEditorStore((s) => s.markSaved)
   const tocOpen = useTocStore((s) => s.open)
   const aiOpen = useAIStore((s) => s.open)
+  const focusMode = useFocusModeStore((s) => s.enabled)
+  const exitFocus = useFocusModeStore((s) => s.exit)
+  const toggleFocus = useFocusModeStore((s) => s.toggle)
 
   const displayFileName = useMemo(() => (isDirty ? `${fileName} *` : fileName), [fileName, isDirty])
 
@@ -264,6 +289,37 @@ function App() {
     }
   }, [isDirty])
 
+  // Focus mode keyboard shortcuts: Cmd/Ctrl+Shift+F to toggle, Escape to exit
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault()
+        toggleFocus()
+      } else if (e.key === 'Escape' && useFocusModeStore.getState().enabled) {
+        e.preventDefault()
+        exitFocus()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [toggleFocus, exitFocus])
+
+  if (focusMode) {
+    return (
+      <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#faf9f6] transition-colors duration-300 dark:bg-[#0d1117]">
+        <div className="flex min-h-0 flex-1 items-stretch justify-center">
+          <div className="flex w-full max-w-3xl flex-col">
+            <Suspense fallback={<div className="h-full w-full" />}>
+              <Editor onOpen={handleOpen} onSave={handleSave} focusMode />
+            </Suspense>
+          </div>
+        </div>
+        <FocusModeOverlay />
+        <SettingsDialog />
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-white text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 transition-colors dark:border-gray-700 dark:bg-gray-800">
@@ -274,6 +330,7 @@ function App() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <FocusModeToggle />
           <AIToggle />
           <ScrollSyncToggle />
           <ThemeToggle />
