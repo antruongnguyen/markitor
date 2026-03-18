@@ -526,6 +526,36 @@
   color: #56b6c2;
 }
 
+/* ── Mermaid diagrams ── */
+
+.mermaid-diagram {
+  margin: 1em 0;
+  text-align: center;
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-error {
+  margin: 1em 0;
+  padding: 0.75em 1em;
+  border-radius: 6px;
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  color: #991b1b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+}
+
+.dark .mermaid-error {
+  border-color: #7f1d1d;
+  background: #1c1012;
+  color: #fca5a5;
+}
+
 /* ── Print styles ── */
 
 @media print {
