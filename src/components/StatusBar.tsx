@@ -1,5 +1,12 @@
 import { useMemo } from 'react'
 import { useEditorStore } from '../store/editorStore'
+import { useLayoutStore } from '../store/layoutStore'
+
+const layoutModeLabels = {
+  editor: 'Editor',
+  split: 'Split',
+  preview: 'Preview',
+} as const
 
 function computeStats(content: string) {
   const words = content.split(/\s+/).filter(Boolean).length
@@ -13,6 +20,8 @@ export function StatusBar() {
   const content = useEditorStore((s) => s.content)
   const cursorLine = useEditorStore((s) => s.cursorLine)
   const cursorColumn = useEditorStore((s) => s.cursorColumn)
+  const layoutMode = useLayoutStore((s) => s.mode)
+  const cycleMode = useLayoutStore((s) => s.cycleMode)
 
   const { words, characters, lines, readingTime } = useMemo(() => computeStats(content), [content])
 
@@ -29,6 +38,15 @@ export function StatusBar() {
       </div>
       <div className="flex items-center gap-3">
         <span>Ln {cursorLine}, Col {cursorColumn}</span>
+        <span className="text-gray-300 dark:text-gray-600">|</span>
+        <button
+          type="button"
+          className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+          onClick={cycleMode}
+          title="Click to cycle layout mode"
+        >
+          {layoutModeLabels[layoutMode]}
+        </button>
         <span className="text-gray-300 dark:text-gray-600">|</span>
         <span>Markdown</span>
       </div>

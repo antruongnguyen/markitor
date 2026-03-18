@@ -15,6 +15,7 @@ import { useTabStore } from './store/tabStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
 import { useTocStore } from './store/tocStore'
 import { useScrollSyncStore } from './store/scrollSyncStore'
+import { useLayoutStore, type LayoutMode } from './store/layoutStore'
 import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
 
@@ -211,6 +212,68 @@ function ExportMenu() {
   )
 }
 
+const layoutModeLabel: Record<LayoutMode, string> = {
+  editor: 'Editor Only',
+  split: 'Split View',
+  preview: 'Preview Only',
+}
+
+function LayoutToggle() {
+  const mode = useLayoutStore((s) => s.mode)
+  const setMode = useLayoutStore((s) => s.setMode)
+
+  return (
+    <div className="flex items-center rounded border border-gray-200 dark:border-gray-600" title={`Layout: ${layoutModeLabel[mode]}`}>
+      {/* Editor Only */}
+      <button
+        type="button"
+        className={`flex h-7 w-7 items-center justify-center text-xs transition-colors ${
+          mode === 'editor'
+            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+            : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+        }`}
+        onClick={() => setMode('editor')}
+        title="Editor only (Ctrl+Shift+1)"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </button>
+      {/* Split View */}
+      <button
+        type="button"
+        className={`flex h-7 w-7 items-center justify-center border-x border-gray-200 text-xs transition-colors dark:border-gray-600 ${
+          mode === 'split'
+            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+            : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+        }`}
+        onClick={() => setMode('split')}
+        title="Split view (Ctrl+Shift+2)"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7" />
+        </svg>
+      </button>
+      {/* Preview Only */}
+      <button
+        type="button"
+        className={`flex h-7 w-7 items-center justify-center text-xs transition-colors ${
+          mode === 'preview'
+            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+            : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+        }`}
+        onClick={() => setMode('preview')}
+        title="Preview only (Ctrl+Shift+3)"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
 function FocusModeToggle() {
   const focusEnabled = useFocusModeStore((s) => s.enabled)
   const toggle = useFocusModeStore((s) => s.toggle)
@@ -244,6 +307,7 @@ function App() {
   const toggleCommandPalette = useCommandPaletteStore((s) => s.toggle)
   const closeTab = useTabStore((s) => s.closeTab)
   const activeTabId = useTabStore((s) => s.activeTabId)
+  const layoutMode = useLayoutStore((s) => s.mode)
 
   const displayFileName = useMemo(() => (isDirty ? `${fileName} *` : fileName), [fileName, isDirty])
 
@@ -346,6 +410,26 @@ function App() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [closeTab, activeTabId])
 
+  // Layout mode shortcuts: Ctrl/Cmd+Shift+1/2/3
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || !e.shiftKey) return
+      const { setMode } = useLayoutStore.getState()
+      if (e.key === '1' || e.key === '!') {
+        e.preventDefault()
+        setMode('editor')
+      } else if (e.key === '2' || e.key === '@') {
+        e.preventDefault()
+        setMode('split')
+      } else if (e.key === '3' || e.key === '#') {
+        e.preventDefault()
+        setMode('preview')
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   if (focusMode) {
     return (
       <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#faf9f6] transition-colors duration-300 dark:bg-[#0d1117]">
@@ -383,6 +467,7 @@ function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </button>
+          <LayoutToggle />
           <FocusModeToggle />
           <AIToggle />
           <ScrollSyncToggle />
@@ -411,16 +496,16 @@ function App() {
         {tocOpen && <TableOfContents />}
         <div className="min-h-0 flex-1">
           <SplitPane
-            left={(
+            left={layoutMode !== 'preview' ? (
               <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
                 <Editor onOpen={handleOpen} onSave={handleSave} />
               </Suspense>
-            )}
-            right={(
+            ) : null}
+            right={layoutMode !== 'editor' ? (
               <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
                 <Preview />
               </Suspense>
-            )}
+            ) : null}
           />
         </div>
         {aiOpen && <AIPanel />}

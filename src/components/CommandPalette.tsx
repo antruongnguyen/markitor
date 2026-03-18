@@ -7,6 +7,7 @@ import { useScrollSyncStore } from '../store/scrollSyncStore'
 import { useFocusModeStore } from '../store/focusModeStore'
 import { useEditorStore } from '../store/editorStore'
 import { useTabStore } from '../store/tabStore'
+import { useLayoutStore } from '../store/layoutStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { exportHTML, exportPDF } from '../utils/exportDocument'
 import {
@@ -259,6 +260,29 @@ function buildCommands(handlers: {
       label: 'AI Settings',
       category: 'View',
       execute: () => useAIStore.getState().setSettingsOpen(true),
+    },
+
+    // Layout commands
+    {
+      id: 'view.layout-editor',
+      label: 'Editor Only',
+      category: 'Layout',
+      shortcut: `${mod()}+Shift+1`,
+      execute: () => useLayoutStore.getState().setMode('editor'),
+    },
+    {
+      id: 'view.layout-split',
+      label: 'Split View',
+      category: 'Layout',
+      shortcut: `${mod()}+Shift+2`,
+      execute: () => useLayoutStore.getState().setMode('split'),
+    },
+    {
+      id: 'view.layout-preview',
+      label: 'Preview Only',
+      category: 'Layout',
+      shortcut: `${mod()}+Shift+3`,
+      execute: () => useLayoutStore.getState().setMode('preview'),
     },
   ]
 }

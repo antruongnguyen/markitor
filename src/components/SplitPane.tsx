@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, type ReactNode } from 'react'
+import { useLayoutStore } from '../store/layoutStore'
 
 type SplitPaneProps = {
   left: ReactNode
@@ -13,6 +14,7 @@ export function SplitPane({
   minLeftWidth = 200,
   minRightWidth = 200,
 }: SplitPaneProps) {
+  const mode = useLayoutStore((s) => s.mode)
   const [leftWidthPercent, setLeftWidthPercent] = useState(50)
   const containerRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
@@ -46,9 +48,28 @@ export function SplitPane({
     document.addEventListener('mouseup', onMouseUp)
   }, [minLeftWidth, minRightWidth])
 
+  if (mode === 'editor') {
+    return (
+      <div className="h-full w-full">
+        {left}
+      </div>
+    )
+  }
+
+  if (mode === 'preview') {
+    return (
+      <div className="h-full w-full">
+        {right}
+      </div>
+    )
+  }
+
   return (
     <div ref={containerRef} className="flex h-full w-full">
-      <div className="h-full overflow-hidden" style={{ width: `${leftWidthPercent}%` }}>
+      <div
+        className="h-full overflow-hidden transition-[width] duration-200 ease-in-out"
+        style={{ width: `${leftWidthPercent}%` }}
+      >
         {left}
       </div>
       <div
@@ -61,3 +82,4 @@ export function SplitPane({
     </div>
   )
 }
+
