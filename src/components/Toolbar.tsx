@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import type { EditorView } from '@codemirror/view'
+import { openSearchPanel } from '@codemirror/search'
 import {
   toggleBold,
   toggleItalic,
@@ -39,6 +40,8 @@ const buttons: (ToolbarButton | 'separator')[] = [
   { label: '🖼', title: 'Image', action: toggleImage },
   { label: '{ }', title: 'Code block (Ctrl+Shift+K)', action: toggleCodeBlock },
   { label: '—', title: 'Horizontal rule', action: insertHorizontalRule },
+  'separator',
+  { label: '🔍', title: 'Find & Replace (Ctrl+F)', action: openSearchPanel },
 ]
 
 type ToolbarProps = {

@@ -1,12 +1,14 @@
 import { useRef, useEffect, useMemo, useCallback } from 'react'
 import { Compartment, EditorState } from '@codemirror/state'
-import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
+import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
+import { search, searchKeymap, highlightSelectionMatches } from '@codemirror/search'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
 import { useThemeStore } from '../store/themeStore'
+import { editorViewRef } from '../utils/editorViewRef'
 import { Toolbar } from './Toolbar'
 
 const lightTheme = EditorView.theme({
@@ -64,6 +66,9 @@ export function Editor({ onOpen, onSave }: EditorProps) {
         bracketMatching(),
         indentOnInput(),
         markdown(),
+        search({ top: true }),
+        highlightSelectionMatches(),
+        keymap.of(searchKeymap),
         themeCompRef.current.of(themeExt),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         shortcuts,
@@ -82,10 +87,12 @@ export function Editor({ onOpen, onSave }: EditorProps) {
     })
 
     viewRef.current = view
+    editorViewRef.current = view
 
     return () => {
       view.destroy()
       viewRef.current = null
+      editorViewRef.current = null
     }
     // Only run on mount; content updates sync through the separate effect below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
