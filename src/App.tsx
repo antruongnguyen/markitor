@@ -1,8 +1,10 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo } from 'react'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
+import { TableOfContents } from './components/TableOfContents'
 import { useEditorStore } from './store/editorStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
+import { useTocStore } from './store/tocStore'
 import { openFile, saveFile } from './utils/fileOps'
 
 const Editor = lazy(() => import('./components/Editor').then((module) => ({ default: module.Editor })))
@@ -50,12 +52,33 @@ function ThemeToggle() {
   )
 }
 
+function TocToggle() {
+  const tocOpen = useTocStore((s) => s.open)
+  const toggle = useTocStore((s) => s.toggle)
+
+  return (
+    <button
+      type="button"
+      className={`flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
+        tocOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+      }`}
+      onClick={toggle}
+      title={tocOpen ? 'Hide table of contents' : 'Show table of contents'}
+    >
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h10M4 18h14" />
+      </svg>
+    </button>
+  )
+}
+
 function App() {
   const fileName = useEditorStore((s) => s.fileName)
   const isDirty = useEditorStore((s) => s.isDirty)
   const setContentFromFile = useEditorStore((s) => s.setContentFromFile)
   const setFileMeta = useEditorStore((s) => s.setFileMeta)
   const markSaved = useEditorStore((s) => s.markSaved)
+  const tocOpen = useTocStore((s) => s.open)
 
   const displayFileName = useMemo(() => (isDirty ? `${fileName} *` : fileName), [fileName, isDirty])
 
@@ -110,8 +133,11 @@ function App() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-white text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 transition-colors dark:border-gray-700 dark:bg-gray-800">
-        <div className="truncate text-sm font-medium" title={displayFileName}>
-          {displayFileName}
+        <div className="flex items-center gap-2">
+          <TocToggle />
+          <div className="truncate text-sm font-medium" title={displayFileName}>
+            {displayFileName}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -132,19 +158,22 @@ function App() {
         </div>
       </header>
 
-      <div className="min-h-0 flex-1">
-        <SplitPane
-          left={(
-            <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
-              <Editor onOpen={handleOpen} onSave={handleSave} />
-            </Suspense>
-          )}
-          right={(
-            <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
-              <Preview />
-            </Suspense>
-          )}
-        />
+      <div className="flex min-h-0 flex-1">
+        {tocOpen && <TableOfContents />}
+        <div className="min-h-0 flex-1">
+          <SplitPane
+            left={(
+              <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
+                <Editor onOpen={handleOpen} onSave={handleSave} />
+              </Suspense>
+            )}
+            right={(
+              <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
+                <Preview />
+              </Suspense>
+            )}
+          />
+        </div>
       </div>
 
       <StatusBar />
