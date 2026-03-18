@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AIPanel } from './components/AIPanel'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
@@ -8,6 +8,7 @@ import { useAIStore } from './store/aiStore'
 import { useEditorStore } from './store/editorStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
 import { useTocStore } from './store/tocStore'
+import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
 
 const Editor = lazy(() => import('./components/Editor').then((module) => ({ default: module.Editor })))
@@ -92,6 +93,94 @@ function AIToggle() {
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
       </svg>
     </button>
+  )
+}
+
+function ExportMenu() {
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  const handleExportHTML = useCallback(() => {
+    const { content, fileName } = useEditorStore.getState()
+    exportHTML(content, fileName)
+    setOpen(false)
+  }, [])
+
+  const handleExportPDF = useCallback(() => {
+    const { content, fileName } = useEditorStore.getState()
+    exportPDF(content, fileName)
+    setOpen(false)
+  }, [])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const onClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [open])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open])
+
+  // Global shortcut: Ctrl/Cmd+Shift+E to toggle export menu
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'e') {
+        e.preventDefault()
+        setOpen((prev) => !prev)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  return (
+    <div className="relative" ref={menuRef} data-export-menu>
+      <button
+        type="button"
+        className="rounded bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+        onClick={() => setOpen((prev) => !prev)}
+        title="Export document (Ctrl+Shift+E)"
+      >
+        Export
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-800">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+            onClick={handleExportHTML}
+          >
+            <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            Export HTML
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+            onClick={handleExportPDF}
+          >
+            <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Print / Save as PDF
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -180,6 +269,7 @@ function App() {
           >
             Save
           </button>
+          <ExportMenu />
         </div>
       </header>
 
