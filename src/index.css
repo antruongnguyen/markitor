@@ -134,6 +134,25 @@
   border-radius: 4px;
 }
 
+/* ── Task lists ── */
+
+.preview-content .task-list-item {
+  list-style-type: none;
+  position: relative;
+  margin-left: -1.5em;
+  padding-left: 1.5em;
+}
+
+.preview-content .task-list-item input[type="checkbox"] {
+  position: absolute;
+  left: 0;
+  top: 0.3em;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* ── Tables ── */
+
 .preview-content table {
   border-collapse: collapse;
   width: 100%;
