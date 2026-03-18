@@ -52,7 +52,7 @@ export function SplitPane({
         {left}
       </div>
       <div
-        className="h-full w-1.5 cursor-col-resize bg-gray-700 hover:bg-blue-500 transition-colors flex-shrink-0"
+        className="h-full w-1.5 cursor-col-resize bg-gray-200 transition-colors hover:bg-blue-500 dark:bg-gray-700 flex-shrink-0"
         onMouseDown={onMouseDown}
       />
       <div className="h-full overflow-hidden flex-1">

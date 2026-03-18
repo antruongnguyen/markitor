@@ -1,13 +1,18 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* highlight.js theme — GitHub-style for light preview */
 @import "highlight.js/styles/github.css";
 
-/* Preview prose typography */
+/* ── Preview prose typography (light mode) ── */
+
 .preview-content {
   color: #1f2937;
   line-height: 1.75;
   max-width: 65ch;
+  transition: color 0.2s;
 }
 
 .preview-content h1,
@@ -145,4 +150,133 @@
 .preview-content th {
   background: #f3f4f6;
   font-weight: 600;
+}
+
+/* ── Preview prose typography (dark mode) ── */
+
+.dark .preview-content {
+  color: #e5e7eb;
+}
+
+.dark .preview-content h1,
+.dark .preview-content h2,
+.dark .preview-content h3,
+.dark .preview-content h4,
+.dark .preview-content h5,
+.dark .preview-content h6 {
+  color: #f3f4f6;
+}
+
+.dark .preview-content h1 {
+  border-bottom-color: #374151;
+}
+
+.dark .preview-content h2 {
+  border-bottom-color: #374151;
+}
+
+.dark .preview-content a {
+  color: #60a5fa;
+}
+
+.dark .preview-content a:hover {
+  color: #93bbfd;
+}
+
+.dark .preview-content strong {
+  color: #f3f4f6;
+}
+
+.dark .preview-content blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+  background: #1f2937;
+}
+
+.dark .preview-content code {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+.dark .preview-content pre {
+  background: #1e2028;
+  border-color: #374151;
+}
+
+.dark .preview-content pre code {
+  color: #abb2bf;
+}
+
+.dark .preview-content hr {
+  border-top-color: #374151;
+}
+
+.dark .preview-content th,
+.dark .preview-content td {
+  border-color: #4b5563;
+}
+
+.dark .preview-content th {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+/* ── Dark mode highlight.js overrides (One Dark inspired) ── */
+
+.dark .hljs {
+  color: #abb2bf;
+  background: #1e2028;
+}
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-literal,
+.dark .hljs-section {
+  color: #c678dd;
+}
+
+.dark .hljs-string,
+.dark .hljs-title,
+.dark .hljs-name,
+.dark .hljs-type,
+.dark .hljs-attribute,
+.dark .hljs-symbol,
+.dark .hljs-bullet,
+.dark .hljs-addition,
+.dark .hljs-variable,
+.dark .hljs-template-tag,
+.dark .hljs-template-variable {
+  color: #98c379;
+}
+
+.dark .hljs-comment,
+.dark .hljs-quote,
+.dark .hljs-deletion,
+.dark .hljs-meta {
+  color: #5c6370;
+  font-style: italic;
+}
+
+.dark .hljs-number {
+  color: #d19a66;
+}
+
+.dark .hljs-built_in {
+  color: #e6c07b;
+}
+
+.dark .hljs-attr {
+  color: #d19a66;
+}
+
+.dark .hljs-link {
+  color: #61afef;
+}
+
+.dark .hljs-params {
+  color: #abb2bf;
+}
+
+.dark .hljs-regexp {
+  color: #56b6c2;
 }
