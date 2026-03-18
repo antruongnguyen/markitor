@@ -7,12 +7,17 @@ import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightSty
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
 
-export function Editor() {
+type EditorProps = {
+  onOpen: () => void
+  onSave: () => void
+}
+
+export function Editor({ onOpen, onSave }: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
   const content = useEditorStore((s) => s.content)
   const setContent = useEditorStore((s) => s.setContent)
-  const shortcuts = useKeyboardShortcuts()
+  const shortcuts = useKeyboardShortcuts({ onOpen, onSave })
 
   const onUpdate = useMemo(
     () =>

@@ -7,8 +7,8 @@ import {
 } from '@codemirror/view'
 
 type ShortcutHandlers = {
-  onSave?: () => void
-  onOpen?: () => void
+  onSave?: () => void | Promise<void>
+  onOpen?: () => void | Promise<void>
 }
 
 type WrapSelectionOptions = {

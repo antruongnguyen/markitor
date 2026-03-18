@@ -25,10 +25,34 @@ console.log(greeting);
 
 type EditorStore = {
   content: string
+  fileName: string
+  fileHandle: FileSystemFileHandle | null
+  isDirty: boolean
   setContent: (s: string) => void
+  setContentFromFile: (s: string) => void
+  setFileMeta: (meta: { fileName: string; fileHandle: FileSystemFileHandle | null }) => void
+  markSaved: () => void
 }
 
 export const useEditorStore = create<EditorStore>((set) => ({
   content: DEFAULT_CONTENT,
-  setContent: (s) => set({ content: s }),
+  fileName: 'untitled.md',
+  fileHandle: null,
+  isDirty: false,
+  setContent: (s) =>
+    set((state) => ({
+      content: s,
+      isDirty: state.content !== s ? true : state.isDirty,
+    })),
+  setContentFromFile: (s) =>
+    set({
+      content: s,
+      isDirty: false,
+    }),
+  setFileMeta: ({ fileName, fileHandle }) =>
+    set({
+      fileName,
+      fileHandle,
+    }),
+  markSaved: () => set({ isDirty: false }),
 }))
