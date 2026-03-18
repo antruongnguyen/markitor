@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { useThemeStore } from '../store/themeStore'
+import { useLayoutStore } from '../store/layoutStore'
 import { useScrollSync } from '../hooks/useScrollSync'
 import { md } from '../utils/markdown'
 import { initMermaid, updateMermaidTheme, renderMermaidDiagram } from '../utils/mermaidRenderer'
@@ -12,6 +13,7 @@ export function Preview() {
   const content = useEditorStore((s) => s.content)
   const resolved = useThemeStore((s) => s.resolved)
   const editorTheme = useThemeStore((s) => s.editorTheme)
+  const layoutMode = useLayoutStore((s) => s.mode)
   const html = useMemo(() => md.render(content), [content])
   const containerRef = useRef<HTMLDivElement>(null)
   const articleRef = useRef<HTMLElement>(null)
@@ -79,7 +81,8 @@ export function Preview() {
     >
       <article
         ref={articleRef}
-        className="preview-content mx-auto"
+        className={`preview-content ${layoutMode === 'preview' ? 'px-12' : 'mx-auto'}`}
+        style={layoutMode === 'preview' ? { maxWidth: 'none' } : undefined}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
