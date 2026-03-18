@@ -11,6 +11,7 @@ import { useTabStore } from '../store/tabStore'
 import { useLayoutStore } from '../store/layoutStore'
 import { usePWAStore } from '../store/pwaStore'
 import { useTemplateGalleryStore } from '../store/templateGalleryStore'
+import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { exportHTML, exportPDF } from '../utils/exportDocument'
 import {
@@ -216,6 +217,13 @@ function buildCommands(handlers: {
       label: 'Horizontal Rule',
       category: 'Format',
       execute: editorCmd(insertHorizontalRule),
+    },
+    {
+      id: 'insert.emoji',
+      label: 'Insert Emoji',
+      category: 'Insert',
+      shortcut: `${mod()}+.`,
+      execute: () => useEmojiPickerStore.getState().toggle(),
     },
     {
       id: 'format.document',

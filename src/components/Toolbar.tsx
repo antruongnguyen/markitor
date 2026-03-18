@@ -20,6 +20,7 @@ import {
   Search,
   Table,
   AlignLeft,
+  Smile,
 } from 'lucide-react'
 import {
   toggleBold,
@@ -39,8 +40,10 @@ import {
 } from '../utils/editorCommands'
 import { useToastStore } from '../store/toastStore'
 import { useEditorStore } from '../store/editorStore'
+import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
+import { EmojiPicker } from './EmojiPicker'
 
 type ToolbarButton = {
   icon: LucideIcon
@@ -78,7 +81,11 @@ type ToolbarProps = {
 
 export function Toolbar({ getView }: ToolbarProps) {
   const [showTablePicker, setShowTablePicker] = useState(false)
+  const showEmojiPicker = useEmojiPickerStore((s) => s.open)
+  const toggleEmojiPicker = useEmojiPickerStore((s) => s.toggle)
+  const closeEmojiPicker = useEmojiPickerStore((s) => s.setOpen)
   const tableButtonRef = useRef<HTMLButtonElement>(null)
+  const emojiButtonRef = useRef<HTMLButtonElement>(null)
   const showToast = useToastStore((s) => s.show)
 
   const handleClick = useCallback(
@@ -104,6 +111,23 @@ export function Toolbar({ getView }: ToolbarProps) {
       setShowTablePicker(false)
     },
     [getView],
+  )
+
+  const handleEmojiInsert = useCallback(
+    (emoji: string) => {
+      const view = getView()
+      if (!view) return
+      const { state } = view
+      const range = state.selection.main
+      view.dispatch({
+        changes: { from: range.from, to: range.to, insert: emoji },
+        selection: { anchor: range.from + emoji.length },
+        scrollIntoView: true,
+      })
+      view.focus()
+      closeEmojiPicker(false)
+    },
+    [getView, closeEmojiPicker],
   )
 
   return (
@@ -154,6 +178,27 @@ export function Toolbar({ getView }: ToolbarProps) {
           anchorRef={tableButtonRef}
           onSelect={handleTableInsert}
           onClose={() => setShowTablePicker(false)}
+        />
+      )}
+
+      {/* Emoji picker button */}
+      <button
+        ref={emojiButtonRef}
+        type="button"
+        title="Insert emoji (Ctrl+.)"
+        className="flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 active:scale-95 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
+        onMouseDown={(e) => {
+          e.preventDefault()
+          toggleEmojiPicker()
+        }}
+      >
+        <Smile size={17} strokeWidth={1.5} />
+      </button>
+      {showEmojiPicker && (
+        <EmojiPicker
+          anchorRef={emojiButtonRef}
+          onSelect={handleEmojiInsert}
+          onClose={() => closeEmojiPicker(false)}
         />
       )}
 

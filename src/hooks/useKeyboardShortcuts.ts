@@ -16,6 +16,7 @@ import {
 } from '../utils/editorCommands'
 import { useToastStore } from '../store/toastStore'
 import { useEditorStore } from '../store/editorStore'
+import { useEmojiPickerStore } from '../store/emojiPickerStore'
 
 type ShortcutHandlers = {
   onSave?: () => void | Promise<void>
@@ -58,6 +59,13 @@ function makeShortcutBindings(handlers: ShortcutHandlers): KeyBinding[] {
       key: 'Mod-o',
       run: () => {
         handlers.onOpen?.()
+        return true
+      },
+    },
+    {
+      key: 'Mod-.',
+      run: () => {
+        useEmojiPickerStore.getState().toggle()
         return true
       },
     },
