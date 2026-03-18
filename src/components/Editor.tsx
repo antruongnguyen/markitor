@@ -6,6 +6,7 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { search, searchKeymap, highlightSelectionMatches } from '@codemirror/search'
 import { markdownAutocomplete } from '../utils/autocomplete'
+import { imageDropHandler } from '../utils/imageHandler'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
 import { useThemeStore } from '../store/themeStore'
@@ -71,6 +72,7 @@ export function Editor({ onOpen, onSave }: EditorProps) {
         highlightSelectionMatches(),
         keymap.of(searchKeymap),
         markdownAutocomplete(),
+        imageDropHandler(),
         themeCompRef.current.of(themeExt),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         shortcuts,
