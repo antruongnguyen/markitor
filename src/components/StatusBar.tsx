@@ -26,28 +26,28 @@ export function StatusBar() {
   const { words, characters, lines, readingTime } = useMemo(() => computeStats(content), [content])
 
   return (
-    <footer className="flex h-6 shrink-0 items-center justify-between border-t border-gray-200 bg-gray-100 px-3 text-xs text-gray-500 transition-colors dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-      <div className="flex items-center gap-3">
+    <footer className="flex h-6 shrink-0 items-center justify-between border-t border-gray-200/80 bg-gray-50/80 px-3 text-[11px] tabular-nums text-gray-500 transition-colors duration-200 dark:border-gray-700/60 dark:bg-gray-800/80 dark:text-gray-400">
+      <div className="flex items-center gap-2.5">
         <span>{words} words</span>
-        <span className="text-gray-300 dark:text-gray-600">|</span>
+        <span className="text-gray-300 dark:text-gray-600">·</span>
         <span>{characters} chars</span>
-        <span className="text-gray-300 dark:text-gray-600">|</span>
+        <span className="text-gray-300 dark:text-gray-600">·</span>
         <span>{lines} lines</span>
-        <span className="text-gray-300 dark:text-gray-600">|</span>
+        <span className="text-gray-300 dark:text-gray-600">·</span>
         <span>{readingTime} min read</span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <span>Ln {cursorLine}, Col {cursorColumn}</span>
-        <span className="text-gray-300 dark:text-gray-600">|</span>
+        <span className="text-gray-300 dark:text-gray-600">·</span>
         <button
           type="button"
-          className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+          className="transition-colors duration-150 hover:text-gray-700 dark:hover:text-gray-200"
           onClick={cycleMode}
           title="Click to cycle layout mode"
         >
           {layoutModeLabels[layoutMode]}
         </button>
-        <span className="text-gray-300 dark:text-gray-600">|</span>
+        <span className="text-gray-300 dark:text-gray-600">·</span>
         <span>Markdown</span>
       </div>
     </footer>

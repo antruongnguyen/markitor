@@ -191,14 +191,14 @@ export function AIPanel() {
   )
 
   return (
-    <div className="flex h-full w-[300px] shrink-0 flex-col overflow-hidden border-l border-gray-200 bg-gray-50 transition-colors dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-full w-[300px] shrink-0 flex-col overflow-hidden border-l border-gray-200/80 bg-gray-50 transition-colors duration-200 dark:border-gray-700/60 dark:bg-gray-800" style={{ animation: 'slideInRight 0.2s ease-out' }}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2 dark:border-gray-700">
+      <div className="flex items-center justify-between border-b border-gray-200/80 px-3 py-2 dark:border-gray-700/60">
         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">AI Assistant</span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             type="button"
-            className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+            className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={clearMessages}
             title="Clear history"
           >
@@ -206,7 +206,7 @@ export function AIPanel() {
           </button>
           <button
             type="button"
-            className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+            className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={() => setSettingsOpen(true)}
             title="AI settings"
           >
@@ -216,7 +216,7 @@ export function AIPanel() {
       </div>
 
       {/* Actions by category — collapsible */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-gray-200/80 dark:border-gray-700/60">
         {visibleCategories.map((cat) => {
           const catActions = allActions.filter((a) => a.category === cat.id)
           const isExpanded = expandedCategory === cat.id
@@ -224,7 +224,7 @@ export function AIPanel() {
             <div key={cat.id}>
               <button
                 type="button"
-                className="flex w-full items-center justify-between px-3 py-1.5 text-left"
+                className="flex w-full items-center justify-between px-3 py-1.5 text-left transition-colors duration-150 hover:bg-gray-100/50 dark:hover:bg-white/[0.03]"
                 onClick={() => toggleCategory(cat.id)}
               >
                 <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">
@@ -233,17 +233,17 @@ export function AIPanel() {
                 <ChevronDown
                   size={12}
                   strokeWidth={1.5}
-                  className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                 />
               </button>
               {isExpanded && (
-                <div className="flex flex-wrap gap-1 px-3 pb-2">
+                <div className="flex flex-wrap gap-1 px-3 pb-2" style={{ animation: 'fadeIn 0.15s ease-out' }}>
                   {catActions.map((a) => (
                     <button
                       key={a.id}
                       type="button"
                       disabled={loading || (a.needsSelection && !hasSelection)}
-                      className="rounded border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-600 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+                      className="rounded-md border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-600 transition-all duration-150 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:text-gray-400 dark:hover:border-blue-500/40 dark:hover:bg-blue-500/10 dark:hover:text-blue-300"
                       onClick={() => runAction(a.id)}
                       title={a.needsSelection && !hasSelection ? 'Select text in editor first' : a.label}
                     >
@@ -258,7 +258,7 @@ export function AIPanel() {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-2">
+      <div ref={scrollRef} className="custom-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-2">
         {messages.length === 0 && !loading && (
           <div className="flex flex-1 items-center justify-center">
             <p className="text-center text-xs text-gray-400 dark:text-gray-500">
@@ -273,7 +273,7 @@ export function AIPanel() {
               className={`max-w-full rounded-lg px-3 py-2 text-xs leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-800 shadow-sm dark:bg-gray-900 dark:text-gray-200'
+                  : 'bg-white text-gray-800 shadow-sm ring-1 ring-gray-200/50 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-700/50'
               }`}
             >
               <pre className="whitespace-pre-wrap break-words font-sans">{msg.content}</pre>
@@ -282,14 +282,14 @@ export function AIPanel() {
               <div className="flex gap-1">
                 <button
                   type="button"
-                  className="rounded bg-green-600 px-2 py-0.5 text-[10px] font-medium text-white transition-colors hover:bg-green-500"
+                  className="rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white transition-all duration-150 hover:bg-blue-500"
                   onClick={() => handleApply(msg.content)}
                 >
                   Apply
                 </button>
                 <button
                   type="button"
-                  className="rounded px-2 py-0.5 text-[10px] font-medium text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                  className="rounded-md px-2 py-0.5 text-[10px] font-medium text-gray-400 transition-colors duration-150 hover:text-gray-600 dark:hover:text-gray-200"
                   onClick={() => navigator.clipboard.writeText(msg.content)}
                 >
                   Copy
@@ -301,7 +301,7 @@ export function AIPanel() {
 
         {loading && streamingContent && (
           <div className="flex flex-col items-start gap-1">
-            <div className="max-w-full rounded-lg bg-white px-3 py-2 text-xs leading-relaxed text-gray-800 shadow-sm dark:bg-gray-900 dark:text-gray-200">
+            <div className="max-w-full rounded-lg bg-white px-3 py-2 text-xs leading-relaxed text-gray-800 shadow-sm ring-1 ring-gray-200/50 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-700/50">
               <pre className="whitespace-pre-wrap break-words font-sans">{streamingContent}</pre>
             </div>
           </div>
@@ -317,10 +317,10 @@ export function AIPanel() {
 
       {/* Stop button */}
       {loading && (
-        <div className="border-t border-gray-200 px-3 py-2 dark:border-gray-700">
+        <div className="border-t border-gray-200/80 px-3 py-2 dark:border-gray-700/60">
           <button
             type="button"
-            className="w-full rounded bg-red-600 px-2 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-500"
+            className="w-full rounded-md bg-red-600 px-2 py-1.5 text-xs font-medium text-white transition-all duration-150 hover:bg-red-500"
             onClick={handleStop}
           >
             Stop generating
@@ -331,7 +331,7 @@ export function AIPanel() {
       {/* Custom prompt input */}
       <form
         onSubmit={handleCustomSubmit}
-        className="flex gap-2 border-t border-gray-200 px-3 py-2 dark:border-gray-700"
+        className="flex gap-2 border-t border-gray-200/80 px-3 py-2 dark:border-gray-700/60"
       >
         <input
           type="text"
@@ -339,12 +339,12 @@ export function AIPanel() {
           onChange={(e) => setCustomPrompt(e.target.value)}
           placeholder="Ask AI anything..."
           disabled={loading}
-          className="min-w-0 flex-1 rounded border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400"
+          className="min-w-0 flex-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 outline-none transition-all duration-150 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
         />
         <button
           type="submit"
           disabled={loading || !customPrompt.trim()}
-          className="shrink-0 rounded bg-blue-600 p-1.5 text-white transition-colors hover:bg-blue-500 disabled:opacity-40"
+          className="shrink-0 rounded-md bg-blue-600 p-1.5 text-white transition-all duration-150 hover:bg-blue-500 disabled:opacity-40"
         >
           <Send size={14} strokeWidth={1.5} />
         </button>

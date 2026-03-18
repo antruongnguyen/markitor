@@ -73,9 +73,11 @@ export function SplitPane({
         {left}
       </div>
       <div
-        className="h-full w-1.5 cursor-col-resize bg-gray-200 transition-colors hover:bg-blue-500 dark:bg-gray-700 flex-shrink-0"
+        className="group relative h-full w-1 cursor-col-resize flex-shrink-0 bg-gray-200 transition-colors duration-150 hover:bg-blue-500 dark:bg-gray-700 dark:hover:bg-blue-400"
         onMouseDown={onMouseDown}
-      />
+      >
+        <div className="absolute inset-y-0 -left-0.5 -right-0.5" />
+      </div>
       <div className="h-full overflow-hidden flex-1">
         {right}
       </div>

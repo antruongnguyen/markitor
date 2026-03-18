@@ -94,22 +94,22 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener('mousedown', onClick)
   }, [showSuggestions])
 
-  const inputCls = 'rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-colors focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400'
+  const inputCls = 'rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none transition-all duration-150 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-400/20'
   const labelCls = 'text-xs font-medium text-gray-600 dark:text-gray-400'
   const hintCls = 'text-[11px] text-gray-400 dark:text-gray-500'
 
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 z-50 m-auto w-[460px] rounded-lg border border-gray-200 bg-white p-0 shadow-xl backdrop:bg-black/40 dark:border-gray-700 dark:bg-gray-800"
+      className="fixed inset-0 z-50 m-auto w-[460px] rounded-xl border border-gray-200/80 bg-white p-0 shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm dark:border-gray-700/60 dark:bg-gray-800"
       onClose={onClose}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3 dark:border-gray-700">
+      <div className="flex items-center justify-between border-b border-gray-200/80 px-5 py-3 dark:border-gray-700/60">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">AI Settings</h2>
         <button
           type="button"
-          className="text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+          className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
           onClick={onClose}
         >
           <X size={16} strokeWidth={1.5} />
@@ -117,17 +117,17 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
+      <div className="flex border-b border-gray-200/80 dark:border-gray-700/60">
         <button
           type="button"
-          className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${tab === 'provider' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+          className={`flex-1 px-4 py-2 text-xs font-medium transition-all duration-150 ${tab === 'provider' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
           onClick={() => setTab('provider')}
         >
           Provider & Model
         </button>
         <button
           type="button"
-          className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${tab === 'functions' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+          className={`flex-1 px-4 py-2 text-xs font-medium transition-all duration-150 ${tab === 'functions' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
           onClick={() => setTab('functions')}
         >
           Custom Functions
@@ -200,7 +200,7 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
             {showSuggestions && modelSuggestions.length > 0 && (
               <ul
                 ref={suggestionsRef}
-                className="absolute left-0 top-full z-10 mt-0.5 max-h-40 w-full overflow-y-auto rounded border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
+                className="absolute left-0 top-full z-10 mt-0.5 max-h-40 w-full overflow-y-auto rounded-md border border-gray-200/80 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
               >
                 {modelSuggestions.map((m) => (
                   <li key={m}>
@@ -301,10 +301,10 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
         </div>
       )}
 
-      <div className="flex justify-end gap-2 border-t border-gray-200 px-5 py-3 dark:border-gray-700">
+      <div className="flex justify-end gap-2 border-t border-gray-200/80 px-5 py-3 dark:border-gray-700/60">
         <button
           type="button"
-          className="rounded px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+          className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-all duration-150 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
           onClick={onClose}
         >
           Cancel
@@ -312,7 +312,7 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
         {tab === 'provider' && (
           <button
             type="button"
-            className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-500"
+            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-blue-500"
             onClick={handleSave}
           >
             Save

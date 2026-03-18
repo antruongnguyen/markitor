@@ -74,12 +74,12 @@ export function Preview() {
   return (
     <div
       ref={containerRef}
-      className="h-full w-full overflow-auto bg-white p-8 transition-colors dark:bg-gray-900"
+      className="custom-scrollbar h-full w-full overflow-auto bg-white p-8 transition-colors duration-200 dark:bg-gray-900"
       data-hljs-theme={editorTheme}
     >
       <article
         ref={articleRef}
-        className="preview-content"
+        className="preview-content mx-auto"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>

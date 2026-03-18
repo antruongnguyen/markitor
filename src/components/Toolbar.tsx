@@ -106,13 +106,13 @@ export function Toolbar({ getView }: ToolbarProps) {
   )
 
   return (
-    <div className="flex shrink-0 items-center gap-0.5 border-b border-gray-200 bg-gray-50 px-2 py-1 transition-colors dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex shrink-0 items-center gap-0.5 border-b border-gray-200/80 bg-gray-50/50 px-2 py-0.5 transition-colors duration-200 dark:border-gray-700/60 dark:bg-gray-800/50">
       {buttons.map((item, i) => {
         if (item === 'separator') {
           return (
             <div
               key={`sep-${i}`}
-              className="mx-1 h-5 w-px bg-gray-300 dark:bg-gray-600"
+              className="mx-1 h-4 w-px bg-gray-200 dark:bg-gray-700"
             />
           )
         }
@@ -124,13 +124,13 @@ export function Toolbar({ getView }: ToolbarProps) {
             key={item.title}
             type="button"
             title={item.title}
-            className="flex h-7 min-w-[28px] items-center justify-center rounded px-1.5 text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+            className="flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 active:scale-95 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onMouseDown={(e) => {
               e.preventDefault()
               handleClick(item.action)
             }}
           >
-            <Icon size={18} strokeWidth={1.5} />
+            <Icon size={17} strokeWidth={1.5} />
           </button>
         )
       })}
@@ -140,13 +140,13 @@ export function Toolbar({ getView }: ToolbarProps) {
         <button
           type="button"
           title="Insert table"
-          className="flex h-7 min-w-[28px] items-center justify-center rounded px-1.5 text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+          className="flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 active:scale-95 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
           onMouseDown={(e) => {
             e.preventDefault()
             setShowTablePicker((prev) => !prev)
           }}
         >
-          <Table size={18} strokeWidth={1.5} />
+          <Table size={17} strokeWidth={1.5} />
         </button>
         {showTablePicker && (
           <TableGridPicker

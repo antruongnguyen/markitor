@@ -16,14 +16,17 @@ function TabItem({
   return (
     <button
       type="button"
-      className={`group flex h-full max-w-[180px] items-center gap-1.5 border-r border-gray-200 px-3 text-xs transition-colors dark:border-gray-700 ${
+      className={`group relative flex h-full max-w-[180px] items-center gap-1.5 px-3 text-xs transition-all duration-150 ${
         isActive
           ? 'bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100'
-          : 'bg-gray-100 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-850'
+          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-300'
       }`}
       onClick={onSwitch}
       title={tab.fileName}
     >
+      {isActive && (
+        <span className="absolute bottom-0 left-1 right-1 h-0.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+      )}
       <span className="truncate">
         {tab.fileName}
       </span>
@@ -35,7 +38,7 @@ function TabItem({
       <span
         role="button"
         tabIndex={-1}
-        className="ml-auto shrink-0 rounded p-0.5 opacity-0 transition-opacity hover:bg-gray-200 group-hover:opacity-100 dark:hover:bg-gray-600"
+        className="ml-auto shrink-0 rounded p-0.5 opacity-0 transition-all duration-150 hover:bg-gray-200 group-hover:opacity-100 dark:hover:bg-gray-600"
         onClick={onClose}
         title="Close tab"
       >
@@ -66,7 +69,7 @@ export function TabBar() {
   }, [addTab])
 
   return (
-    <div className="flex h-8 shrink-0 items-stretch border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-8 shrink-0 items-stretch border-b border-gray-200/80 bg-gray-100/80 dark:border-gray-700/60 dark:bg-gray-800/80">
       <div ref={scrollRef} className="flex flex-1 items-stretch overflow-x-auto">
         {tabs.map((tab) => (
           <TabItem
@@ -80,7 +83,7 @@ export function TabBar() {
       </div>
       <button
         type="button"
-        className="flex w-8 shrink-0 items-center justify-center border-l border-gray-200 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 dark:border-gray-700 dark:hover:bg-gray-750 dark:hover:text-gray-300"
+        className="flex w-8 shrink-0 items-center justify-center border-l border-gray-200/80 text-gray-400 transition-all duration-150 hover:bg-gray-50 hover:text-gray-600 dark:border-gray-700/60 dark:hover:bg-white/5 dark:hover:text-gray-300"
         onClick={handleNewTab}
         title="New tab"
       >

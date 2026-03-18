@@ -414,13 +414,14 @@ function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close}>
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: 'fadeIn 0.15s ease-out' }} />
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-2xl dark:border-gray-700/60 dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()}
+        style={{ animation: 'scaleIn 0.15s ease-out' }}
       >
         {/* Search input */}
-        <div className="flex items-center gap-2 border-b border-gray-200 px-4 dark:border-gray-700">
+        <div className="flex items-center gap-2.5 border-b border-gray-200/80 px-4 dark:border-gray-700/60">
           <Search size={16} strokeWidth={1.5} className="shrink-0 text-gray-400" />
           <input
             ref={inputRef}
@@ -434,7 +435,7 @@ function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
         </div>
 
         {/* Command list */}
-        <div ref={listRef} className="max-h-[320px] overflow-y-auto py-1">
+        <div ref={listRef} className="custom-scrollbar max-h-[320px] overflow-y-auto py-1">
           {filtered.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
               No commands found
@@ -444,10 +445,10 @@ function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
               <button
                 key={cmd.id}
                 type="button"
-                className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors ${
+                className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors duration-100 ${
                   i === selectedIndex
-                    ? 'bg-blue-50 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100'
-                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                    ? 'bg-blue-50 text-blue-900 dark:bg-blue-500/10 dark:text-blue-100'
+                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.03]'
                 }`}
                 onClick={() => execute(cmd)}
                 onMouseEnter={() => setSelectedIndex(i)}
@@ -459,7 +460,7 @@ function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
                   <span>{cmd.label}</span>
                 </div>
                 {cmd.shortcut && (
-                  <kbd className="ml-4 shrink-0 rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                  <kbd className="ml-4 shrink-0 rounded border border-gray-200/80 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400">
                     {cmd.shortcut}
                   </kbd>
                 )}
@@ -469,10 +470,10 @@ function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
         </div>
 
         {/* Footer hint */}
-        <div className="flex items-center gap-3 border-t border-gray-200 px-4 py-2 text-[10px] text-gray-400 dark:border-gray-700 dark:text-gray-500">
-          <span><kbd className="rounded border border-gray-200 px-1 dark:border-gray-600">↑↓</kbd> Navigate</span>
-          <span><kbd className="rounded border border-gray-200 px-1 dark:border-gray-600">↵</kbd> Execute</span>
-          <span><kbd className="rounded border border-gray-200 px-1 dark:border-gray-600">Esc</kbd> Close</span>
+        <div className="flex items-center gap-3 border-t border-gray-200/80 px-4 py-2 text-[10px] text-gray-400 dark:border-gray-700/60 dark:text-gray-500">
+          <span><kbd className="rounded border border-gray-200/80 px-1 dark:border-gray-600">↑↓</kbd> Navigate</span>
+          <span><kbd className="rounded border border-gray-200/80 px-1 dark:border-gray-600">↵</kbd> Execute</span>
+          <span><kbd className="rounded border border-gray-200/80 px-1 dark:border-gray-600">Esc</kbd> Close</span>
         </div>
       </div>
     </div>

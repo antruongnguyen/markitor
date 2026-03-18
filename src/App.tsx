@@ -58,7 +58,7 @@ function ThemeToggle() {
   return (
     <button
       type="button"
-      className="flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+      className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
       onClick={() => setMode(nextMode[mode])}
       title={`Theme: ${modeLabel[mode]}`}
     >
@@ -76,8 +76,10 @@ function TocToggle() {
   return (
     <button
       type="button"
-      className={`flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
-        tocOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+      className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150 ${
+        tocOpen
+          ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
       }`}
       onClick={toggle}
       title={tocOpen ? 'Hide table of contents' : 'Show table of contents'}
@@ -94,8 +96,10 @@ function AIToggle() {
   return (
     <button
       type="button"
-      className={`flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
-        aiOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+      className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150 ${
+        aiOpen
+          ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
       }`}
       onClick={toggle}
       title={aiOpen ? 'Hide AI assistant' : 'Show AI assistant'}
@@ -112,8 +116,10 @@ function ScrollSyncToggle() {
   return (
     <button
       type="button"
-      className={`flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
-        syncEnabled ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+      className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150 ${
+        syncEnabled
+          ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
       }`}
       onClick={toggle}
       title={syncEnabled ? 'Disable scroll sync' : 'Enable scroll sync'}
@@ -177,18 +183,18 @@ function ExportMenu() {
     <div className="relative" ref={menuRef} data-export-menu>
       <button
         type="button"
-        className="rounded bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+        className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-150 hover:bg-gray-50 hover:shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
         onClick={() => setOpen((prev) => !prev)}
         title="Export document (Ctrl+Shift+E)"
       >
-        <Download size={16} strokeWidth={1.5} className="mr-1.5" />
+        <Download size={15} strokeWidth={1.5} />
         Export
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-800">
+        <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-gray-800" style={{ animation: 'scaleIn 0.15s ease-out' }}>
           <button
             type="button"
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
             onClick={handleExportHTML}
           >
             <FileCode size={16} strokeWidth={1.5} className="shrink-0 text-gray-400" />
@@ -196,7 +202,7 @@ function ExportMenu() {
           </button>
           <button
             type="button"
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
             onClick={handleExportPDF}
           >
             <Printer size={16} strokeWidth={1.5} className="shrink-0 text-gray-400" />
@@ -219,14 +225,14 @@ function LayoutToggle() {
   const setMode = useLayoutStore((s) => s.setMode)
 
   return (
-    <div className="flex items-center rounded border border-gray-200 dark:border-gray-600" title={`Layout: ${layoutModeLabel[mode]}`}>
+    <div className="flex items-center overflow-hidden rounded-md border border-gray-200 dark:border-gray-600" title={`Layout: ${layoutModeLabel[mode]}`}>
       {/* Editor Only */}
       <button
         type="button"
-        className={`flex h-7 w-7 items-center justify-center text-xs transition-colors ${
+        className={`flex h-7 w-7 items-center justify-center text-xs transition-all duration-150 ${
           mode === 'editor'
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
-            : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+            ? 'bg-blue-600 text-white dark:bg-blue-500'
+            : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5'
         }`}
         onClick={() => setMode('editor')}
         title="Editor only (Ctrl+Shift+1)"
@@ -236,10 +242,10 @@ function LayoutToggle() {
       {/* Split View */}
       <button
         type="button"
-        className={`flex h-7 w-7 items-center justify-center border-x border-gray-200 text-xs transition-colors dark:border-gray-600 ${
+        className={`flex h-7 w-7 items-center justify-center border-x border-gray-200 text-xs transition-all duration-150 dark:border-gray-600 ${
           mode === 'split'
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
-            : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+            ? 'bg-blue-600 text-white dark:bg-blue-500'
+            : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5'
         }`}
         onClick={() => setMode('split')}
         title="Split view (Ctrl+Shift+2)"
@@ -249,10 +255,10 @@ function LayoutToggle() {
       {/* Preview Only */}
       <button
         type="button"
-        className={`flex h-7 w-7 items-center justify-center text-xs transition-colors ${
+        className={`flex h-7 w-7 items-center justify-center text-xs transition-all duration-150 ${
           mode === 'preview'
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
-            : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+            ? 'bg-blue-600 text-white dark:bg-blue-500'
+            : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5'
         }`}
         onClick={() => setMode('preview')}
         title="Preview only (Ctrl+Shift+3)"
@@ -270,8 +276,10 @@ function FocusModeToggle() {
   return (
     <button
       type="button"
-      className={`flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
-        focusEnabled ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+      className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150 ${
+        focusEnabled
+          ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
       }`}
       onClick={toggle}
       title={focusEnabled ? 'Exit focus mode (Ctrl+Shift+F)' : 'Enter focus mode (Ctrl+Shift+F)'}
@@ -436,38 +444,41 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-white text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 transition-colors dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex items-center gap-2">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-white text-gray-900 transition-colors duration-200 dark:bg-gray-900 dark:text-gray-100">
+      <header className="flex h-11 shrink-0 items-center justify-between border-b border-gray-200/80 bg-gray-50/80 px-3 backdrop-blur-sm transition-colors duration-200 dark:border-gray-700/60 dark:bg-gray-800/80">
+        <div className="flex items-center gap-1.5">
           <TocToggle />
-          <div className="truncate text-sm font-medium" title={displayFileName}>
+          <div className="truncate text-sm font-medium text-gray-700 dark:text-gray-200" title={displayFileName}>
             {displayFileName}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             type="button"
-            className="flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={toggleCommandPalette}
             title="Command palette (Ctrl+P)"
           >
             <Terminal size={16} strokeWidth={1.5} />
           </button>
+          <div className="mx-0.5 h-4 w-px bg-gray-200 dark:bg-gray-700" />
           <LayoutToggle />
+          <div className="mx-0.5 h-4 w-px bg-gray-200 dark:bg-gray-700" />
           <FocusModeToggle />
           <AIToggle />
           <ScrollSyncToggle />
           <ThemeToggle />
+          <div className="mx-0.5 h-4 w-px bg-gray-200 dark:bg-gray-700" />
           <button
             type="button"
-            className="rounded bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+            className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-150 hover:bg-gray-50 hover:shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
             onClick={handleOpen}
           >
             Open
           </button>
           <button
             type="button"
-            className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-500"
+            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-blue-500 hover:shadow"
             onClick={handleSave}
           >
             Save
