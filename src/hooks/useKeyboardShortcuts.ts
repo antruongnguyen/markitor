@@ -4,11 +4,14 @@ import { type KeyBinding, keymap } from '@codemirror/view'
 import {
   toggleBold,
   toggleItalic,
+  toggleStrikethrough,
+  toggleInlineCode,
   toggleLink,
   toggleCodeBlock,
   toggleHeading,
   toggleUnorderedList,
   toggleOrderedList,
+  insertBlockquote,
 } from '../utils/editorCommands'
 
 type ShortcutHandlers = {
@@ -20,6 +23,8 @@ function makeShortcutBindings(handlers: ShortcutHandlers): KeyBinding[] {
   return [
     { key: 'Mod-b', run: toggleBold },
     { key: 'Mod-i', run: toggleItalic },
+    { key: 'Mod-Shift-x', run: toggleStrikethrough },
+    { key: 'Mod-e', run: toggleInlineCode },
     { key: 'Mod-k', run: toggleLink },
     { key: 'Mod-Shift-k', run: toggleCodeBlock },
     { key: 'Mod-1', run: (view) => toggleHeading(view, 1) },
@@ -27,6 +32,7 @@ function makeShortcutBindings(handlers: ShortcutHandlers): KeyBinding[] {
     { key: 'Mod-3', run: (view) => toggleHeading(view, 3) },
     { key: 'Mod-l', run: toggleUnorderedList },
     { key: 'Mod-Shift-l', run: toggleOrderedList },
+    { key: 'Mod-Shift-q', run: insertBlockquote },
     {
       key: 'Mod-s',
       run: () => {
