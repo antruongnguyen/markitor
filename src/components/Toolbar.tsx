@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { EditorView } from '@codemirror/view'
 import { openSearchPanel } from '@codemirror/search'
 import type { LucideIcon } from 'lucide-react'
@@ -78,6 +78,7 @@ type ToolbarProps = {
 
 export function Toolbar({ getView }: ToolbarProps) {
   const [showTablePicker, setShowTablePicker] = useState(false)
+  const tableButtonRef = useRef<HTMLButtonElement>(null)
   const showToast = useToastStore((s) => s.show)
 
   const handleClick = useCallback(
@@ -136,25 +137,25 @@ export function Toolbar({ getView }: ToolbarProps) {
       })}
 
       {/* Table insert button with grid picker */}
-      <div className="relative">
-        <button
-          type="button"
-          title="Insert table"
-          className="flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 active:scale-95 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
-          onMouseDown={(e) => {
-            e.preventDefault()
-            setShowTablePicker((prev) => !prev)
-          }}
-        >
-          <Table size={17} strokeWidth={1.5} />
-        </button>
-        {showTablePicker && (
-          <TableGridPicker
-            onSelect={handleTableInsert}
-            onClose={() => setShowTablePicker(false)}
-          />
-        )}
-      </div>
+      <button
+        ref={tableButtonRef}
+        type="button"
+        title="Insert table"
+        className="flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 active:scale-95 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
+        onMouseDown={(e) => {
+          e.preventDefault()
+          setShowTablePicker((prev) => !prev)
+        }}
+      >
+        <Table size={17} strokeWidth={1.5} />
+      </button>
+      {showTablePicker && (
+        <TableGridPicker
+          anchorRef={tableButtonRef}
+          onSelect={handleTableInsert}
+          onClose={() => setShowTablePicker(false)}
+        />
+      )}
 
       {/* Spacer pushes theme picker to the right */}
       <div className="flex-1" />

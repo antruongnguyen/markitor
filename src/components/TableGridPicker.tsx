@@ -1,21 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 type TableGridPickerProps = {
   onSelect: (rows: number, cols: number) => void
   onClose: () => void
+  anchorRef: React.RefObject<HTMLElement | null>
 }
 
 const MAX_ROWS = 8
 const MAX_COLS = 8
 
-export function TableGridPicker({ onSelect, onClose }: TableGridPickerProps) {
+export function TableGridPicker({ onSelect, onClose, anchorRef }: TableGridPickerProps) {
   const [hoverRow, setHoverRow] = useState(0)
   const [hoverCol, setHoverCol] = useState(0)
   const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+
+  // Calculate position from anchor element
+  useEffect(() => {
+    const anchor = anchorRef.current
+    if (!anchor) return
+    const rect = anchor.getBoundingClientRect()
+    setPos({ top: rect.bottom + 4, left: rect.left })
+  }, [anchorRef])
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (
+        ref.current && !ref.current.contains(e.target as Node) &&
+        anchorRef.current && !anchorRef.current.contains(e.target as Node)
+      ) {
         onClose()
       }
     }
@@ -28,12 +42,15 @@ export function TableGridPicker({ onSelect, onClose }: TableGridPickerProps) {
       document.removeEventListener('mousedown', onClickOutside)
       document.removeEventListener('keydown', onEscape)
     }
-  }, [onClose])
+  }, [onClose, anchorRef])
 
-  return (
+  if (!pos) return null
+
+  return createPortal(
     <div
       ref={ref}
-      className="absolute left-0 top-full z-50 mt-1 rounded-md border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-600 dark:bg-gray-800"
+      className="fixed z-50 rounded-md border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-600 dark:bg-gray-800"
+      style={{ top: `${pos.top}px`, left: `${pos.left}px` }}
     >
       <div className="mb-1.5 text-center text-xs text-gray-500 dark:text-gray-400">
         {hoverRow > 0 && hoverCol > 0
@@ -67,6 +84,7 @@ export function TableGridPicker({ onSelect, onClose }: TableGridPickerProps) {
           )
         })}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
