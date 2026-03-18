@@ -1,0 +1,305 @@
+import { useCallback, useRef, useState, useEffect } from 'react'
+import { useAIStore } from '../store/aiStore'
+import { useEditorStore } from '../store/editorStore'
+import { editorViewRef } from '../utils/editorViewRef'
+import { sendMessage, buildSystemPrompt, buildActionPrompt } from '../utils/aiClient'
+
+type ActionId =
+  | 'rewrite-concise'
+  | 'rewrite-formal'
+  | 'rewrite-casual'
+  | 'rewrite-clearer'
+  | 'continue'
+  | 'explain'
+  | 'grammar'
+  | 'custom'
+
+const ACTIONS: { id: ActionId; label: string; needsSelection: boolean }[] = [
+  { id: 'rewrite-concise', label: 'More concise', needsSelection: true },
+  { id: 'rewrite-formal', label: 'More formal', needsSelection: true },
+  { id: 'rewrite-casual', label: 'More casual', needsSelection: true },
+  { id: 'rewrite-clearer', label: 'Clearer', needsSelection: true },
+  { id: 'continue', label: 'Continue writing', needsSelection: false },
+  { id: 'explain', label: 'Explain / Expand', needsSelection: true },
+  { id: 'grammar', label: 'Fix grammar', needsSelection: true },
+]
+
+function getSelectedText(): string {
+  const view = editorViewRef.current
+  if (!view) return ''
+  const { from, to } = view.state.selection.main
+  if (from === to) return ''
+  return view.state.doc.sliceString(from, to)
+}
+
+function getContextAroundCursor(): string {
+  const view = editorViewRef.current
+  if (!view) return ''
+  const doc = view.state.doc.toString()
+  const pos = view.state.selection.main.head
+  const start = Math.max(0, pos - 500)
+  return doc.slice(start, pos)
+}
+
+export function AIPanel() {
+  const messages = useAIStore((s) => s.messages)
+  const loading = useAIStore((s) => s.loading)
+  const streamingContent = useAIStore((s) => s.streamingContent)
+  const apiKey = useAIStore((s) => s.apiKey)
+  const model = useAIStore((s) => s.model)
+  const maxTokens = useAIStore((s) => s.maxTokens)
+  const addMessage = useAIStore((s) => s.addMessage)
+  const setLoading = useAIStore((s) => s.setLoading)
+  const setStreamingContent = useAIStore((s) => s.setStreamingContent)
+  const appendStreamingContent = useAIStore((s) => s.appendStreamingContent)
+  const clearMessages = useAIStore((s) => s.clearMessages)
+  const setSettingsOpen = useAIStore((s) => s.setSettingsOpen)
+  const content = useEditorStore((s) => s.content)
+
+  const [customPrompt, setCustomPrompt] = useState('')
+  const abortRef = useRef<AbortController | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // auto-scroll on new content
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [messages, streamingContent])
+
+  const runAction = useCallback(
+    async (action: ActionId) => {
+      if (!apiKey) {
+        setSettingsOpen(true)
+        return
+      }
+
+      const selected = getSelectedText()
+      const contextText = action === 'continue' ? getContextAroundCursor() : selected
+
+      if (!contextText && action !== 'custom') return
+
+      const userPrompt = buildActionPrompt(action, contextText, action === 'custom' ? customPrompt : undefined)
+
+      addMessage({
+        id: crypto.randomUUID(),
+        role: 'user',
+        content: action === 'custom' ? customPrompt : `[${action}] ${contextText.slice(0, 100)}${contextText.length > 100 ? '...' : ''}`,
+        action,
+        timestamp: Date.now(),
+      })
+
+      setLoading(true)
+      setStreamingContent('')
+
+      const abort = new AbortController()
+      abortRef.current = abort
+
+      try {
+        const full = await sendMessage({
+          apiKey,
+          model,
+          maxTokens,
+          system: buildSystemPrompt(content),
+          userMessage: userPrompt,
+          onChunk: (chunk) => appendStreamingContent(chunk),
+          signal: abort.signal,
+        })
+
+        addMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: full,
+          action,
+          timestamp: Date.now(),
+        })
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError') return
+        const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+        addMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `Error: ${errorMsg}`,
+          timestamp: Date.now(),
+        })
+      } finally {
+        setLoading(false)
+        setStreamingContent('')
+        abortRef.current = null
+      }
+    },
+    [apiKey, model, maxTokens, content, customPrompt, addMessage, setLoading, setStreamingContent, appendStreamingContent, setSettingsOpen],
+  )
+
+  const handleApply = useCallback((text: string) => {
+    const view = editorViewRef.current
+    if (!view) return
+    const { from, to } = view.state.selection.main
+    view.dispatch({
+      changes: { from, to, insert: text },
+    })
+    view.focus()
+  }, [])
+
+  const handleStop = useCallback(() => {
+    abortRef.current?.abort()
+  }, [])
+
+  const handleCustomSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!customPrompt.trim()) return
+      runAction('custom')
+      setCustomPrompt('')
+    },
+    [customPrompt, runAction],
+  )
+
+  const hasSelection = !!getSelectedText()
+
+  return (
+    <div className="flex h-full w-[300px] shrink-0 flex-col overflow-hidden border-l border-gray-200 bg-gray-50 transition-colors dark:border-gray-700 dark:bg-gray-800">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2 dark:border-gray-700">
+        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">AI Assistant</span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+            onClick={clearMessages}
+            title="Clear history"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+            onClick={() => setSettingsOpen(true)}
+            title="AI settings"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Quick actions */}
+      <div className="border-b border-gray-200 px-3 py-2 dark:border-gray-700">
+        <div className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          Actions
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {ACTIONS.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              disabled={loading || (a.needsSelection && !hasSelection)}
+              className="rounded border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-600 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+              onClick={() => runAction(a.id)}
+              title={a.needsSelection && !hasSelection ? 'Select text in editor first' : a.label}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-2">
+        {messages.length === 0 && !loading && (
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+              Select text in the editor and choose an action, or use the custom prompt below.
+            </p>
+          </div>
+        )}
+
+        {messages.map((msg) => (
+          <div key={msg.id} className={`flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+            <div
+              className={`max-w-full rounded-lg px-3 py-2 text-xs leading-relaxed ${
+                msg.role === 'user'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-800 shadow-sm dark:bg-gray-900 dark:text-gray-200'
+              }`}
+            >
+              <pre className="whitespace-pre-wrap break-words font-sans">{msg.content}</pre>
+            </div>
+            {msg.role === 'assistant' && !msg.content.startsWith('Error:') && (
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  className="rounded bg-green-600 px-2 py-0.5 text-[10px] font-medium text-white transition-colors hover:bg-green-500"
+                  onClick={() => handleApply(msg.content)}
+                >
+                  Apply
+                </button>
+                <button
+                  type="button"
+                  className="rounded px-2 py-0.5 text-[10px] font-medium text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                  onClick={() => navigator.clipboard.writeText(msg.content)}
+                >
+                  Copy
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {loading && streamingContent && (
+          <div className="flex flex-col items-start gap-1">
+            <div className="max-w-full rounded-lg bg-white px-3 py-2 text-xs leading-relaxed text-gray-800 shadow-sm dark:bg-gray-900 dark:text-gray-200">
+              <pre className="whitespace-pre-wrap break-words font-sans">{streamingContent}</pre>
+            </div>
+          </div>
+        )}
+
+        {loading && !streamingContent && (
+          <div className="flex items-center gap-2 py-2">
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+            <span className="text-xs text-gray-400">Thinking...</span>
+          </div>
+        )}
+      </div>
+
+      {/* Stop button */}
+      {loading && (
+        <div className="border-t border-gray-200 px-3 py-2 dark:border-gray-700">
+          <button
+            type="button"
+            className="w-full rounded bg-red-600 px-2 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-500"
+            onClick={handleStop}
+          >
+            Stop generating
+          </button>
+        </div>
+      )}
+
+      {/* Custom prompt input */}
+      <form
+        onSubmit={handleCustomSubmit}
+        className="flex gap-2 border-t border-gray-200 px-3 py-2 dark:border-gray-700"
+      >
+        <input
+          type="text"
+          value={customPrompt}
+          onChange={(e) => setCustomPrompt(e.target.value)}
+          placeholder="Ask AI anything..."
+          disabled={loading}
+          className="min-w-0 flex-1 rounded border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400"
+        />
+        <button
+          type="submit"
+          disabled={loading || !customPrompt.trim()}
+          className="shrink-0 rounded bg-blue-600 px-2 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-40"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  )
+}

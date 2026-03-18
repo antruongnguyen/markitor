@@ -1,7 +1,10 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo } from 'react'
+import { AIPanel } from './components/AIPanel'
+import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
 import { TableOfContents } from './components/TableOfContents'
+import { useAIStore } from './store/aiStore'
 import { useEditorStore } from './store/editorStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
 import { useTocStore } from './store/tocStore'
@@ -72,6 +75,26 @@ function TocToggle() {
   )
 }
 
+function AIToggle() {
+  const aiOpen = useAIStore((s) => s.open)
+  const toggle = useAIStore((s) => s.toggle)
+
+  return (
+    <button
+      type="button"
+      className={`flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 ${
+        aiOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+      }`}
+      onClick={toggle}
+      title={aiOpen ? 'Hide AI assistant' : 'Show AI assistant'}
+    >
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg>
+    </button>
+  )
+}
+
 function App() {
   const fileName = useEditorStore((s) => s.fileName)
   const isDirty = useEditorStore((s) => s.isDirty)
@@ -79,6 +102,7 @@ function App() {
   const setFileMeta = useEditorStore((s) => s.setFileMeta)
   const markSaved = useEditorStore((s) => s.markSaved)
   const tocOpen = useTocStore((s) => s.open)
+  const aiOpen = useAIStore((s) => s.open)
 
   const displayFileName = useMemo(() => (isDirty ? `${fileName} *` : fileName), [fileName, isDirty])
 
@@ -140,6 +164,7 @@ function App() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <AIToggle />
           <ThemeToggle />
           <button
             type="button"
@@ -174,9 +199,11 @@ function App() {
             )}
           />
         </div>
+        {aiOpen && <AIPanel />}
       </div>
 
       <StatusBar />
+      <SettingsDialog />
     </div>
   )
 }
