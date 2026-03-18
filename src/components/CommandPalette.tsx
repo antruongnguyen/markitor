@@ -1,0 +1,436 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCommandPaletteStore } from '../store/commandPaletteStore'
+import { useThemeStore } from '../store/themeStore'
+import { useTocStore } from '../store/tocStore'
+import { useAIStore } from '../store/aiStore'
+import { useScrollSyncStore } from '../store/scrollSyncStore'
+import { useFocusModeStore } from '../store/focusModeStore'
+import { useEditorStore } from '../store/editorStore'
+import { editorViewRef } from '../utils/editorViewRef'
+import { exportHTML, exportPDF } from '../utils/exportDocument'
+import {
+  toggleBold,
+  toggleItalic,
+  toggleStrikethrough,
+  toggleInlineCode,
+  toggleLink,
+  toggleImage,
+  toggleCodeBlock,
+  toggleHeading,
+  toggleUnorderedList,
+  toggleOrderedList,
+  insertBlockquote,
+  insertHorizontalRule,
+} from '../utils/editorCommands'
+
+
+type Command = {
+  id: string
+  label: string
+  category: string
+  shortcut?: string
+  execute: () => void
+}
+
+function isMac() {
+  return navigator.platform.toUpperCase().indexOf('MAC') >= 0
+}
+
+function mod() {
+  return isMac() ? 'Cmd' : 'Ctrl'
+}
+
+function buildCommands(handlers: {
+  onOpen: () => void
+  onSave: () => void
+}): Command[] {
+  const editorCmd = (fn: (view: NonNullable<typeof editorViewRef.current>) => boolean) => () => {
+    const view = editorViewRef.current
+    if (view) {
+      fn(view)
+      view.focus()
+    }
+  }
+
+  return [
+    // File commands
+    {
+      id: 'file.new',
+      label: 'New File',
+      category: 'File',
+      execute: () => {
+        useEditorStore.getState().setContentFromFile('')
+        useEditorStore.getState().setFileMeta({ fileName: 'untitled.md', fileHandle: null })
+      },
+    },
+    {
+      id: 'file.open',
+      label: 'Open File',
+      category: 'File',
+      shortcut: `${mod()}+O`,
+      execute: handlers.onOpen,
+    },
+    {
+      id: 'file.save',
+      label: 'Save File',
+      category: 'File',
+      shortcut: `${mod()}+S`,
+      execute: handlers.onSave,
+    },
+    {
+      id: 'file.export-html',
+      label: 'Export as HTML',
+      category: 'File',
+      execute: () => {
+        const { content, fileName } = useEditorStore.getState()
+        exportHTML(content, fileName)
+      },
+    },
+    {
+      id: 'file.export-pdf',
+      label: 'Print / Save as PDF',
+      category: 'File',
+      execute: () => {
+        const { content, fileName } = useEditorStore.getState()
+        exportPDF(content, fileName)
+      },
+    },
+
+    // Formatting commands
+    {
+      id: 'format.bold',
+      label: 'Bold',
+      category: 'Format',
+      shortcut: `${mod()}+B`,
+      execute: editorCmd(toggleBold),
+    },
+    {
+      id: 'format.italic',
+      label: 'Italic',
+      category: 'Format',
+      shortcut: `${mod()}+I`,
+      execute: editorCmd(toggleItalic),
+    },
+    {
+      id: 'format.strikethrough',
+      label: 'Strikethrough',
+      category: 'Format',
+      shortcut: `${mod()}+Shift+X`,
+      execute: editorCmd(toggleStrikethrough),
+    },
+    {
+      id: 'format.inline-code',
+      label: 'Inline Code',
+      category: 'Format',
+      shortcut: `${mod()}+E`,
+      execute: editorCmd(toggleInlineCode),
+    },
+    {
+      id: 'format.code-block',
+      label: 'Code Block',
+      category: 'Format',
+      shortcut: `${mod()}+Shift+K`,
+      execute: editorCmd(toggleCodeBlock),
+    },
+    {
+      id: 'format.link',
+      label: 'Insert Link',
+      category: 'Format',
+      shortcut: `${mod()}+K`,
+      execute: editorCmd(toggleLink),
+    },
+    {
+      id: 'format.image',
+      label: 'Insert Image',
+      category: 'Format',
+      execute: editorCmd(toggleImage),
+    },
+    {
+      id: 'format.blockquote',
+      label: 'Blockquote',
+      category: 'Format',
+      shortcut: `${mod()}+Shift+Q`,
+      execute: editorCmd(insertBlockquote),
+    },
+    {
+      id: 'format.h1',
+      label: 'Heading 1',
+      category: 'Format',
+      shortcut: `${mod()}+1`,
+      execute: editorCmd((v) => toggleHeading(v, 1)),
+    },
+    {
+      id: 'format.h2',
+      label: 'Heading 2',
+      category: 'Format',
+      shortcut: `${mod()}+2`,
+      execute: editorCmd((v) => toggleHeading(v, 2)),
+    },
+    {
+      id: 'format.h3',
+      label: 'Heading 3',
+      category: 'Format',
+      shortcut: `${mod()}+3`,
+      execute: editorCmd((v) => toggleHeading(v, 3)),
+    },
+    {
+      id: 'format.ul',
+      label: 'Unordered List',
+      category: 'Format',
+      shortcut: `${mod()}+L`,
+      execute: editorCmd(toggleUnorderedList),
+    },
+    {
+      id: 'format.ol',
+      label: 'Ordered List',
+      category: 'Format',
+      shortcut: `${mod()}+Shift+L`,
+      execute: editorCmd(toggleOrderedList),
+    },
+    {
+      id: 'format.hr',
+      label: 'Horizontal Rule',
+      category: 'Format',
+      execute: editorCmd(insertHorizontalRule),
+    },
+
+    // View commands
+    {
+      id: 'view.theme-light',
+      label: 'Switch to Light Theme',
+      category: 'View',
+      execute: () => useThemeStore.getState().setMode('light'),
+    },
+    {
+      id: 'view.theme-dark',
+      label: 'Switch to Dark Theme',
+      category: 'View',
+      execute: () => useThemeStore.getState().setMode('dark'),
+    },
+    {
+      id: 'view.theme-system',
+      label: 'Switch to System Theme',
+      category: 'View',
+      execute: () => useThemeStore.getState().setMode('system'),
+    },
+    {
+      id: 'view.toggle-toc',
+      label: 'Toggle Table of Contents',
+      category: 'View',
+      execute: () => useTocStore.getState().toggle(),
+    },
+    {
+      id: 'view.toggle-ai',
+      label: 'Toggle AI Assistant',
+      category: 'View',
+      execute: () => useAIStore.getState().toggle(),
+    },
+    {
+      id: 'view.toggle-scroll-sync',
+      label: 'Toggle Scroll Sync',
+      category: 'View',
+      execute: () => useScrollSyncStore.getState().toggle(),
+    },
+    {
+      id: 'view.toggle-focus',
+      label: 'Toggle Focus Mode',
+      category: 'View',
+      shortcut: `${mod()}+Shift+F`,
+      execute: () => useFocusModeStore.getState().toggle(),
+    },
+    {
+      id: 'view.toggle-typewriter',
+      label: 'Toggle Typewriter Mode',
+      category: 'View',
+      execute: () => useFocusModeStore.getState().toggleTypewriter(),
+    },
+    {
+      id: 'view.ai-settings',
+      label: 'AI Settings',
+      category: 'View',
+      execute: () => useAIStore.getState().setSettingsOpen(true),
+    },
+  ]
+}
+
+function fuzzyMatch(query: string, text: string): { match: boolean; score: number } {
+  const q = query.toLowerCase()
+  const t = text.toLowerCase()
+
+  // Exact substring match gets high score
+  if (t.includes(q)) {
+    const idx = t.indexOf(q)
+    return { match: true, score: 100 - idx }
+  }
+
+  // Fuzzy: all query chars appear in order
+  let qi = 0
+  let score = 0
+  let lastIdx = -1
+  for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+    if (t[ti] === q[qi]) {
+      // Bonus for consecutive matches
+      score += lastIdx === ti - 1 ? 10 : 1
+      // Bonus for word-start matches
+      if (ti === 0 || t[ti - 1] === ' ') score += 5
+      lastIdx = ti
+      qi++
+    }
+  }
+
+  if (qi === q.length) {
+    return { match: true, score }
+  }
+
+  return { match: false, score: 0 }
+}
+
+type CommandPaletteInnerProps = {
+  onOpen: () => void
+  onSave: () => void
+}
+
+function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
+  const setOpen = useCommandPaletteStore((s) => s.setOpen)
+  const [query, setQuery] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+
+  const commands = useMemo(() => buildCommands({ onOpen, onSave }), [onOpen, onSave])
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return commands
+
+    return commands
+      .map((cmd) => {
+        const labelMatch = fuzzyMatch(query, cmd.label)
+        const catMatch = fuzzyMatch(query, cmd.category)
+        const bestScore = Math.max(labelMatch.score, catMatch.score)
+        const isMatch = labelMatch.match || catMatch.match
+        return { cmd, score: bestScore, isMatch }
+      })
+      .filter((r) => r.isMatch)
+      .sort((a, b) => b.score - a.score)
+      .map((r) => r.cmd)
+  }, [commands, query])
+
+  // Auto focus
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  const close = useCallback(() => setOpen(false), [setOpen])
+
+  const execute = useCallback(
+    (cmd: Command) => {
+      close()
+      // Delay execution slightly so the palette closes cleanly
+      requestAnimationFrame(() => cmd.execute())
+    },
+    [close],
+  )
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex((i) => Math.min(i + 1, filtered.length - 1))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex((i) => Math.max(i - 1, 0))
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        if (filtered[selectedIndex]) {
+          execute(filtered[selectedIndex])
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        close()
+      }
+    },
+    [filtered, selectedIndex, execute, close],
+  )
+
+  // Scroll selected item into view
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    const selected = list.children[selectedIndex] as HTMLElement | undefined
+    selected?.scrollIntoView({ block: 'nearest' })
+  }, [selectedIndex])
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close}>
+      <div className="absolute inset-0 bg-black/40" />
+      <div
+        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Search input */}
+        <div className="flex items-center gap-2 border-b border-gray-200 px-4 dark:border-gray-700">
+          <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0) }}
+            onKeyDown={onKeyDown}
+            placeholder="Type a command..."
+            className="h-12 w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-500"
+          />
+        </div>
+
+        {/* Command list */}
+        <div ref={listRef} className="max-h-[320px] overflow-y-auto py-1">
+          {filtered.length === 0 ? (
+            <div className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
+              No commands found
+            </div>
+          ) : (
+            filtered.map((cmd, i) => (
+              <button
+                key={cmd.id}
+                type="button"
+                className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors ${
+                  i === selectedIndex
+                    ? 'bg-blue-50 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100'
+                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                }`}
+                onClick={() => execute(cmd)}
+                onMouseEnter={() => setSelectedIndex(i)}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="w-14 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    {cmd.category}
+                  </span>
+                  <span>{cmd.label}</span>
+                </div>
+                {cmd.shortcut && (
+                  <kbd className="ml-4 shrink-0 rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                    {cmd.shortcut}
+                  </kbd>
+                )}
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Footer hint */}
+        <div className="flex items-center gap-3 border-t border-gray-200 px-4 py-2 text-[10px] text-gray-400 dark:border-gray-700 dark:text-gray-500">
+          <span><kbd className="rounded border border-gray-200 px-1 dark:border-gray-600">↑↓</kbd> Navigate</span>
+          <span><kbd className="rounded border border-gray-200 px-1 dark:border-gray-600">↵</kbd> Execute</span>
+          <span><kbd className="rounded border border-gray-200 px-1 dark:border-gray-600">Esc</kbd> Close</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function CommandPalette({ onOpen, onSave }: CommandPaletteInnerProps) {
+  const open = useCommandPaletteStore((s) => s.open)
+  if (!open) return null
+  return <CommandPaletteInner onOpen={onOpen} onSave={onSave} />
+}

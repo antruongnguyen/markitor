@@ -1,11 +1,13 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AIPanel } from './components/AIPanel'
+import { CommandPalette } from './components/CommandPalette'
 import { FocusModeOverlay } from './components/FocusModeOverlay'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
 import { TableOfContents } from './components/TableOfContents'
 import { useAIStore } from './store/aiStore'
+import { useCommandPaletteStore } from './store/commandPaletteStore'
 import { useEditorStore } from './store/editorStore'
 import { useFocusModeStore } from './store/focusModeStore'
 import { useThemeStore, type ThemeMode } from './store/themeStore'
@@ -238,6 +240,7 @@ function App() {
   const focusMode = useFocusModeStore((s) => s.enabled)
   const exitFocus = useFocusModeStore((s) => s.exit)
   const toggleFocus = useFocusModeStore((s) => s.toggle)
+  const toggleCommandPalette = useCommandPaletteStore((s) => s.toggle)
 
   const displayFileName = useMemo(() => (isDirty ? `${fileName} *` : fileName), [fileName, isDirty])
 
@@ -304,6 +307,18 @@ function App() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [toggleFocus, exitFocus])
 
+  // Command palette: Cmd/Ctrl+P to toggle
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        toggleCommandPalette()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [toggleCommandPalette])
+
   if (focusMode) {
     return (
       <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#faf9f6] transition-colors duration-300 dark:bg-[#0d1117]">
@@ -315,6 +330,7 @@ function App() {
           </div>
         </div>
         <FocusModeOverlay />
+        <CommandPalette onOpen={handleOpen} onSave={handleSave} />
         <SettingsDialog />
       </div>
     )
@@ -330,6 +346,16 @@ function App() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded px-2 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+            onClick={toggleCommandPalette}
+            title="Command palette (Ctrl+P)"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </button>
           <FocusModeToggle />
           <AIToggle />
           <ScrollSyncToggle />
@@ -372,6 +398,7 @@ function App() {
       </div>
 
       <StatusBar />
+      <CommandPalette onOpen={handleOpen} onSave={handleSave} />
       <SettingsDialog />
     </div>
   )
