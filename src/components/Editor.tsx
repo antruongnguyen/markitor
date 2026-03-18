@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from 'react'
+import { useRef, useEffect, useMemo, useCallback } from 'react'
 import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
@@ -7,6 +7,7 @@ import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightSty
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
 import { useThemeStore } from '../store/themeStore'
+import { Toolbar } from './Toolbar'
 
 const lightTheme = EditorView.theme({
   '&': { backgroundColor: '#ffffff', color: '#24292e' },
@@ -119,5 +120,12 @@ export function Editor({ onOpen, onSave }: EditorProps) {
     })
   }, [content])
 
-  return <div ref={containerRef} className="h-full w-full overflow-hidden" />
+  const getView = useCallback(() => viewRef.current, [])
+
+  return (
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <Toolbar getView={getView} />
+      <div ref={containerRef} className="min-h-0 flex-1 overflow-hidden" />
+    </div>
+  )
 }
