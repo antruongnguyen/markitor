@@ -1,7 +1,14 @@
+import { SplitPane } from './components/SplitPane'
+import { Editor } from './components/Editor'
+import { Preview } from './components/Preview'
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <h1 className="text-5xl font-bold text-gray-900">Markitor</h1>
+    <div className="h-screen w-screen overflow-hidden bg-gray-900">
+      <SplitPane
+        left={<Editor />}
+        right={<Preview />}
+      />
     </div>
   )
 }
