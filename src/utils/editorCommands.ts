@@ -1,5 +1,6 @@
 import { EditorSelection } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
+import { createEmptyTable } from './tableUtils'
 
 type WrapSelectionOptions = {
   prefix: string
@@ -205,6 +206,27 @@ export function insertBlockquote(view: EditorView): boolean {
     }
     return `> ${lineText}`
   })
+}
+
+export function insertTable(view: EditorView, rows: number, cols: number): boolean {
+  const { state } = view
+  const range = state.selection.main
+  const line = state.doc.lineAt(range.from)
+  const table = createEmptyTable(rows, cols)
+  const prefix = line.text.length > 0 ? '\n\n' : ''
+  const insert = `${prefix}${table}\n`
+  const cursorPos = line.to + prefix.length + table.indexOf('Header 1') + 'Header 1'.length
+
+  view.dispatch({
+    changes: { from: line.to, to: line.to, insert },
+    selection: EditorSelection.single(
+      line.to + prefix.length + table.indexOf('Header 1'),
+      cursorPos,
+    ),
+    scrollIntoView: true,
+  })
+
+  return true
 }
 
 export function insertHorizontalRule(view: EditorView): boolean {

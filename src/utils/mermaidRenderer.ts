@@ -13,7 +13,7 @@ export function initMermaid(theme: ResolvedTheme) {
   currentTheme = theme
   mermaid.initialize({
     startOnLoad: false,
-    theme: getMermaidTheme(theme),
+    theme: getMermaidTheme(theme) as 'dark' | 'default',
     securityLevel: 'loose',
     fontFamily: 'inherit',
   })

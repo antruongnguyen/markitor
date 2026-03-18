@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import type { EditorView } from '@codemirror/view'
 import { openSearchPanel } from '@codemirror/search'
 import {
@@ -14,7 +14,10 @@ import {
   toggleCodeBlock,
   insertBlockquote,
   insertHorizontalRule,
+  insertTable,
 } from '../utils/editorCommands'
+import { TableGridPicker } from './TableGridPicker'
+import { ThemePicker } from './ThemePicker'
 
 type ToolbarButton = {
   label: string
@@ -49,12 +52,25 @@ type ToolbarProps = {
 }
 
 export function Toolbar({ getView }: ToolbarProps) {
+  const [showTablePicker, setShowTablePicker] = useState(false)
+
   const handleClick = useCallback(
     (action: (view: EditorView) => boolean) => {
       const view = getView()
       if (!view) return
       action(view)
       view.focus()
+    },
+    [getView],
+  )
+
+  const handleTableInsert = useCallback(
+    (rows: number, cols: number) => {
+      const view = getView()
+      if (!view) return
+      insertTable(view, rows, cols)
+      view.focus()
+      setShowTablePicker(false)
     },
     [getView],
   )
@@ -105,6 +121,34 @@ export function Toolbar({ getView }: ToolbarProps) {
           </button>
         )
       })}
+
+      {/* Table insert button with grid picker */}
+      <div className="relative">
+        <button
+          type="button"
+          title="Insert table"
+          className="flex h-7 min-w-[28px] items-center justify-center rounded px-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            setShowTablePicker((prev) => !prev)
+          }}
+        >
+          <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm1 1v4h6V3H1zm7 0v4h7V3H8zM1 8v4h6V8H1zm7 0v4h7V8H8zM1 13v1a1 1 0 0 0 1 1h5v-2H1zm7 0v2h6a1 1 0 0 0 1-1v-1H8zM1 2a1 1 0 0 1 1-1h5v1H1zm7-1h6a1 1 0 0 1 1 1H8V1z" />
+          </svg>
+        </button>
+        {showTablePicker && (
+          <TableGridPicker
+            onSelect={handleTableInsert}
+            onClose={() => setShowTablePicker(false)}
+          />
+        )}
+      </div>
+
+      {/* Spacer pushes theme picker to the right */}
+      <div className="flex-1" />
+
+      <ThemePicker />
     </div>
   )
 }

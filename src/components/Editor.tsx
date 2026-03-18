@@ -2,27 +2,19 @@ import { useRef, useEffect, useMemo, useCallback } from 'react'
 import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
-import { oneDark } from '@codemirror/theme-one-dark'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { search, searchKeymap, highlightSelectionMatches } from '@codemirror/search'
 import { markdownAutocomplete } from '../utils/autocomplete'
 import { imageDropHandler } from '../utils/imageHandler'
+import { tableTabNavigation } from '../utils/tableTabNavigation'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
 import { useFocusModeStore } from '../store/focusModeStore'
 import { useThemeStore } from '../store/themeStore'
 import { editorViewRef } from '../utils/editorViewRef'
+import { getThemeExtension } from '../utils/editorThemes'
 import { Toolbar } from './Toolbar'
-
-const lightTheme = EditorView.theme({
-  '&': { backgroundColor: '#ffffff', color: '#24292e' },
-  '.cm-gutters': { backgroundColor: '#fafbfc', color: '#959da5', borderRight: '1px solid #e1e4e8' },
-  '.cm-activeLineGutter': { backgroundColor: '#f1f8ff' },
-  '.cm-activeLine': { backgroundColor: '#f6f8fa' },
-  '.cm-cursor': { borderLeftColor: '#24292e' },
-  '.cm-selectionBackground': { backgroundColor: '#0366d625' },
-  '&.cm-focused .cm-selectionBackground': { backgroundColor: '#0366d640' },
-})
+import { TableToolbar } from './TableToolbar'
 
 const focusLightTheme = EditorView.theme({
   '&': { backgroundColor: '#faf9f6', color: '#24292e' },
@@ -60,6 +52,7 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
   const setContent = useEditorStore((s) => s.setContent)
   const setCursorPosition = useEditorStore((s) => s.setCursorPosition)
   const resolved = useThemeStore((s) => s.resolved)
+  const editorTheme = useThemeStore((s) => s.editorTheme)
   const typewriterMode = useFocusModeStore((s) => s.typewriterMode)
   const shortcuts = useKeyboardShortcuts({ onOpen, onSave })
 
@@ -83,9 +76,10 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
 
     const initialResolved = useThemeStore.getState().resolved
     const initialFocus = useFocusModeStore.getState().enabled
+    const initialEditorTheme = useThemeStore.getState().editorTheme
     const themeExt = initialFocus
       ? (initialResolved === 'dark' ? focusDarkTheme : focusLightTheme)
-      : (initialResolved === 'dark' ? oneDark : lightTheme)
+      : getThemeExtension(initialEditorTheme)
     const focusStyleExt = initialFocus
       ? EditorView.theme({
           '.cm-content': { fontSize: '18px', lineHeight: '1.8', padding: '2rem 0' },
@@ -105,6 +99,7 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
         search({ top: true }),
         highlightSelectionMatches(),
         keymap.of(searchKeymap),
+        tableTabNavigation(),
         markdownAutocomplete(),
         imageDropHandler(),
         themeCompRef.current.of(themeExt),
@@ -138,13 +133,13 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Dynamically switch CodeMirror theme when resolved theme or focus mode changes
+  // Dynamically switch CodeMirror theme when editor theme or focus mode changes
   useEffect(() => {
     const view = viewRef.current
     if (!view) return
     const themeExt = focusMode
       ? (resolved === 'dark' ? focusDarkTheme : focusLightTheme)
-      : (resolved === 'dark' ? oneDark : lightTheme)
+      : getThemeExtension(editorTheme)
     const focusStyleExt = focusMode
       ? EditorView.theme({
           '.cm-content': { fontSize: '18px', lineHeight: '1.8', padding: '2rem 0' },
@@ -157,7 +152,7 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
         focusStyleCompRef.current.reconfigure(focusStyleExt),
       ],
     })
-  }, [resolved, focusMode])
+  }, [resolved, focusMode, editorTheme])
 
   useEffect(() => {
     const view = viewRef.current
@@ -215,7 +210,10 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       {!focusMode && <Toolbar getView={getView} />}
-      <div ref={containerRef} className="min-h-0 flex-1 overflow-hidden" />
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <div ref={containerRef} className="h-full w-full" />
+        {!focusMode && <TableToolbar getView={getView} />}
+      </div>
     </div>
   )
 }
