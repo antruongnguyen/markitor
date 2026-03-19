@@ -45,7 +45,7 @@ export function FocusModeOverlay() {
         className={`pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-sm transition-colors ${
           typewriterMode
             ? 'bg-blue-600/80 text-white hover:bg-blue-500/80'
-            : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+            : 'bg-gray-900/10 text-gray-700 hover:bg-gray-900/20 hover:text-gray-900 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white'
         }`}
         onClick={toggleTypewriter}
         title="Toggle typewriter mode"
@@ -55,7 +55,7 @@ export function FocusModeOverlay() {
       </button>
       <button
         type="button"
-        className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white/70 shadow-lg backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+        className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-gray-900/10 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-lg backdrop-blur-sm transition-colors hover:bg-gray-900/20 hover:text-gray-900 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white"
         onClick={exit}
         title="Exit focus mode (Escape)"
       >
