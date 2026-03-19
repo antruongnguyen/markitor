@@ -37,6 +37,7 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'file.close-tab', name: 'Close Tab', category: 'File', keys: 'Mod+W', description: 'Close the active tab' },
 
   // ── Format ────────────────────────────────────────────
+  { id: 'format.paste-plain', name: 'Paste as Plain Text', category: 'Format', keys: 'Mod+Shift+V', description: 'Paste as plain text (bypass smart paste)' },
   { id: 'format.bold', name: 'Bold', category: 'Format', keys: 'Mod+B', description: 'Toggle bold formatting' },
   { id: 'format.italic', name: 'Italic', category: 'Format', keys: 'Mod+I', description: 'Toggle italic formatting' },
   { id: 'format.strikethrough', name: 'Strikethrough', category: 'Format', keys: 'Mod+Shift+X', description: 'Toggle strikethrough formatting' },

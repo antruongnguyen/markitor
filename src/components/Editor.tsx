@@ -5,8 +5,12 @@ import { markdown } from '@codemirror/lang-markdown'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { search, searchKeymap, highlightSelectionMatches, openSearchPanel } from '@codemirror/search'
 import { history, historyKeymap } from '@codemirror/commands'
+import { linter, lintGutter } from '@codemirror/lint'
+import { lintMarkdown } from '../utils/markdownLinter'
+import { useLintStore } from '../store/lintStore'
 import { markdownAutocomplete } from '../utils/autocomplete'
 import { imageDropHandler } from '../utils/imageHandler'
+import { smartPasteHandler } from '../utils/smartPaste'
 import { tableTabNavigation } from '../utils/tableTabNavigation'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
@@ -18,6 +22,7 @@ import { getThemeExtension } from '../utils/editorThemes'
 import { createSearchPanel } from '../utils/createSearchPanel'
 import { Toolbar } from './Toolbar'
 import { TableToolbar } from './TableToolbar'
+import { FrontmatterEditor } from './FrontmatterEditor'
 
 const focusLightTheme = EditorView.theme({
   '&': { backgroundColor: '#faf9f6', color: '#24292e' },
@@ -52,11 +57,13 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
   const themeCompRef = useRef(new Compartment())
   const focusStyleCompRef = useRef(new Compartment())
   const typewriterCompRef = useRef(new Compartment())
+  const lintCompRef = useRef(new Compartment())
   const content = useEditorStore((s) => s.content)
   const setContent = useEditorStore((s) => s.setContent)
   const setCursorPosition = useEditorStore((s) => s.setCursorPosition)
   const resolved = useThemeStore((s) => s.resolved)
   const typewriterMode = useFocusModeStore((s) => s.typewriterMode)
+  const lintEnabled = useLintStore((s) => s.enabled)
   const shortcuts = useKeyboardShortcuts({ onOpen, onSave, onSaveDisk })
 
   const onUpdate = useMemo(
@@ -79,6 +86,7 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
 
     const initialResolved = useThemeStore.getState().resolved
     const initialFocus = useFocusModeStore.getState().enabled
+    const initialLint = useLintStore.getState().enabled
     const themeExt = initialFocus
       ? (initialResolved === 'dark' ? focusDarkTheme : focusLightTheme)
       : getThemeExtension(initialResolved)
@@ -116,9 +124,15 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
         tableTabNavigation(),
         markdownAutocomplete(),
         imageDropHandler(),
+        smartPasteHandler(),
         themeCompRef.current.of(themeExt),
         focusStyleCompRef.current.of(focusStyleExt),
         typewriterCompRef.current.of([]),
+        lintCompRef.current.of(
+          initialLint
+            ? [linter((view) => lintMarkdown(view.state.doc), { delay: 400 }), lintGutter()]
+            : [],
+        ),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         shortcuts,
         onUpdate,
@@ -167,6 +181,19 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
       ],
     })
   }, [resolved, focusMode])
+
+  // Toggle lint extension when lintEnabled changes
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) return
+    view.dispatch({
+      effects: lintCompRef.current.reconfigure(
+        lintEnabled
+          ? [linter((v) => lintMarkdown(v.state.doc), { delay: 400 }), lintGutter()]
+          : [],
+      ),
+    })
+  }, [lintEnabled])
 
   useEffect(() => {
     const view = viewRef.current
@@ -224,6 +251,7 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       {!focusMode && <Toolbar getView={getView} />}
+      {!focusMode && <FrontmatterEditor />}
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <div ref={containerRef} className="h-full w-full" />
         {typewriterMode && (

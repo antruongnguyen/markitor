@@ -18,7 +18,7 @@ export function readAsDataURL(file: File): Promise<string> {
 /**
  * Extract image files from a DataTransfer object.
  */
-function getImageFiles(dataTransfer: DataTransfer): File[] {
+export function getImageFiles(dataTransfer: DataTransfer): File[] {
   const files: File[] = []
   for (let i = 0; i < dataTransfer.files.length; i++) {
     const file = dataTransfer.files[i]
@@ -43,7 +43,7 @@ function insertImageMarkdown(view: EditorView, pos: number, alt: string, dataUrl
 /**
  * Insert a placeholder while loading, then replace with the actual image.
  */
-async function handleImageFiles(view: EditorView, files: File[], pos: number): Promise<void> {
+export async function handleImageFiles(view: EditorView, files: File[], pos: number): Promise<void> {
   for (const file of files) {
     const alt = file.name.replace(/\.[^.]+$/, '')
 
@@ -100,7 +100,8 @@ async function handleImageFiles(view: EditorView, files: File[], pos: number): P
 }
 
 /**
- * CodeMirror extension that handles drag-and-drop and paste of images.
+ * CodeMirror extension that handles drag-and-drop of images.
+ * Paste is handled by the smart paste extension.
  * Images are embedded as data URLs in markdown image syntax.
  */
 export function imageDropHandler(): Extension {
@@ -117,19 +118,6 @@ export function imageDropHandler(): Extension {
       // Get the drop position in the document
       const pos = view.posAtCoords({ x: event.clientX, y: event.clientY }) ?? view.state.selection.main.head
 
-      handleImageFiles(view, files, pos)
-      return true
-    },
-
-    paste(event, view) {
-      if (!event.clipboardData) return false
-
-      const files = getImageFiles(event.clipboardData)
-      if (files.length === 0) return false
-
-      event.preventDefault()
-
-      const pos = view.state.selection.main.head
       handleImageFiles(view, files, pos)
       return true
     },
