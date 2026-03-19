@@ -407,6 +407,7 @@
 
 .dark .preview-content pre code {
   color: #cbd5e1;
+  background: none;
 }
 
 .dark .preview-content hr {
@@ -591,7 +592,7 @@
 
 /* GitHub Light: explicit overrides ensure correct styling even in dark UI mode */
 [data-hljs-theme="github-light"] .preview-content pre { background: #f6f8fa; border-color: #e5e7eb; }
-[data-hljs-theme="github-light"] .preview-content pre code { color: #24292e; }
+[data-hljs-theme="github-light"] .preview-content pre code { color: #24292e; background: none; }
 [data-hljs-theme="github-light"] .preview-content code { background: #f3f4f6; color: #24292e; }
 
 /* One Dark */
@@ -622,7 +623,7 @@
 [data-hljs-theme="one-dark"] .hljs-params { color: #abb2bf; }
 [data-hljs-theme="one-dark"] .hljs-regexp { color: #56b6c2; }
 [data-hljs-theme="one-dark"] .preview-content pre { background: #282c34; border-color: #3e4451; }
-[data-hljs-theme="one-dark"] .preview-content pre code { color: #abb2bf; }
+[data-hljs-theme="one-dark"] .preview-content pre code { color: #abb2bf; background: none; }
 [data-hljs-theme="one-dark"] .preview-content code { background: #3e4451; color: #abb2bf; }
 
 /* Solarized Light */
@@ -653,7 +654,7 @@
 [data-hljs-theme="solarized-light"] .hljs-params { color: #657b83; }
 [data-hljs-theme="solarized-light"] .hljs-regexp { color: #cb4b16; }
 [data-hljs-theme="solarized-light"] .preview-content pre { background: #fdf6e3; border-color: #eee8d5; }
-[data-hljs-theme="solarized-light"] .preview-content pre code { color: #657b83; }
+[data-hljs-theme="solarized-light"] .preview-content pre code { color: #657b83; background: none; }
 [data-hljs-theme="solarized-light"] .preview-content code { background: #eee8d5; color: #657b83; }
 
 /* Solarized Dark */
@@ -684,7 +685,7 @@
 [data-hljs-theme="solarized-dark"] .hljs-params { color: #839496; }
 [data-hljs-theme="solarized-dark"] .hljs-regexp { color: #cb4b16; }
 [data-hljs-theme="solarized-dark"] .preview-content pre { background: #002b36; border-color: #073642; }
-[data-hljs-theme="solarized-dark"] .preview-content pre code { color: #839496; }
+[data-hljs-theme="solarized-dark"] .preview-content pre code { color: #839496; background: none; }
 [data-hljs-theme="solarized-dark"] .preview-content code { background: #073642; color: #839496; }
 
 /* Dracula */
@@ -715,7 +716,7 @@
 [data-hljs-theme="dracula"] .hljs-params { color: #f8f8f2; }
 [data-hljs-theme="dracula"] .hljs-regexp { color: #ff5555; }
 [data-hljs-theme="dracula"] .preview-content pre { background: #282a36; border-color: #44475a; }
-[data-hljs-theme="dracula"] .preview-content pre code { color: #f8f8f2; }
+[data-hljs-theme="dracula"] .preview-content pre code { color: #f8f8f2; background: none; }
 [data-hljs-theme="dracula"] .preview-content code { background: #44475a; color: #f8f8f2; }
 
 /* Nord */
@@ -746,7 +747,7 @@
 [data-hljs-theme="nord"] .hljs-params { color: #d8dee9; }
 [data-hljs-theme="nord"] .hljs-regexp { color: #ebcb8b; }
 [data-hljs-theme="nord"] .preview-content pre { background: #2e3440; border-color: #3b4252; }
-[data-hljs-theme="nord"] .preview-content pre code { color: #d8dee9; }
+[data-hljs-theme="nord"] .preview-content pre code { color: #d8dee9; background: none; }
 [data-hljs-theme="nord"] .preview-content code { background: #3b4252; color: #d8dee9; }
 
 /* ── Mermaid diagrams ── */
