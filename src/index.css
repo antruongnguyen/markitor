@@ -287,6 +287,73 @@
   background: #f8fafc;
 }
 
+/* ── Footnotes ── */
+
+.preview-content .footnotes-sep {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 2em 0 1em;
+}
+
+.preview-content .footnotes-list {
+  font-size: 0.85em;
+  color: #64748b;
+  padding-left: 1.5em;
+}
+
+.preview-content .footnotes-list li {
+  margin-bottom: 0.4em;
+}
+
+.preview-content .footnote-ref a {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+  text-decoration: none;
+  color: #3b82f6;
+  font-weight: 600;
+  padding: 0 1px;
+}
+
+.preview-content .footnote-ref a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.preview-content .footnote-backref {
+  font-size: 0.8em;
+  text-decoration: none;
+  color: #3b82f6;
+  margin-left: 4px;
+}
+
+.preview-content .footnote-backref:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* ── Definition lists ── */
+
+.preview-content dl {
+  margin: 1.25em 0;
+}
+
+.preview-content dt {
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 0.75em;
+}
+
+.preview-content dt:first-child {
+  margin-top: 0;
+}
+
+.preview-content dd {
+  margin-left: 1.5em;
+  margin-bottom: 0.5em;
+  color: #475569;
+}
+
 /* ── Preview prose typography (dark mode) ── */
 
 .dark .preview-content {
@@ -358,6 +425,42 @@
 
 .dark .preview-content tr:hover td {
   background: #1e293b;
+}
+
+/* Dark mode footnotes */
+
+.dark .preview-content .footnotes-sep {
+  border-top-color: #334155;
+}
+
+.dark .preview-content .footnotes-list {
+  color: #94a3b8;
+}
+
+.dark .preview-content .footnote-ref a {
+  color: #60a5fa;
+}
+
+.dark .preview-content .footnote-ref a:hover {
+  color: #93bbfd;
+}
+
+.dark .preview-content .footnote-backref {
+  color: #60a5fa;
+}
+
+.dark .preview-content .footnote-backref:hover {
+  color: #93bbfd;
+}
+
+/* Dark mode definition lists */
+
+.dark .preview-content dt {
+  color: #f1f5f9;
+}
+
+.dark .preview-content dd {
+  color: #94a3b8;
 }
 
 .dark .preview-content img {

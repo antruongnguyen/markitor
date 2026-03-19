@@ -35,6 +35,7 @@ import {
   toggleSubscript,
   insertBlockquote,
   insertHorizontalRule,
+  insertFootnote,
   indentLines,
   outdentLines,
   formatDocument,
@@ -281,6 +282,12 @@ function buildCommands(handlers: {
       execute: editorCmd(insertHorizontalRule),
     },
     {
+      id: 'insert.footnote',
+      label: 'Insert Footnote',
+      category: 'Insert',
+      execute: editorCmd(insertFootnote),
+    },
+    {
       id: 'insert.emoji',
       label: 'Insert Emoji',
       category: 'Insert',
@@ -388,6 +395,7 @@ function buildCommands(handlers: {
       id: 'view.toggle-typewriter',
       label: 'Toggle Typewriter Mode',
       category: 'View',
+      shortcut: `${mod()}+Alt+T`,
       execute: () => useFocusModeStore.getState().toggleTypewriter(),
     },
     {

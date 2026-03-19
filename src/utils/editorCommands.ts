@@ -350,3 +350,50 @@ export function formatDocument(view: EditorView): boolean {
 
   return true
 }
+
+/**
+ * Insert a footnote reference at the cursor and append a footnote
+ * definition at the end of the document. Auto-numbers based on
+ * existing footnotes.
+ */
+export function insertFootnote(view: EditorView): boolean {
+  const { state } = view
+  const docText = state.doc.toString()
+
+  // Find the next available footnote number
+  const existingRefs = docText.match(/\[\^(\d+)]/g) || []
+  const usedNumbers = existingRefs.map((r) => parseInt(r.replace(/\[\^|]/g, ''), 10))
+  let nextNum = 1
+  while (usedNumbers.includes(nextNum)) nextNum++
+
+  const label = String(nextNum)
+  const ref = `[^${label}]`
+  const def = `[^${label}]: `
+
+  const range = state.selection.main
+
+  // Insert reference at cursor
+  const refInsert = ref
+  // Append definition at end of document
+  const docEnd = state.doc.length
+  const lastLine = state.doc.lineAt(docEnd)
+  const defPrefix = lastLine.text.length > 0 ? '\n\n' : (docEnd > 0 ? '\n' : '')
+  const defInsert = `${defPrefix}${def}`
+
+  // Apply both changes in one transaction
+  const defAnchor = docEnd + defPrefix.length + def.length
+
+  view.dispatch({
+    changes: [
+      { from: range.from, to: range.to, insert: refInsert },
+      { from: docEnd, to: docEnd, insert: defInsert },
+    ],
+    // Place cursor at the end of the footnote definition line
+    selection: EditorSelection.single(
+      docEnd + refInsert.length + defInsert.length,
+    ),
+    scrollIntoView: true,
+  })
+
+  return true
+}
