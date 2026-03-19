@@ -18,6 +18,7 @@ import { useSearchStore } from '../store/searchStore'
 import { usePreviewStyleStore } from '../store/previewStyleStore'
 import { useShortcutsStore } from '../store/shortcutsStore'
 import { useLintStore } from '../store/lintStore'
+import { useFrontmatterStore } from '../store/frontmatterStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
@@ -503,6 +504,26 @@ function buildCommands(handlers: {
       label: useLintStore.getState().enabled ? 'Disable Markdown Linting' : 'Enable Markdown Linting',
       category: 'View',
       execute: () => useLintStore.getState().toggle(),
+    },
+
+    // Frontmatter commands
+    {
+      id: 'view.toggle-frontmatter',
+      label: 'Toggle Frontmatter Editor',
+      category: 'View',
+      execute: () => useFrontmatterStore.getState().toggle(),
+    },
+    {
+      id: 'insert.frontmatter',
+      label: 'Insert Frontmatter',
+      category: 'Insert',
+      execute: () => {
+        const { content, setContent } = useEditorStore.getState()
+        if (/^---\r?\n/.test(content)) return // already has frontmatter
+        const fm = `---\ntitle: ""\ndate: ${new Date().toISOString().slice(0, 10)}\n---\n\n`
+        setContent(fm + content)
+        useFrontmatterStore.getState().setExpanded(true)
+      },
     },
   ]
 }
