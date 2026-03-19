@@ -388,8 +388,9 @@ function App() {
 
   const handleSaveBrowser = useCallback(async () => {
     await useAutosaveStore.getState().saveNow()
+    markSaved()
     useToastStore.getState().show('Saved to browser storage')
-  }, [])
+  }, [markSaved])
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -512,7 +513,7 @@ function App() {
 
   if (focusMode) {
     return (
-      <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#faf9f6] transition-colors duration-300 dark:bg-[#0d1117]">
+      <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#faf9f6] transition-colors duration-300 dark:bg-[#282c34]">
         <div className="flex min-h-0 flex-1 items-stretch justify-center">
           <div className="flex w-full flex-col">
             <Suspense fallback={<div className="h-full w-full" />}>

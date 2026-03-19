@@ -3,6 +3,23 @@
 /* Enable class-based dark mode for Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Override Tailwind gray palette in dark mode to match One Dark editor colors.
+   Default Tailwind grays are blue-tinted; One Dark uses warmer neutral grays.
+   We override the CSS custom properties so all dark:bg-gray-* classes get the new colors. */
+.dark {
+  --color-gray-50: #f8f9fa;
+  --color-gray-100: #e5e9f0;
+  --color-gray-200: #c8ccd4;
+  --color-gray-300: #abb2bf;
+  --color-gray-400: #848b98;
+  --color-gray-500: #5c6370;
+  --color-gray-600: #4b5263;
+  --color-gray-700: #3e4451;
+  --color-gray-800: #2c313a;
+  --color-gray-900: #282c34;
+  --color-gray-950: #1b1d23;
+}
+
 /* highlight.js theme — GitHub-style for light preview */
 @import "highlight.js/styles/github.css";
 
@@ -508,6 +525,14 @@
 .dark .cm-searchMatch-selected {
   background: #ea580c;
   color: #ffffff;
+}
+
+/* ── CodeMirror gutter (line numbers) sizing ── */
+
+.cm-lineNumbers .cm-gutterElement {
+  font-size: 1em;
+  line-height: inherit;
+  padding: 0 8px 0 4px;
 }
 
 /* ── CodeMirror autocomplete dropdown (light mode) ── */

@@ -30,13 +30,13 @@ const focusLightTheme = EditorView.theme({
 })
 
 const focusDarkTheme = EditorView.theme({
-  '&': { backgroundColor: '#0d1117', color: '#c9d1d9' },
-  '.cm-gutters': { backgroundColor: 'transparent', color: '#484f58', border: 'none' },
+  '&': { backgroundColor: '#282c34', color: '#abb2bf' },
+  '.cm-gutters': { backgroundColor: 'transparent', color: '#5c6370', border: 'none' },
   '.cm-activeLineGutter': { backgroundColor: 'transparent' },
-  '.cm-activeLine': { backgroundColor: '#161b22' },
-  '.cm-cursor': { borderLeftColor: '#c9d1d9' },
-  '.cm-selectionBackground': { backgroundColor: '#388bfd33' },
-  '&.cm-focused .cm-selectionBackground': { backgroundColor: '#388bfd55' },
+  '.cm-activeLine': { backgroundColor: '#2c313a' },
+  '.cm-cursor': { borderLeftColor: '#abb2bf' },
+  '.cm-selectionBackground': { backgroundColor: '#3e4451' },
+  '&.cm-focused .cm-selectionBackground': { backgroundColor: '#3e4451' },
 })
 
 type EditorProps = {
