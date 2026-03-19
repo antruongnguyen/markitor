@@ -412,10 +412,18 @@ function App() {
   }, [markSaved, setFileMeta])
 
   const handleSaveBrowser = useCallback(async () => {
+    // Prompt for a name if the file is still untitled
+    const currentFileName = useEditorStore.getState().fileName
+    if (currentFileName === 'untitled.md') {
+      const name = window.prompt('Document name:', 'untitled.md')
+      if (!name) return // user cancelled
+      const safeName = name.endsWith('.md') ? name : `${name}.md`
+      setFileMeta({ fileName: safeName, fileHandle: null })
+    }
     await useAutosaveStore.getState().saveNow()
     markSaved()
     useToastStore.getState().show('Saved to browser storage')
-  }, [markSaved])
+  }, [markSaved, setFileMeta])
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {

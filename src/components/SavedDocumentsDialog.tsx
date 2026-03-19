@@ -152,11 +152,11 @@ function SavedDocumentsInner() {
                 >
                   <button
                     type="button"
-                    className="flex min-w-0 flex-1 items-start gap-3"
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
                     onClick={() => handleOpen(draft)}
                   >
                     <FileText
-                      size={16}
+                      size={24}
                       strokeWidth={1.5}
                       className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500"
                     />
