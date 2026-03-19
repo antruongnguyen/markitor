@@ -3,6 +3,9 @@
  *
  * - Anthropic SDK for native Anthropic API (supports browser via dangerouslyAllowBrowser)
  * - OpenAI SDK for all OpenAI-compatible providers (OpenAI, Ollama, LM Studio, Together AI, etc.)
+ *
+ * In dev mode, requests are routed through a Vite server-side proxy (/__ai_proxy)
+ * to avoid CORS issues with external AI providers.
  */
 
 import Anthropic from '@anthropic-ai/sdk'
@@ -22,6 +25,21 @@ function toOpenAIBaseURL(baseUrl: string): string {
   return `${cleaned}/v1`
 }
 
+/**
+ * Custom fetch that routes cross-origin requests through the Vite dev proxy
+ * to bypass CORS restrictions. Same-origin requests pass through unchanged.
+ */
+const proxyFetch: typeof globalThis.fetch = (input, init) => {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+  // Only proxy cross-origin requests in dev mode
+  if (!import.meta.env.DEV || url.startsWith('/') || url.startsWith(window.location.origin)) {
+    return globalThis.fetch(input, init)
+  }
+  const headers = new Headers(init?.headers)
+  headers.set('x-proxy-url', url)
+  return globalThis.fetch('/__ai_proxy', { ...init, headers })
+}
+
 async function streamWithAnthropic(opts: {
   apiKey: string
   baseUrl: string
@@ -36,6 +54,7 @@ async function streamWithAnthropic(opts: {
     apiKey: opts.apiKey,
     baseURL: opts.baseUrl.replace(/\/+$/, ''),
     dangerouslyAllowBrowser: true,
+    fetch: proxyFetch,
   })
 
   const stream = client.messages.stream(
@@ -72,6 +91,7 @@ async function streamWithOpenAI(opts: {
     apiKey: opts.apiKey || 'not-required',
     baseURL: toOpenAIBaseURL(opts.baseUrl),
     dangerouslyAllowBrowser: true,
+    fetch: proxyFetch,
   })
 
   const stream = await client.chat.completions.create(
