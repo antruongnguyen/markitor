@@ -3,7 +3,7 @@ import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
-import { search, searchKeymap, highlightSelectionMatches } from '@codemirror/search'
+import { search, searchKeymap, highlightSelectionMatches, openSearchPanel } from '@codemirror/search'
 import { markdownAutocomplete } from '../utils/autocomplete'
 import { imageDropHandler } from '../utils/imageHandler'
 import { tableTabNavigation } from '../utils/tableTabNavigation'
@@ -11,8 +11,10 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useEditorStore } from '../store/editorStore'
 import { useFocusModeStore } from '../store/focusModeStore'
 import { useThemeStore } from '../store/themeStore'
+import { useSearchStore } from '../store/searchStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { getThemeExtension } from '../utils/editorThemes'
+import { createSearchPanel } from '../utils/createSearchPanel'
 import { Toolbar } from './Toolbar'
 import { TableToolbar } from './TableToolbar'
 
@@ -96,9 +98,19 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
         bracketMatching(),
         indentOnInput(),
         markdown(),
-        search({ top: true }),
+        search({ top: true, createPanel: createSearchPanel }),
         highlightSelectionMatches(),
-        keymap.of(searchKeymap),
+        keymap.of([
+          {
+            key: 'Mod-h',
+            run: (v) => {
+              useSearchStore.getState().setShowReplace(true)
+              openSearchPanel(v)
+              return true
+            },
+          },
+          ...searchKeymap,
+        ]),
         tableTabNavigation(),
         markdownAutocomplete(),
         imageDropHandler(),

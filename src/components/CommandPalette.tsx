@@ -14,8 +14,10 @@ import { useTemplateGalleryStore } from '../store/templateGalleryStore'
 import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { useAutosaveStore } from '../store/autosaveStore'
 import { useStatsStore } from '../store/statsStore'
+import { useSearchStore } from '../store/searchStore'
 import { usePreviewStyleStore } from '../store/previewStyleStore'
 import { editorViewRef } from '../utils/editorViewRef'
+import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
 import { exportHTML, exportPDF } from '../utils/exportDocument'
 import {
   toggleBold,
@@ -296,6 +298,43 @@ function buildCommands(handlers: {
           formatDocument(view)
           useEditorStore.getState().setDirty(true)
           useToastStore.getState().show('Document formatted')
+          view.focus()
+        }
+      },
+    },
+
+    // Search commands
+    {
+      id: 'search.find',
+      label: 'Find',
+      category: 'Search',
+      shortcut: `${mod()}+F`,
+      execute: () => {
+        const view = editorViewRef.current
+        if (view) openSearchPanel(view)
+      },
+    },
+    {
+      id: 'search.find-replace',
+      label: 'Find and Replace',
+      category: 'Search',
+      shortcut: `${mod()}+H`,
+      execute: () => {
+        const view = editorViewRef.current
+        if (view) {
+          useSearchStore.getState().setShowReplace(true)
+          openSearchPanel(view)
+        }
+      },
+    },
+    {
+      id: 'search.close',
+      label: 'Close Search',
+      category: 'Search',
+      execute: () => {
+        const view = editorViewRef.current
+        if (view) {
+          closeSearchPanel(view)
           view.focus()
         }
       },

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EditorView } from '@codemirror/view'
 import { undo, redo } from '@codemirror/commands'
-import { openSearchPanel } from '@codemirror/search'
+import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
 import type { LucideIcon } from 'lucide-react'
 import {
   Undo2,
@@ -60,6 +60,7 @@ import { useToastStore } from '../store/toastStore'
 import { useEditorStore } from '../store/editorStore'
 import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { useStatsStore } from '../store/statsStore'
+import { useSearchStore } from '../store/searchStore'
 import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
 import { EmojiPicker } from './EmojiPicker'
@@ -109,8 +110,6 @@ const listButtons: (ToolbarButton | 'separator')[] = [
   { icon: Link, title: 'Link (Ctrl+K)', action: toggleLink },
   { icon: FileCode, title: 'Code block (Ctrl+Shift+K)', action: toggleCodeBlock },
   { icon: Minus, title: 'Horizontal rule', action: insertHorizontalRule },
-  'separator',
-  { icon: Search, title: 'Find & Replace (Ctrl+F)', action: openSearchPanel },
   'separator',
   { icon: AlignLeft, title: 'Format Document (Alt+Shift+F)', action: formatDocument },
 ]
@@ -187,6 +186,7 @@ export function Toolbar({ getView }: ToolbarProps) {
   const closeEmojiPicker = useEmojiPickerStore((s) => s.setOpen)
   const statsOpen = useStatsStore((s) => s.open)
   const toggleStats = useStatsStore((s) => s.toggle)
+  const searchOpen = useSearchStore((s) => s.isOpen)
   const tableButtonRef = useRef<HTMLButtonElement>(null)
   const imageButtonRef = useRef<HTMLButtonElement>(null)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
@@ -330,6 +330,29 @@ export function Toolbar({ getView }: ToolbarProps) {
       )}
 
       <div className={separatorClass} />
+
+      {/* Search toggle */}
+      <button
+        type="button"
+        title="Find & Replace (Ctrl+F)"
+        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+          searchOpen
+            ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+        }`}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          const view = getView()
+          if (!view) return
+          if (searchOpen) {
+            closeSearchPanel(view)
+          } else {
+            openSearchPanel(view)
+          }
+        }}
+      >
+        <Search size={17} strokeWidth={1.5} />
+      </button>
 
       {/* Writing statistics toggle */}
       <button
