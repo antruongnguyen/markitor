@@ -63,6 +63,7 @@ import { useStatsStore } from '../store/statsStore'
 import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
 import { EmojiPicker } from './EmojiPicker'
+import { ImageInsertDialog } from './ImageInsertDialog'
 
 type ToolbarButton = {
   icon: LucideIcon
