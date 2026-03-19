@@ -19,6 +19,7 @@ import { usePreviewStyleStore } from '../store/previewStyleStore'
 import { useShortcutsStore } from '../store/shortcutsStore'
 import { useLintStore } from '../store/lintStore'
 import { useFrontmatterStore } from '../store/frontmatterStore'
+import { useSavedDocumentsStore } from './SavedDocumentsDialog'
 import { editorViewRef } from '../utils/editorViewRef'
 import { formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
@@ -109,6 +110,12 @@ function buildCommands(handlers: {
       category: 'File',
       shortcut: shortcutFor('file.open'),
       execute: handlers.onOpen,
+    },
+    {
+      id: 'file.browse-saved',
+      label: 'Browse Saved Documents',
+      category: 'File',
+      execute: () => useSavedDocumentsStore.getState().setOpen(true),
     },
     {
       id: 'file.save',
