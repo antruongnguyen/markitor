@@ -1,12 +1,12 @@
 import { EditorView } from '@codemirror/view'
 import type { Extension } from '@codemirror/state'
 
-const IMAGE_SIZE_WARN_BYTES = 500 * 1024 // 500KB
+export const IMAGE_SIZE_WARN_BYTES = 500 * 1024 // 500KB
 
 /**
  * Read an image File as a data URL string.
  */
-function readAsDataURL(file: File): Promise<string> {
+export function readAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result as string)

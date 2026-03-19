@@ -92,7 +92,7 @@ function stripHeading(text: string): string {
   return text.replace(/^#{1,6}\s+/, '')
 }
 
-export function toggleHeading(view: EditorView, level: 1 | 2 | 3): boolean {
+export function toggleHeading(view: EditorView, level: 1 | 2 | 3 | 4 | 5 | 6): boolean {
   const prefix = `${'#'.repeat(level)} `
 
   return transformLinePrefix(view, (lineText) => {
@@ -240,6 +240,81 @@ export function insertHorizontalRule(view: EditorView): boolean {
   view.dispatch({
     changes: { from: line.to, to: line.to, insert },
     selection: EditorSelection.single(cursorPos, cursorPos),
+    scrollIntoView: true,
+  })
+
+  return true
+}
+
+export function toggleTaskList(view: EditorView): boolean {
+  return transformLinePrefix(view, (lineText) => {
+    if (/^- \[([ x])]\s/.test(lineText)) {
+      return lineText.replace(/^- \[[ x]]\s/, '')
+    }
+    return `- [ ] ${lineText.replace(/^-\s+/, '').replace(/^\d+\.\s+/, '')}`
+  })
+}
+
+export function toggleSuperscript(view: EditorView): boolean {
+  return toggleInlineWrap(view, { prefix: '<sup>', suffix: '</sup>', placeholder: 'superscript' })
+}
+
+export function toggleSubscript(view: EditorView): boolean {
+  return toggleInlineWrap(view, { prefix: '<sub>', suffix: '</sub>', placeholder: 'subscript' })
+}
+
+export function indentLines(view: EditorView): boolean {
+  const { state } = view
+  const range = state.selection.main
+  const fromLine = state.doc.lineAt(range.from)
+  const toLine = state.doc.lineAt(range.to)
+  const changes: { from: number; to: number; insert: string }[] = []
+
+  for (let i = fromLine.number; i <= toLine.number; i++) {
+    const line = state.doc.line(i)
+    changes.push({ from: line.from, to: line.from, insert: '  ' })
+  }
+
+  view.dispatch({
+    changes,
+    selection: EditorSelection.single(
+      range.from + 2,
+      range.to + (toLine.number - fromLine.number + 1) * 2,
+    ),
+    scrollIntoView: true,
+  })
+
+  return true
+}
+
+export function outdentLines(view: EditorView): boolean {
+  const { state } = view
+  const range = state.selection.main
+  const fromLine = state.doc.lineAt(range.from)
+  const toLine = state.doc.lineAt(range.to)
+  const changes: { from: number; to: number; insert: string }[] = []
+  let fromDelta = 0
+  let totalDelta = 0
+
+  for (let i = fromLine.number; i <= toLine.number; i++) {
+    const line = state.doc.line(i)
+    const match = line.text.match(/^( {1,2})/)
+    if (match) {
+      const removeLen = match[1].length
+      changes.push({ from: line.from, to: line.from + removeLen, insert: '' })
+      if (i === fromLine.number) fromDelta = removeLen
+      totalDelta += removeLen
+    }
+  }
+
+  if (changes.length === 0) return true
+
+  view.dispatch({
+    changes,
+    selection: EditorSelection.single(
+      Math.max(fromLine.from, range.from - fromDelta),
+      Math.max(fromLine.from, range.to - totalDelta),
+    ),
     scrollIntoView: true,
   })
 

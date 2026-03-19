@@ -11,6 +11,7 @@ import {
   toggleHeading,
   toggleUnorderedList,
   toggleOrderedList,
+  toggleTaskList,
   insertBlockquote,
   formatDocument,
 } from '../utils/editorCommands'
@@ -34,8 +35,12 @@ function makeShortcutBindings(handlers: ShortcutHandlers): KeyBinding[] {
     { key: 'Mod-1', run: (view) => toggleHeading(view, 1) },
     { key: 'Mod-2', run: (view) => toggleHeading(view, 2) },
     { key: 'Mod-3', run: (view) => toggleHeading(view, 3) },
+    { key: 'Mod-4', run: (view) => toggleHeading(view, 4) },
+    { key: 'Mod-5', run: (view) => toggleHeading(view, 5) },
+    { key: 'Mod-6', run: (view) => toggleHeading(view, 6) },
     { key: 'Mod-l', run: toggleUnorderedList },
     { key: 'Mod-Shift-l', run: toggleOrderedList },
+    { key: 'Mod-Shift-t', run: toggleTaskList },
     { key: 'Mod-Shift-q', run: insertBlockquote },
     {
       key: 'Alt-Shift-f',
