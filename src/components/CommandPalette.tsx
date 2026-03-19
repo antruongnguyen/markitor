@@ -17,6 +17,7 @@ import { useStatsStore } from '../store/statsStore'
 import { useSearchStore } from '../store/searchStore'
 import { usePreviewStyleStore } from '../store/previewStyleStore'
 import { useShortcutsStore } from '../store/shortcutsStore'
+import { useLintStore } from '../store/lintStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
@@ -494,6 +495,14 @@ function buildCommands(handlers: {
       category: 'View',
       shortcut: shortcutFor('view.shortcuts'),
       execute: () => useShortcutsStore.getState().setOpen(true),
+    },
+
+    // Lint commands
+    {
+      id: 'lint.toggle',
+      label: useLintStore.getState().enabled ? 'Disable Markdown Linting' : 'Enable Markdown Linting',
+      category: 'View',
+      execute: () => useLintStore.getState().toggle(),
     },
   ]
 }
