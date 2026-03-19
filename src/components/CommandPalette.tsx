@@ -19,7 +19,7 @@ import { usePreviewStyleStore } from '../store/previewStyleStore'
 import { useShortcutsStore } from '../store/shortcutsStore'
 import { useLintStore } from '../store/lintStore'
 import { useFrontmatterStore } from '../store/frontmatterStore'
-import { useSavedDocumentsStore } from './SavedDocumentsDialog'
+import { useSavedDocumentsStore } from '../store/savedDocumentsStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
@@ -645,7 +645,7 @@ function CommandPaletteInner({ onOpen, onSave, onSaveDisk }: CommandPaletteInner
   }, [selectedIndex])
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close}>
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close} role="dialog" aria-modal="true" aria-label="Command palette">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: 'fadeIn 0.15s ease-out' }} />
       <div
         className="relative w-full max-w-lg overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-2xl dark:border-gray-700/60 dark:bg-gray-800"
@@ -654,7 +654,7 @@ function CommandPaletteInner({ onOpen, onSave, onSaveDisk }: CommandPaletteInner
       >
         {/* Search input */}
         <div className="flex items-center gap-2.5 border-b border-gray-200/80 px-4 dark:border-gray-700/60">
-          <Search size={16} strokeWidth={1.5} className="shrink-0 text-gray-400" />
+          <Search size={16} strokeWidth={1.5} className="shrink-0 text-gray-400" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -662,6 +662,7 @@ function CommandPaletteInner({ onOpen, onSave, onSaveDisk }: CommandPaletteInner
             onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0) }}
             onKeyDown={onKeyDown}
             placeholder="Type a command..."
+            aria-label="Search commands"
             className="h-12 w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-500"
           />
         </div>

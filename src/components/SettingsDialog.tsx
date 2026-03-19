@@ -110,6 +110,7 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
         <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">AI Settings</h2>
         <button
           type="button"
+          aria-label="Close settings"
           className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
           onClick={onClose}
         >
@@ -118,9 +119,11 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200/80 dark:border-gray-700/60">
+      <div className="flex border-b border-gray-200/80 dark:border-gray-700/60" role="tablist">
         <button
           type="button"
+          role="tab"
+          aria-selected={tab === 'provider'}
           className={`flex-1 px-4 py-2 text-xs font-medium transition-all duration-150 ${tab === 'provider' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
           onClick={() => setTab('provider')}
         >
@@ -128,6 +131,8 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={tab === 'functions'}
           className={`flex-1 px-4 py-2 text-xs font-medium transition-all duration-150 ${tab === 'functions' ? 'border-b-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
           onClick={() => setTab('functions')}
         >
@@ -201,6 +206,8 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
             {showSuggestions && modelSuggestions.length > 0 && (
               <ul
                 ref={suggestionsRef}
+                role="listbox"
+                aria-label="Model suggestions"
                 className="absolute left-0 top-full z-10 mt-0.5 max-h-40 w-full overflow-y-auto rounded-md border border-gray-200/80 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
               >
                 {modelSuggestions.map((m) => (
@@ -256,6 +263,7 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
                     className="shrink-0 rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
                     onClick={() => removeCustomFunction(fn.id)}
                     title="Delete"
+                    aria-label={`Delete ${fn.name}`}
                   >
                     <Trash2 size={14} strokeWidth={1.5} />
                   </button>

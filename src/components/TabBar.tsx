@@ -33,6 +33,7 @@ function TabItem({
     <button
       type="button"
       draggable
+      aria-current={isActive ? 'page' : undefined}
       className={`group relative flex h-full max-w-[180px] items-center gap-1.5 px-3 text-xs transition-all duration-150 ${
         isActive
           ? 'bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100'
@@ -63,6 +64,7 @@ function TabItem({
         className="ml-auto shrink-0 rounded p-0.5 opacity-0 transition-all duration-150 hover:bg-gray-200 group-hover:opacity-100 dark:hover:bg-gray-600"
         onClick={onClose}
         title="Close tab"
+        aria-label="Close tab"
       >
         <X size={12} strokeWidth={1.5} />
       </span>
@@ -165,6 +167,7 @@ export function TabBar() {
           className="flex w-8 shrink-0 items-center justify-center border-l border-gray-200/80 text-gray-400 transition-all duration-150 hover:bg-gray-50 hover:text-gray-600 dark:border-gray-700/60 dark:hover:bg-white/5 dark:hover:text-gray-300"
           onClick={handleNewTab}
           title="New tab from template"
+          aria-label="New tab"
         >
           <Plus size={16} strokeWidth={1.5} />
         </button>

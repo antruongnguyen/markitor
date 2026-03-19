@@ -48,7 +48,7 @@ import { useShortcutsStore } from './store/shortcutsStore'
 import { useToastStore } from './store/toastStore'
 import { StatsPanel } from './components/StatsPanel'
 import { SavedDocumentsDialog } from './components/SavedDocumentsDialog'
-import { useSavedDocumentsStore } from './components/SavedDocumentsDialog'
+import { useSavedDocumentsStore } from './store/savedDocumentsStore'
 import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
 
@@ -77,6 +77,7 @@ function ThemeToggle() {
       className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
       onClick={() => setMode(nextMode[mode])}
       title={`Theme: ${modeLabel[mode]}`}
+      aria-label={`Theme: ${modeLabel[mode]}`}
     >
       {mode === 'light' && <Sun size={16} strokeWidth={1.5} />}
       {mode === 'dark' && <Moon size={16} strokeWidth={1.5} />}
@@ -99,6 +100,8 @@ function TocToggle() {
       }`}
       onClick={toggle}
       title={tocOpen ? 'Hide table of contents' : 'Show table of contents'}
+      aria-label={tocOpen ? 'Hide table of contents' : 'Show table of contents'}
+      aria-pressed={tocOpen}
     >
       <List size={16} strokeWidth={1.5} />
     </button>
@@ -119,6 +122,8 @@ function AIToggle() {
       }`}
       onClick={toggle}
       title={aiOpen ? 'Hide AI assistant' : 'Show AI assistant'}
+      aria-label={aiOpen ? 'Hide AI assistant' : 'Show AI assistant'}
+      aria-pressed={aiOpen}
     >
       <Sparkles size={16} strokeWidth={1.5} />
     </button>
@@ -139,6 +144,8 @@ function StatsToggle() {
       }`}
       onClick={toggle}
       title={statsOpen ? 'Hide writing statistics (Ctrl+Alt+S)' : 'Show writing statistics (Ctrl+Alt+S)'}
+      aria-label={statsOpen ? 'Hide writing statistics' : 'Show writing statistics'}
+      aria-pressed={statsOpen}
     >
       <BarChart3 size={16} strokeWidth={1.5} />
     </button>
@@ -159,6 +166,8 @@ function ScrollSyncToggle() {
       }`}
       onClick={toggle}
       title={syncEnabled ? 'Disable scroll sync' : 'Enable scroll sync'}
+      aria-label={syncEnabled ? 'Disable scroll sync' : 'Enable scroll sync'}
+      aria-pressed={syncEnabled}
     >
       <ArrowUpDown size={16} strokeWidth={1.5} />
     </button>
@@ -222,6 +231,8 @@ function ExportMenu() {
         className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
         onClick={() => setOpen((prev) => !prev)}
         title="Export document (Ctrl+Shift+E)"
+        aria-label="Export document"
+        aria-expanded={open}
       >
         <Download size={16} strokeWidth={1.5} />
       </button>
@@ -271,6 +282,8 @@ function LayoutToggle() {
         }`}
         onClick={() => setMode('editor')}
         title="Editor only (Ctrl+Shift+1)"
+        aria-label="Editor only"
+        aria-pressed={mode === 'editor'}
       >
         <SquarePen size={14} strokeWidth={1.5} />
       </button>
@@ -284,6 +297,8 @@ function LayoutToggle() {
         }`}
         onClick={() => setMode('split')}
         title="Split view (Ctrl+Shift+2)"
+        aria-label="Split view"
+        aria-pressed={mode === 'split'}
       >
         <Columns2 size={14} strokeWidth={1.5} />
       </button>
@@ -297,6 +312,8 @@ function LayoutToggle() {
         }`}
         onClick={() => setMode('preview')}
         title="Preview only (Ctrl+Shift+3)"
+        aria-label="Preview only"
+        aria-pressed={mode === 'preview'}
       >
         <Eye size={14} strokeWidth={1.5} />
       </button>
@@ -318,6 +335,8 @@ function FocusModeToggle() {
       }`}
       onClick={toggle}
       title={focusEnabled ? 'Exit focus mode (Ctrl+Shift+F)' : 'Enter focus mode (Ctrl+Shift+F)'}
+      aria-label={focusEnabled ? 'Exit focus mode' : 'Enter focus mode'}
+      aria-pressed={focusEnabled}
     >
       <Maximize2 size={16} strokeWidth={1.5} />
     </button>
@@ -549,6 +568,7 @@ function App() {
             className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={toggleCommandPalette}
             title="Command palette (Ctrl+P)"
+            aria-label="Command palette"
           >
             <Terminal size={16} strokeWidth={1.5} />
           </button>
@@ -566,6 +586,7 @@ function App() {
             className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={() => useSavedDocumentsStore.getState().setOpen(true)}
             title="Open saved documents"
+            aria-label="Open saved documents"
           >
             <Archive size={16} strokeWidth={1.5} />
           </button>
@@ -574,6 +595,7 @@ function App() {
             className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={handleOpen}
             title="Open file (Ctrl+O)"
+            aria-label="Open file"
           >
             <FolderOpen size={16} strokeWidth={1.5} />
           </button>
@@ -582,6 +604,7 @@ function App() {
             className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={handleSaveBrowser}
             title="Save to browser (Ctrl+S)"
+            aria-label="Save to browser"
           >
             <HardDrive size={16} strokeWidth={1.5} />
           </button>
@@ -590,6 +613,7 @@ function App() {
             className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={handleSave}
             title="Save to disk (Ctrl+Shift+S)"
+            aria-label="Save to disk"
           >
             <Save size={16} strokeWidth={1.5} />
           </button>

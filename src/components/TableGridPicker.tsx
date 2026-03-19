@@ -60,6 +60,8 @@ export function TableGridPicker({ onSelect, onClose, anchorRef }: TableGridPicke
       <div
         className="grid gap-0.5"
         style={{ gridTemplateColumns: `repeat(${MAX_COLS}, 1fr)` }}
+        role="grid"
+        aria-label="Table size picker"
       >
         {Array.from({ length: MAX_ROWS * MAX_COLS }, (_, idx) => {
           const row = Math.floor(idx / MAX_COLS) + 1
@@ -69,6 +71,7 @@ export function TableGridPicker({ onSelect, onClose, anchorRef }: TableGridPicke
             <button
               key={idx}
               type="button"
+              aria-label={`${row} × ${col} table`}
               className={`h-4 w-4 rounded-sm border transition-colors ${
                 isActive
                   ? 'border-blue-400 bg-blue-100 dark:border-blue-500 dark:bg-blue-900/40'

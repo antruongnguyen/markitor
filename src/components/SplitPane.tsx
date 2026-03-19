@@ -73,6 +73,9 @@ export function SplitPane({
         {left}
       </div>
       <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize panels"
         className="group relative h-full w-1 cursor-col-resize flex-shrink-0 bg-gray-200 transition-colors duration-150 hover:bg-blue-500 dark:bg-gray-700 dark:hover:bg-blue-400"
         onMouseDown={onMouseDown}
       >

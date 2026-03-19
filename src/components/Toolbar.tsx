@@ -145,6 +145,8 @@ function HeadingDropdown({ getView }: { getView: () => EditorView | null }) {
       <button
         type="button"
         title="Headings"
+        aria-label="Headings"
+        aria-expanded={open}
         className={btnClass + ' gap-0.5'}
         onMouseDown={(e) => {
           e.preventDefault()
@@ -266,6 +268,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         key={title}
         type="button"
         title={title}
+        aria-label={item.label}
         className={btnClass}
         onMouseDown={(e) => {
           e.preventDefault()
@@ -293,6 +296,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         ref={imageButtonRef}
         type="button"
         title="Insert image"
+        aria-label="Insert image"
         className={btnClass}
         onMouseDown={(e) => {
           e.preventDefault()
@@ -314,6 +318,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         ref={tableButtonRef}
         type="button"
         title="Insert table"
+        aria-label="Insert table"
         className={btnClass}
         onMouseDown={(e) => {
           e.preventDefault()
@@ -335,6 +340,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         ref={emojiButtonRef}
         type="button"
         title={tooltipWithShortcut('Insert emoji', 'format.emoji')}
+        aria-label="Insert emoji"
         className={btnClass}
         onMouseDown={(e) => {
           e.preventDefault()
@@ -357,6 +363,8 @@ export function Toolbar({ getView }: ToolbarProps) {
       <button
         type="button"
         title={tooltipWithShortcut('Find & Replace', 'search.find')}
+        aria-label="Find & Replace"
+        aria-pressed={searchOpen}
         className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           searchOpen
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
@@ -380,6 +388,8 @@ export function Toolbar({ getView }: ToolbarProps) {
       <button
         type="button"
         title={tooltipWithShortcut('Writing statistics', 'view.stats')}
+        aria-label="Writing statistics"
+        aria-pressed={statsOpen}
         className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           statsOpen
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
@@ -397,6 +407,8 @@ export function Toolbar({ getView }: ToolbarProps) {
       <button
         type="button"
         title={tooltipWithShortcut('Typewriter mode', 'view.typewriter')}
+        aria-label="Typewriter mode"
+        aria-pressed={typewriterMode}
         className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           typewriterMode
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
@@ -414,6 +426,8 @@ export function Toolbar({ getView }: ToolbarProps) {
       <button
         type="button"
         title="Toggle markdown linting"
+        aria-label="Toggle markdown linting"
+        aria-pressed={lintEnabled}
         className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           lintEnabled
             ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
@@ -431,6 +445,8 @@ export function Toolbar({ getView }: ToolbarProps) {
       <button
         type="button"
         title={tooltipWithShortcut('Toggle Frontmatter', 'view.frontmatter')}
+        aria-label="Toggle Frontmatter"
+        aria-pressed={frontmatterExpanded}
         className={`relative flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           frontmatterExpanded
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'

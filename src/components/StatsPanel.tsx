@@ -37,7 +37,7 @@ function Section({ title, icon: Icon, children }: { title: string; icon: typeof 
   return (
     <div className="border-b border-gray-200/60 px-3 py-2.5 last:border-b-0 dark:border-gray-700/40">
       <div className="mb-1.5 flex items-center gap-1.5">
-        <Icon size={12} strokeWidth={1.5} className="text-gray-400 dark:text-gray-500" />
+        <Icon size={12} strokeWidth={1.5} aria-hidden="true" className="text-gray-400 dark:text-gray-500" />
         <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           {title}
         </span>
@@ -113,6 +113,7 @@ export function StatsPanel() {
         </div>
         <button
           type="button"
+          aria-label="Close statistics"
           className="rounded p-0.5 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           onClick={() => close(false)}
           title="Close statistics"

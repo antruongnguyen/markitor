@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   ChevronDown,
   Plus,
@@ -97,6 +97,8 @@ function FieldRow({
         return (
           <button
             type="button"
+            role="switch"
+            aria-checked={!!field.value}
             onClick={() => onUpdate({ ...field, value: !field.value })}
             className={`relative h-5 w-9 rounded-full transition-colors duration-200 ${
               field.value
@@ -163,6 +165,7 @@ function FieldRow({
         onClick={onRemove}
         className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:hover:bg-red-500/10 dark:hover:text-red-400"
         title="Remove field"
+        aria-label="Remove field"
       >
         <Trash2 size={13} />
       </button>
@@ -277,17 +280,19 @@ export function FrontmatterEditor() {
   const setStoreHasFrontmatter = useFrontmatterStore((s) => s.setHasFrontmatter)
 
   const [fields, setFields] = useState<FrontmatterField[]>([])
-  const [hasFrontmatter, setHasFrontmatter] = useState(false)
   const syncingRef = useRef(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  // Sync from editor content -> fields
+  // Derive hasFrontmatter from content (no local state needed)
+  const hasFrontmatter = useMemo(() => extractFrontmatter(content).found, [content])
+
+  // Sync from editor content -> fields and store (bidirectional sync with syncingRef guard)
   useEffect(() => {
     if (syncingRef.current) return
     const result = extractFrontmatter(content)
-    setHasFrontmatter(result.found)
     setStoreHasFrontmatter(result.found)
     if (result.found) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional bidirectional sync guarded by syncingRef
       setFields(result.fields)
     }
   }, [content, setStoreHasFrontmatter])
@@ -333,7 +338,6 @@ export function FrontmatterEditor() {
           syncingRef.current = true
           const newContent = removeFrontmatter(content)
           setContent(newContent)
-          setHasFrontmatter(false)
           setStoreHasFrontmatter(false)
           requestAnimationFrame(() => {
             syncingRef.current = false
@@ -344,7 +348,7 @@ export function FrontmatterEditor() {
         return next
       })
     },
-    [content, setContent, syncToEditor],
+    [content, setContent, syncToEditor, setStoreHasFrontmatter],
   )
 
   const addField = useCallback(
@@ -362,7 +366,6 @@ export function FrontmatterEditor() {
           const yamlStr = buildFrontmatter(next)
           const newContent = replaceFrontmatter(content, yamlStr)
           setContent(newContent)
-          setHasFrontmatter(true)
           setStoreHasFrontmatter(true)
           requestAnimationFrame(() => {
             syncingRef.current = false
@@ -373,14 +376,13 @@ export function FrontmatterEditor() {
         return next
       })
     },
-    [hasFrontmatter, content, setContent, syncToEditor],
+    [hasFrontmatter, content, setContent, syncToEditor, setStoreHasFrontmatter],
   )
 
   const applyTemplate = useCallback(
     (template: FrontmatterTemplate) => {
       const newFields = template.fields.map((f) => ({ ...f }))
       setFields(newFields)
-      setHasFrontmatter(true)
       setStoreHasFrontmatter(true)
       syncingRef.current = true
       const yamlStr = buildFrontmatter(newFields)
@@ -390,7 +392,7 @@ export function FrontmatterEditor() {
         syncingRef.current = false
       })
     },
-    [content, setContent],
+    [content, setContent, setStoreHasFrontmatter],
   )
 
   // Clean up debounce on unmount
@@ -441,7 +443,7 @@ export function FrontmatterEditor() {
         <div className="space-y-1.5 px-2 pb-2">
           {fields.map((field, i) => (
             <FieldRow
-              key={i}
+              key={`${field.key}-${field.type}-${i}`}
               field={field}
               onUpdate={(f) => updateField(i, f)}
               onRemove={() => removeField(i)}

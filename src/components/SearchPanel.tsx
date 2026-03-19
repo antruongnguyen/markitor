@@ -139,6 +139,8 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
         <button
           type="button"
           title={showReplace ? 'Hide replace' : 'Show replace (Ctrl+H)'}
+          aria-label={showReplace ? 'Hide replace' : 'Show replace'}
+          aria-expanded={showReplace}
           className={iconBtn}
           onClick={toggleReplace}
         >
@@ -163,6 +165,7 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
             onChange={(e) => setSearchText(e.target.value)}
             onKeyDown={handleSearchKeyDown}
             placeholder="Search…"
+            aria-label="Search"
             className={inputClass + ' pl-7'}
           />
         </div>
@@ -170,6 +173,7 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
         {/* Match count */}
         {matchLabel && (
           <span
+            aria-live="polite"
             className={`shrink-0 text-[11px] tabular-nums ${matchCount === 0 ? 'text-red-400 dark:text-red-500' : 'text-gray-400 dark:text-gray-500'}`}
           >
             {matchLabel}
@@ -180,6 +184,8 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
         <button
           type="button"
           title="Match case"
+          aria-label="Match case"
+          aria-pressed={caseSensitive}
           className={caseSensitive ? activeToggle : iconBtn}
           onClick={() => setCaseSensitive(!caseSensitive)}
         >
@@ -190,6 +196,8 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
         <button
           type="button"
           title="Use regular expression"
+          aria-label="Use regular expression"
+          aria-pressed={isRegex}
           className={isRegex ? activeToggle : iconBtn}
           onClick={() => setIsRegex(!isRegex)}
         >
@@ -202,6 +210,7 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
         <button
           type="button"
           title="Previous match (Shift+Enter)"
+          aria-label="Previous match"
           className={iconBtn}
           onClick={doFindPrev}
         >
@@ -210,6 +219,7 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
         <button
           type="button"
           title="Next match (Enter)"
+          aria-label="Next match"
           className={iconBtn}
           onClick={doFindNext}
         >
@@ -220,6 +230,7 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
         <button
           type="button"
           title="Close (Escape)"
+          aria-label="Close search"
           className={iconBtn}
           onClick={handleClose}
         >
@@ -242,15 +253,17 @@ export function SearchPanelContent({ view }: { view: EditorView }) {
               onChange={(e) => setReplaceText(e.target.value)}
               onKeyDown={handleReplaceKeyDown}
               placeholder="Replace…"
+              aria-label="Replace with"
               className={inputClass + ' pl-7'}
             />
           </div>
-          <button type="button" title="Replace" className={iconBtn} onClick={doReplace}>
+          <button type="button" title="Replace" aria-label="Replace" className={iconBtn} onClick={doReplace}>
             <Replace size={14} strokeWidth={1.5} />
           </button>
           <button
             type="button"
             title="Replace all"
+            aria-label="Replace all"
             className={iconBtn}
             onClick={doReplaceAll}
           >

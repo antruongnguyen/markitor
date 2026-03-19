@@ -22,7 +22,6 @@ export function TableToolbar({ getView }: TableToolbarProps) {
   const [table, setTable] = useState<ParsedTable | null>(null)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const toolbarRef = useRef<HTMLDivElement>(null)
-  const rafRef = useRef<number>(0)
 
   // Poll for table context on selection/doc changes
   useEffect(() => {
@@ -52,18 +51,11 @@ export function TableToolbar({ getView }: TableToolbarProps) {
       }
     }
 
-    // Check on an interval synchronized with animation frames
-    const poll = () => {
-      check()
-      rafRef.current = requestAnimationFrame(poll)
-    }
-
-    // Use a less aggressive polling — check every 200ms
+    // Check on an interval — poll every 200ms
     const intervalId = setInterval(check, 200)
 
     return () => {
       clearInterval(intervalId)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [getView])
 
@@ -206,6 +198,8 @@ export function TableToolbar({ getView }: TableToolbarProps) {
       <button
         type="button"
         title="Align left"
+        aria-label="Align left"
+        aria-pressed={table.alignments[table.cursorCol] === 'left'}
         className={`flex h-6 w-6 items-center justify-center rounded text-[10px] hover:bg-gray-100 dark:hover:bg-gray-700 ${
           table.alignments[table.cursorCol] === 'left'
             ? 'text-blue-600 dark:text-blue-400'
@@ -218,6 +212,8 @@ export function TableToolbar({ getView }: TableToolbarProps) {
       <button
         type="button"
         title="Align center"
+        aria-label="Align center"
+        aria-pressed={table.alignments[table.cursorCol] === 'center'}
         className={`flex h-6 w-6 items-center justify-center rounded text-[10px] hover:bg-gray-100 dark:hover:bg-gray-700 ${
           table.alignments[table.cursorCol] === 'center'
             ? 'text-blue-600 dark:text-blue-400'
@@ -230,6 +226,8 @@ export function TableToolbar({ getView }: TableToolbarProps) {
       <button
         type="button"
         title="Align right"
+        aria-label="Align right"
+        aria-pressed={table.alignments[table.cursorCol] === 'right'}
         className={`flex h-6 w-6 items-center justify-center rounded text-[10px] hover:bg-gray-100 dark:hover:bg-gray-700 ${
           table.alignments[table.cursorCol] === 'right'
             ? 'text-blue-600 dark:text-blue-400'

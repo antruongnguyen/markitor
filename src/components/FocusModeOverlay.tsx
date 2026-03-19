@@ -49,6 +49,8 @@ export function FocusModeOverlay() {
         }`}
         onClick={toggleTypewriter}
         title="Toggle typewriter mode"
+        aria-label="Toggle typewriter mode"
+        aria-pressed={typewriterMode}
       >
         <Type size={14} strokeWidth={1.5} />
         Typewriter
@@ -58,6 +60,7 @@ export function FocusModeOverlay() {
         className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-gray-900/10 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-lg backdrop-blur-sm transition-colors hover:bg-gray-900/20 hover:text-gray-900 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white"
         onClick={exit}
         title="Exit focus mode (Escape)"
+        aria-label="Exit focus mode"
       >
         <Minimize2 size={14} strokeWidth={1.5} />
         Exit Focus

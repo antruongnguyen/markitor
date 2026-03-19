@@ -44,7 +44,7 @@ export function TableOfContents() {
         Contents
       </div>
 
-      <nav className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-1 pb-2">
+      <nav aria-label="Table of contents" className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-1 pb-2">
         {headings.length === 0 ? (
           <div className="px-2 py-1 text-xs italic text-gray-400 dark:text-gray-500">
             No headings found

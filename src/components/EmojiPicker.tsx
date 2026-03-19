@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   type EmojiCategory,
@@ -33,16 +33,11 @@ export function EmojiPicker({ anchorRef, onSelect, onClose }: EmojiPickerProps) 
   const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
+  const [recentEmojis, setRecentEmojis] = useState(() => getRecentEmojis())
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
-  const [recentEmojis, setRecentEmojis] = useState<string[]>([])
 
-  // Load recent emojis on mount
-  useEffect(() => {
-    setRecentEmojis(getRecentEmojis())
-  }, [])
-
-  // Calculate position from anchor element
-  useEffect(() => {
+  // Measure anchor position before paint (legitimate DOM measurement pattern)
+  useLayoutEffect(() => {
     const anchor = anchorRef.current
     if (!anchor) return
     const rect = anchor.getBoundingClientRect()
@@ -63,6 +58,7 @@ export function EmojiPicker({ anchorRef, onSelect, onClose }: EmojiPickerProps) 
       top = rect.top - pickerHeight - 4
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM measurement in layout effect is the standard approach
     setPos({ top, left })
   }, [anchorRef])
 

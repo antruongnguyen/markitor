@@ -72,6 +72,9 @@ export function TemplateGallery({ onClose }: { onClose: () => void }) {
     <div
       className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh]"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="New from template"
     >
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -90,6 +93,7 @@ export function TemplateGallery({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           >
             <X size={16} strokeWidth={1.5} />

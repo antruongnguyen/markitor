@@ -61,25 +61,27 @@ export function ImageInsertDialog({ anchorRef, getView, onClose }: ImageInsertDi
     }
   }, [onClose, anchorRef])
 
-  // Try to preview URL images
+  // Try to preview URL images (only async callbacks set state)
   useEffect(() => {
-    if (mode !== 'url' || !imageUrl.trim()) {
-      if (mode === 'url') {
-        setPreviewSrc(null)
-        setUrlError(false)
-      }
-      return
-    }
+    if (mode !== 'url' || !imageUrl.trim()) return
+    let cancelled = false
     const img = new Image()
     img.onload = () => {
-      setPreviewSrc(imageUrl)
-      setUrlError(false)
+      if (!cancelled) {
+        setPreviewSrc(imageUrl)
+        setUrlError(false)
+      }
     }
     img.onerror = () => {
-      setPreviewSrc(null)
-      setUrlError(true)
+      if (!cancelled) {
+        setPreviewSrc(null)
+        setUrlError(true)
+      }
     }
     img.src = imageUrl
+    return () => {
+      cancelled = true
+    }
   }, [imageUrl, mode])
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,6 +148,7 @@ export function ImageInsertDialog({ anchorRef, getView, onClose }: ImageInsertDi
         <button
           type="button"
           onClick={onClose}
+          aria-label="Close"
           className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
         >
           <X size={14} />
@@ -176,7 +179,14 @@ export function ImageInsertDialog({ anchorRef, getView, onClose }: ImageInsertDi
               type="url"
               placeholder="https://example.com/image.png"
               value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              onChange={(e) => {
+                const url = e.target.value
+                setImageUrl(url)
+                if (!url.trim()) {
+                  setPreviewSrc(null)
+                  setUrlError(false)
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && canInsert) handleInsert()
               }}
@@ -221,7 +231,7 @@ export function ImageInsertDialog({ anchorRef, getView, onClose }: ImageInsertDi
           <div className="overflow-hidden rounded-md border border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700/50">
             <img
               src={previewSrc}
-              alt="Preview"
+              alt={altText.trim() || 'Image preview'}
               className="max-h-32 w-full object-contain"
             />
           </div>

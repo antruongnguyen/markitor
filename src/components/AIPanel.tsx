@@ -32,7 +32,7 @@ function getContextAroundCursor(): string {
 }
 
 // Reactive selection tracking via polling (CodeMirror doesn't emit DOM events on selection change)
-let _selectionListeners = new Set<() => void>()
+const _selectionListeners = new Set<() => void>()
 let _hasSelection = false
 let _pollTimer: ReturnType<typeof setInterval> | null = null
 
@@ -283,6 +283,9 @@ export function AIPanel() {
     <div className="flex h-full shrink-0 overflow-hidden" style={{ width: `${panelWidth}px`, animation: 'slideInRight 0.2s ease-out' }}>
       {/* Resize handle */}
       <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize AI panel"
         className="group relative h-full w-1 cursor-col-resize flex-shrink-0 bg-gray-200 transition-colors duration-150 hover:bg-blue-500 dark:bg-gray-700 dark:hover:bg-blue-400"
         onMouseDown={onResizeMouseDown}
       >
@@ -299,6 +302,7 @@ export function AIPanel() {
             className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={clearMessages}
             title="Clear history"
+            aria-label="Clear history"
           >
             <Trash2 size={14} strokeWidth={1.5} />
           </button>
@@ -307,6 +311,7 @@ export function AIPanel() {
             className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={() => setSettingsOpen(true)}
             title="AI settings"
+            aria-label="AI settings"
           >
             <Settings size={14} strokeWidth={1.5} />
           </button>
@@ -388,6 +393,7 @@ export function AIPanel() {
               <div className="flex gap-1">
                 <button
                   type="button"
+                  aria-label="Apply to editor"
                   className="rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white transition-all duration-150 hover:bg-blue-500"
                   onClick={() => handleApply(msg.content)}
                 >
@@ -395,6 +401,7 @@ export function AIPanel() {
                 </button>
                 <button
                   type="button"
+                  aria-label="Copy to clipboard"
                   className="rounded-md px-2 py-0.5 text-[10px] font-medium text-gray-400 transition-colors duration-150 hover:text-gray-600 dark:hover:text-gray-200"
                   onClick={() => navigator.clipboard.writeText(msg.content)}
                 >
@@ -444,12 +451,14 @@ export function AIPanel() {
           value={customPrompt}
           onChange={(e) => setCustomPrompt(e.target.value)}
           placeholder="Ask AI anything..."
+          aria-label="Custom AI prompt"
           disabled={loading}
           className="min-w-0 flex-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 outline-none transition-all duration-150 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
         />
         <button
           type="submit"
           disabled={loading || !customPrompt.trim()}
+          aria-label="Send prompt"
           className="shrink-0 rounded-md bg-blue-600 p-1.5 text-white transition-all duration-150 hover:bg-blue-500 disabled:opacity-40"
         >
           <Send size={14} strokeWidth={1.5} />

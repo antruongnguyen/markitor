@@ -2,19 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { FileText, Trash2, X, Clock, FolderOpen } from 'lucide-react'
 import { loadAllDrafts, deleteDraft, type Draft } from '../utils/autosave'
 import { useTabStore } from '../store/tabStore'
-import { create } from 'zustand'
-
-type SavedDocumentsStore = {
-  open: boolean
-  setOpen: (v: boolean) => void
-  toggle: () => void
-}
-
-export const useSavedDocumentsStore = create<SavedDocumentsStore>((set) => ({
-  open: false,
-  setOpen: (v) => set({ open: v }),
-  toggle: () => set((s) => ({ open: !s.open })),
-}))
+import { useSavedDocumentsStore } from '../store/savedDocumentsStore'
 
 function formatRelativeTime(timestamp: number): string {
   const diff = Date.now() - timestamp
@@ -43,21 +31,25 @@ function SavedDocumentsInner() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
 
-  const loadDrafts = useCallback(async () => {
-    setLoading(true)
-    try {
-      const all = await loadAllDrafts()
-      all.sort((a, b) => b.savedAt - a.savedAt)
-      setDrafts(all)
-    } catch {
-      setDrafts([])
-    }
-    setLoading(false)
-  }, [])
-
+  // Load drafts on mount
   useEffect(() => {
-    loadDrafts()
-  }, [loadDrafts])
+    let cancelled = false
+    loadAllDrafts()
+      .then((all) => {
+        if (cancelled) return
+        all.sort((a, b) => b.savedAt - a.savedAt)
+        setDrafts(all)
+        setLoading(false)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setDrafts([])
+        setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const close = useCallback(() => setOpen(false), [setOpen])
 
@@ -112,7 +104,7 @@ function SavedDocumentsInner() {
   )
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close}>
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close} role="dialog" aria-modal="true" aria-label="Saved documents">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: 'fadeIn 0.15s ease-out' }} />
       <div
         ref={dialogRef}
@@ -133,6 +125,7 @@ function SavedDocumentsInner() {
           </div>
           <button
             type="button"
+            aria-label="Close"
             className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
             onClick={close}
           >
@@ -205,6 +198,7 @@ function SavedDocumentsInner() {
                       className="shrink-0 rounded-md p-1 text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-gray-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                       onClick={() => setConfirmDelete(draft.tabId)}
                       title="Delete saved document"
+                      aria-label={`Delete ${draft.fileName}`}
                     >
                       <Trash2 size={14} strokeWidth={1.5} />
                     </button>

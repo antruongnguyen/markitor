@@ -27,7 +27,7 @@ export function KeyCombo({ keys }: { keys: string }) {
   return (
     <span className="inline-flex items-center gap-[3px]">
       {parts.map((part, i) => (
-        <KeyBadge key={i}>{part}</KeyBadge>
+        <KeyBadge key={`${part}-${i}`}>{part}</KeyBadge>
       ))}
     </span>
   )
@@ -300,6 +300,7 @@ function KeyboardShortcutsDialogInner({ onClose }: { onClose: () => void }) {
           )}
           <button
             type="button"
+            aria-label="Close"
             className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={onClose}
           >
@@ -317,6 +318,7 @@ function KeyboardShortcutsDialogInner({ onClose }: { onClose: () => void }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search shortcuts..."
+          aria-label="Search shortcuts"
           className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-500"
         />
       </div>

@@ -59,6 +59,7 @@ function PreviewCSSEditorInner({ onClose }: { onClose: () => void }) {
         <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Preview Style</h2>
         <button
           type="button"
+          aria-label="Close"
           className="rounded-md p-1 text-gray-400 transition-all duration-150 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-200"
           onClick={onClose}
         >
