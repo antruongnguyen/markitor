@@ -14,7 +14,6 @@ initMermaid(useThemeStore.getState().resolved)
 export function Preview() {
   const content = useEditorStore((s) => s.content)
   const resolved = useThemeStore((s) => s.resolved)
-  const editorTheme = useThemeStore((s) => s.editorTheme)
   const layoutMode = useLayoutStore((s) => s.mode)
   const customCSS = usePreviewStyleStore((s) => s.customCSS)
   const html = useMemo(() => md.render(content), [content])
@@ -85,7 +84,7 @@ export function Preview() {
     <div
       ref={containerRef}
       className="custom-scrollbar h-full w-full overflow-auto bg-white p-8 transition-colors duration-200 dark:bg-gray-900"
-      data-hljs-theme={editorTheme}
+      data-hljs-theme={resolved === 'dark' ? 'one-dark' : 'github-light'}
     >
       <article
         ref={articleRef}

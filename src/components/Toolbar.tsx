@@ -65,7 +65,6 @@ import { useSearchStore } from '../store/searchStore'
 import { useFocusModeStore } from '../store/focusModeStore'
 import { tooltipWithShortcut, formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { TableGridPicker } from './TableGridPicker'
-import { ThemePicker } from './ThemePicker'
 import { EmojiPicker } from './EmojiPicker'
 import { ImageInsertDialog } from './ImageInsertDialog'
 
@@ -402,10 +401,6 @@ export function Toolbar({ getView }: ToolbarProps) {
         <MoveVertical size={17} strokeWidth={1.5} />
       </button>
 
-      {/* Spacer pushes theme picker to the right */}
-      <div className="flex-1" />
-
-      <ThemePicker />
     </div>
   )
 }
