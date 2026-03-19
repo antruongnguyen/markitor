@@ -36,6 +36,7 @@ import {
   IndentDecrease,
   ChevronDown,
   MoveVertical,
+  AlertTriangle,
 } from 'lucide-react'
 import {
   toggleBold,
@@ -63,6 +64,7 @@ import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { useStatsStore } from '../store/statsStore'
 import { useSearchStore } from '../store/searchStore'
 import { useFocusModeStore } from '../store/focusModeStore'
+import { useLintStore } from '../store/lintStore'
 import { tooltipWithShortcut, formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { TableGridPicker } from './TableGridPicker'
 import { EmojiPicker } from './EmojiPicker'
@@ -196,6 +198,8 @@ export function Toolbar({ getView }: ToolbarProps) {
   const toggleStats = useStatsStore((s) => s.toggle)
   const typewriterMode = useFocusModeStore((s) => s.typewriterMode)
   const toggleTypewriter = useFocusModeStore((s) => s.toggleTypewriter)
+  const lintEnabled = useLintStore((s) => s.enabled)
+  const toggleLint = useLintStore((s) => s.toggle)
   const searchOpen = useSearchStore((s) => s.isOpen)
   const tableButtonRef = useRef<HTMLButtonElement>(null)
   const imageButtonRef = useRef<HTMLButtonElement>(null)
@@ -399,6 +403,23 @@ export function Toolbar({ getView }: ToolbarProps) {
         }}
       >
         <MoveVertical size={17} strokeWidth={1.5} />
+      </button>
+
+      {/* Lint toggle */}
+      <button
+        type="button"
+        title="Toggle markdown linting"
+        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+          lintEnabled
+            ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+        }`}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          toggleLint()
+        }}
+      >
+        <AlertTriangle size={17} strokeWidth={1.5} />
       </button>
 
     </div>

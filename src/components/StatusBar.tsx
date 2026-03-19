@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
-import { WifiOff, CloudOff, Check, Loader2, MoveVertical } from 'lucide-react'
+import { WifiOff, CloudOff, Check, Loader2, MoveVertical, AlertTriangle } from 'lucide-react'
 import { useEditorStore } from '../store/editorStore'
 import { useLayoutStore } from '../store/layoutStore'
 import { usePWAStore } from '../store/pwaStore'
 import { useAutosaveStore } from '../store/autosaveStore'
 import { useFocusModeStore } from '../store/focusModeStore'
+import { useLintStore } from '../store/lintStore'
 
 const layoutModeLabels = {
   editor: 'Editor',
@@ -30,6 +31,7 @@ export function StatusBar() {
   const autosaveStatus = useAutosaveStore((s) => s.status)
   const autosaveEnabled = useAutosaveStore((s) => s.enabled)
   const typewriterMode = useFocusModeStore((s) => s.typewriterMode)
+  const lintEnabled = useLintStore((s) => s.enabled)
 
   const { words, characters, lines, readingTime } = useMemo(() => computeStats(content), [content])
 
@@ -86,6 +88,15 @@ export function StatusBar() {
             <span className="flex items-center gap-1 text-violet-600 dark:text-violet-400" title="Typewriter mode — cursor stays centered">
               <MoveVertical size={11} strokeWidth={1.5} />
               Typewriter
+            </span>
+            <span className="text-gray-300 dark:text-gray-600">·</span>
+          </>
+        )}
+        {lintEnabled && (
+          <>
+            <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400" title="Markdown linting enabled">
+              <AlertTriangle size={11} strokeWidth={1.5} />
+              Lint
             </span>
             <span className="text-gray-300 dark:text-gray-600">·</span>
           </>
