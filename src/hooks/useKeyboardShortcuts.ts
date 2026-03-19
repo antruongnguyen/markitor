@@ -123,6 +123,8 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers = {}): Extension
 
   return useMemo(
     () => keymap.of(makeShortcutBindings(handlers, customBindings)),
+    // bindingsVersion is a counter that increments when customBindings changes,
+    // serving as a stable dependency proxy (avoids object identity issues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [handlers, bindingsVersion],
   )

@@ -38,7 +38,8 @@ export const useThemeStore = create<ThemeStore>((set) => ({
 }))
 
 // React to OS preference changes when in system mode
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+mediaQuery.addEventListener('change', () => {
   const { mode } = useThemeStore.getState()
   if (mode === 'system') {
     const resolved = getSystemTheme()

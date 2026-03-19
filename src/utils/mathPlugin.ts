@@ -3,6 +3,7 @@ import type StateInline from 'markdown-it/lib/rules_inline/state_inline.mjs'
 import type StateBlock from 'markdown-it/lib/rules_block/state_block.mjs'
 import type Token from 'markdown-it/lib/token.mjs'
 import { renderMath } from './katexRenderer'
+import { escapeHtml } from './html'
 
 /**
  * markdown-it plugin that parses `$...$` (inline) and `$$...$$` (block)
@@ -159,12 +160,3 @@ function mathBlockRenderer(tokens: Token[], idx: number): string {
   return `<div class="math-block math-error"><pre>${escapeHtml(result.error)}</pre></div>\n`
 }
 
-// ── Helpers ────────────────────────────────────────────────────────
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}

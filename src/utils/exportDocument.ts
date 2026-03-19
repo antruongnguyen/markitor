@@ -1,4 +1,5 @@
 import { md } from './markdown'
+import { escapeHtml } from './html'
 
 /**
  * Inline CSS for standalone HTML export.
@@ -95,7 +96,7 @@ function buildHTMLDocument(markdownContent: string, title: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHTML(title)}</title>
+  <title>${escapeHtml(title)}</title>
   <style>${EXPORT_CSS}</style>
 </head>
 <body>
@@ -104,14 +105,6 @@ function buildHTMLDocument(markdownContent: string, title: string): string {
   </article>
 </body>
 </html>`
-}
-
-function escapeHTML(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
 }
 
 function downloadBlob(blob: Blob, fileName: string): void {

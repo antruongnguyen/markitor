@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 
+const DEFAULT_TOAST_DURATION_MS = 2000
+
 type Toast = {
   id: number
   message: string
@@ -15,7 +17,7 @@ let nextId = 1
 
 export const useToastStore = create<ToastStore>((set) => ({
   toasts: [],
-  show: (message, durationMs = 2000) => {
+  show: (message, durationMs = DEFAULT_TOAST_DURATION_MS) => {
     const id = nextId++
     set((s) => ({ toasts: [...s.toasts, { id, message }] }))
     setTimeout(() => {

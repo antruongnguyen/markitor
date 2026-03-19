@@ -14,6 +14,10 @@ import {
 
 export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'disabled'
 
+const DEFAULT_INTERVAL_SEC = 30
+const MIN_INTERVAL_SEC = 5
+const DEBOUNCE_MS = 2000
+
 type AutosaveStore = {
   enabled: boolean
   intervalSec: number
@@ -128,12 +132,12 @@ async function restoreTabs(): Promise<void> {
 
 export const useAutosaveStore = create<AutosaveStore>((set, get) => ({
   enabled: true,
-  intervalSec: 30,
+  intervalSec: DEFAULT_INTERVAL_SEC,
   status: 'idle',
   lastSavedAt: null,
 
   setEnabled: (v) => set({ enabled: v, status: v ? 'idle' : 'disabled' }),
-  setInterval: (sec) => set({ intervalSec: Math.max(5, sec) }),
+  setInterval: (sec) => set({ intervalSec: Math.max(MIN_INTERVAL_SEC, sec) }),
 
   saveNow: async () => {
     if (!get().enabled) return
@@ -194,7 +198,7 @@ export const useAutosaveStore = create<AutosaveStore>((set, get) => ({
         if (debounceId) clearTimeout(debounceId)
         debounceId = setTimeout(() => {
           get().saveNow()
-        }, 2000)
+        }, DEBOUNCE_MS)
       }
     })
 

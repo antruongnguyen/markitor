@@ -8,7 +8,7 @@ import { syncPreviewToEditor, syncEditorToPreview } from '../utils/scrollSync'
  * preview container. Attaches scroll listeners to both and uses
  * data-source-line attributes for accurate mapping.
  */
-export function useScrollSync(previewRef: RefObject<HTMLElement | null>) {
+export function useScrollSync(previewRef: RefObject<HTMLElement | null>): void {
   const enabled = useScrollSyncStore((s) => s.enabled)
   const rafRef = useRef(0)
 
