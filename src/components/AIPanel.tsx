@@ -92,14 +92,51 @@ export function AIPanel() {
 
   const [customPrompt, setCustomPrompt] = useState('')
   const [expandedCategory, setExpandedCategory] = useState<string | null>('writing')
+  const [panelWidth, setPanelWidth] = useState(() => {
+    const stored = localStorage.getItem('markitor-ai-panel-width')
+    return stored ? Math.max(240, Math.min(600, Number(stored))) : 300
+  })
   const abortRef = useRef<AbortController | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages, streamingContent])
+
+  // Resize handle drag logic
+  const onResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    dragRef.current = { startX: e.clientX, startWidth: panelWidth }
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return
+      // Dragging left increases width (panel is on the right side)
+      const delta = dragRef.current.startX - ev.clientX
+      const newWidth = Math.max(240, Math.min(600, dragRef.current.startWidth + delta))
+      setPanelWidth(newWidth)
+    }
+
+    const onMouseUp = () => {
+      dragRef.current = null
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }, [panelWidth])
+
+  // Persist width when it changes
+  useEffect(() => {
+    localStorage.setItem('markitor-ai-panel-width', String(panelWidth))
+  }, [panelWidth])
 
   // Build the custom function actions from store
   const customActions: ActionDef[] = customFunctions.map((fn) => ({
@@ -243,7 +280,16 @@ export function AIPanel() {
   )
 
   return (
-    <div className="flex h-full w-[300px] shrink-0 flex-col overflow-hidden border-l border-gray-200/80 bg-gray-50 transition-colors duration-200 dark:border-gray-700/60 dark:bg-gray-800" style={{ animation: 'slideInRight 0.2s ease-out' }}>
+    <div className="flex h-full shrink-0 overflow-hidden" style={{ width: `${panelWidth}px`, animation: 'slideInRight 0.2s ease-out' }}>
+      {/* Resize handle */}
+      <div
+        className="group relative h-full w-1 cursor-col-resize flex-shrink-0 bg-gray-200 transition-colors duration-150 hover:bg-blue-500 dark:bg-gray-700 dark:hover:bg-blue-400"
+        onMouseDown={onResizeMouseDown}
+      >
+        <div className="absolute inset-y-0 -left-0.5 -right-0.5" />
+      </div>
+      {/* Panel content */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-gray-50 transition-colors duration-200 dark:bg-gray-800">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200/80 px-3 py-2 dark:border-gray-700/60">
         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">AI Assistant</span>
@@ -409,6 +455,7 @@ export function AIPanel() {
           <Send size={14} strokeWidth={1.5} />
         </button>
       </form>
+      </div>
     </div>
   )
 }
