@@ -49,7 +49,13 @@ function snapshotAllTabs(): Draft[] {
     })
 }
 
+let _restored = false
+
 async function restoreTabs(): Promise<void> {
+  // Guard against double invocation (React StrictMode calls _init twice)
+  if (_restored) return
+  _restored = true
+
   try {
     await expireOldDrafts()
     const [drafts, savedActiveTabId] = await Promise.all([

@@ -52,6 +52,8 @@ export async function saveDrafts(drafts: Draft[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite')
     const store = transaction.objectStore(STORE_NAME)
+    // Clear all old entries first to prevent orphaned drafts from accumulating
+    store.clear()
     for (const draft of drafts) {
       store.put(draft)
     }
