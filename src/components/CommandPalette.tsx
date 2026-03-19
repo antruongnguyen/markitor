@@ -63,6 +63,7 @@ function shortcutFor(id: string): string | undefined {
 function buildCommands(handlers: {
   onOpen: () => void
   onSave: () => void
+  onSaveDisk: () => void
 }): Command[] {
   const editorCmd = (fn: (view: NonNullable<typeof editorViewRef.current>) => boolean) => () => {
     const view = editorViewRef.current
@@ -109,10 +110,17 @@ function buildCommands(handlers: {
     },
     {
       id: 'file.save',
-      label: 'Save File',
+      label: 'Save to Browser',
       category: 'File',
       shortcut: shortcutFor('file.save'),
       execute: handlers.onSave,
+    },
+    {
+      id: 'file.save-disk',
+      label: 'Save to Disk',
+      category: 'File',
+      shortcut: shortcutFor('file.save-disk'),
+      execute: handlers.onSaveDisk,
     },
     {
       id: 'file.export-html',
@@ -525,16 +533,17 @@ function fuzzyMatch(query: string, text: string): { match: boolean; score: numbe
 type CommandPaletteInnerProps = {
   onOpen: () => void
   onSave: () => void
+  onSaveDisk: () => void
 }
 
-function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
+function CommandPaletteInner({ onOpen, onSave, onSaveDisk }: CommandPaletteInnerProps) {
   const setOpen = useCommandPaletteStore((s) => s.setOpen)
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
-  const commands = useMemo(() => buildCommands({ onOpen, onSave }), [onOpen, onSave])
+  const commands = useMemo(() => buildCommands({ onOpen, onSave, onSaveDisk }), [onOpen, onSave, onSaveDisk])
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands
@@ -665,8 +674,8 @@ function CommandPaletteInner({ onOpen, onSave }: CommandPaletteInnerProps) {
   )
 }
 
-export function CommandPalette({ onOpen, onSave }: CommandPaletteInnerProps) {
+export function CommandPalette({ onOpen, onSave, onSaveDisk }: CommandPaletteInnerProps) {
   const open = useCommandPaletteStore((s) => s.open)
   if (!open) return null
-  return <CommandPaletteInner onOpen={onOpen} onSave={onSave} />
+  return <CommandPaletteInner onOpen={onOpen} onSave={onSave} onSaveDisk={onSaveDisk} />
 }

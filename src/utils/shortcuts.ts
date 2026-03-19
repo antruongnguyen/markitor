@@ -31,7 +31,8 @@ export const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
 
 export const SHORTCUTS: ShortcutDef[] = [
   // ── File ──────────────────────────────────────────────
-  { id: 'file.save', name: 'Save File', category: 'File', keys: 'Mod+S', description: 'Save the current file to disk' },
+  { id: 'file.save', name: 'Save to Browser', category: 'File', keys: 'Mod+S', description: 'Save to browser storage (IndexedDB)' },
+  { id: 'file.save-disk', name: 'Save to Disk', category: 'File', keys: 'Mod+Shift+S', description: 'Save the current file to disk' },
   { id: 'file.open', name: 'Open File', category: 'File', keys: 'Mod+O', description: 'Open a file from disk' },
   { id: 'file.close-tab', name: 'Close Tab', category: 'File', keys: 'Mod+W', description: 'Close the active tab' },
 
@@ -66,7 +67,7 @@ export const SHORTCUTS: ShortcutDef[] = [
   // ── View / Panels ────────────────────────────────────
   { id: 'view.command-palette', name: 'Command Palette', category: 'View', keys: 'Mod+P', description: 'Open the command palette' },
   { id: 'view.focus-mode', name: 'Focus Mode', category: 'View', keys: 'Mod+Shift+F', description: 'Toggle distraction-free focus mode' },
-  { id: 'view.stats', name: 'Writing Statistics', category: 'View', keys: 'Mod+Shift+S', description: 'Toggle the writing statistics panel' },
+  { id: 'view.stats', name: 'Writing Statistics', category: 'View', keys: 'Mod+Alt+S', description: 'Toggle the writing statistics panel' },
   { id: 'view.export', name: 'Export Menu', category: 'View', keys: 'Mod+Shift+E', description: 'Toggle the export menu' },
   { id: 'view.typewriter', name: 'Typewriter Mode', category: 'View', keys: 'Mod+Alt+T', description: 'Toggle typewriter mode (cursor stays centered)' },
   { id: 'view.shortcuts', name: 'Keyboard Shortcuts', category: 'View', keys: 'Mod+/', description: 'Show all keyboard shortcuts' },

@@ -17,6 +17,7 @@ import {
   BarChart3,
   FolderOpen,
   Save,
+  HardDrive,
 } from 'lucide-react'
 import { AIPanel } from './components/AIPanel'
 import { CommandPalette } from './components/CommandPalette'
@@ -43,6 +44,7 @@ import { usePWAStore } from './store/pwaStore'
 import { useAutosaveStore } from './store/autosaveStore'
 import { useStatsStore } from './store/statsStore'
 import { useShortcutsStore } from './store/shortcutsStore'
+import { useToastStore } from './store/toastStore'
 import { StatsPanel } from './components/StatsPanel'
 import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
@@ -133,7 +135,7 @@ function StatsToggle() {
           : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
       }`}
       onClick={toggle}
-      title={statsOpen ? 'Hide writing statistics (Ctrl+Shift+S)' : 'Show writing statistics (Ctrl+Shift+S)'}
+      title={statsOpen ? 'Hide writing statistics (Ctrl+Alt+S)' : 'Show writing statistics (Ctrl+Alt+S)'}
     >
       <BarChart3 size={16} strokeWidth={1.5} />
     </button>
@@ -381,7 +383,13 @@ function App() {
     // Clear auto-save draft for the current tab after explicit save
     const tabId = useTabStore.getState().activeTabId
     useAutosaveStore.getState().clearDraftForTab(tabId)
+    useToastStore.getState().show('Saved to disk')
   }, [markSaved, setFileMeta])
+
+  const handleSaveBrowser = useCallback(async () => {
+    await useAutosaveStore.getState().saveNow()
+    useToastStore.getState().show('Saved to browser storage')
+  }, [])
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -460,10 +468,10 @@ function App() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  // Writing statistics shortcut: Ctrl/Cmd+Shift+S
+  // Writing statistics shortcut: Ctrl/Cmd+Alt+S
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key.toLowerCase() === 's') {
         e.preventDefault()
         useStatsStore.getState().toggle()
       }
@@ -471,6 +479,18 @@ function App() {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
+
+  // Save to disk shortcut: Ctrl/Cmd+Shift+S
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        handleSave()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [handleSave])
 
   // Keyboard shortcuts panel: Ctrl/Cmd+/
   useEffect(() => {
@@ -496,12 +516,12 @@ function App() {
         <div className="flex min-h-0 flex-1 items-stretch justify-center">
           <div className="flex w-full max-w-3xl flex-col">
             <Suspense fallback={<div className="h-full w-full" />}>
-              <Editor onOpen={handleOpen} onSave={handleSave} focusMode />
+              <Editor onOpen={handleOpen} onSave={handleSaveBrowser} onSaveDisk={handleSave} focusMode />
             </Suspense>
           </div>
         </div>
         <FocusModeOverlay />
-        <CommandPalette onOpen={handleOpen} onSave={handleSave} />
+        <CommandPalette onOpen={handleOpen} onSave={handleSaveBrowser} onSaveDisk={handleSave} />
         <SettingsDialog />
         <KeyboardShortcutsDialog />
         <PreviewCSSEditorDialog />
@@ -548,8 +568,16 @@ function App() {
           <button
             type="button"
             className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
+            onClick={handleSaveBrowser}
+            title="Save to browser (Ctrl+S)"
+          >
+            <HardDrive size={16} strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={handleSave}
-            title="Save file (Ctrl+S)"
+            title="Save to disk (Ctrl+Shift+S)"
           >
             <Save size={16} strokeWidth={1.5} />
           </button>
@@ -566,7 +594,7 @@ function App() {
           <SplitPane
             left={layoutMode !== 'preview' ? (
               <Suspense fallback={<div className="h-full w-full bg-white dark:bg-gray-900" />}>
-                <Editor onOpen={handleOpen} onSave={handleSave} />
+                <Editor onOpen={handleOpen} onSave={handleSaveBrowser} onSaveDisk={handleSave} />
               </Suspense>
             ) : null}
             right={layoutMode !== 'editor' ? (
@@ -581,7 +609,7 @@ function App() {
       </div>
 
       <StatusBar />
-      <CommandPalette onOpen={handleOpen} onSave={handleSave} />
+      <CommandPalette onOpen={handleOpen} onSave={handleSaveBrowser} onSaveDisk={handleSave} />
       <SettingsDialog />
       <KeyboardShortcutsDialog />
       <PreviewCSSEditorDialog />

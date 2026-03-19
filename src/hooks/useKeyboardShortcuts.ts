@@ -26,6 +26,7 @@ import { useFocusModeStore } from '../store/focusModeStore'
 
 type ShortcutHandlers = {
   onSave?: () => void | Promise<void>
+  onSaveDisk?: () => void | Promise<void>
   onOpen?: () => void | Promise<void>
 }
 
@@ -74,6 +75,13 @@ function makeShortcutBindings(
       key: key('file.save', customBindings),
       run: () => {
         handlers.onSave?.()
+        return true
+      },
+    },
+    {
+      key: key('file.save-disk', customBindings),
+      run: () => {
+        handlers.onSaveDisk?.()
         return true
       },
     },

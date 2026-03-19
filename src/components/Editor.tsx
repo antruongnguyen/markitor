@@ -42,10 +42,11 @@ const focusDarkTheme = EditorView.theme({
 type EditorProps = {
   onOpen: () => void
   onSave: () => void
+  onSaveDisk: () => void
   focusMode?: boolean
 }
 
-export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
+export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
   const themeCompRef = useRef(new Compartment())
@@ -55,9 +56,8 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
   const setContent = useEditorStore((s) => s.setContent)
   const setCursorPosition = useEditorStore((s) => s.setCursorPosition)
   const resolved = useThemeStore((s) => s.resolved)
-  const editorTheme = useThemeStore((s) => s.editorTheme)
   const typewriterMode = useFocusModeStore((s) => s.typewriterMode)
-  const shortcuts = useKeyboardShortcuts({ onOpen, onSave })
+  const shortcuts = useKeyboardShortcuts({ onOpen, onSave, onSaveDisk })
 
   const onUpdate = useMemo(
     () =>
@@ -79,10 +79,9 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
 
     const initialResolved = useThemeStore.getState().resolved
     const initialFocus = useFocusModeStore.getState().enabled
-    const initialEditorTheme = useThemeStore.getState().editorTheme
     const themeExt = initialFocus
       ? (initialResolved === 'dark' ? focusDarkTheme : focusLightTheme)
-      : getThemeExtension(initialEditorTheme)
+      : getThemeExtension(initialResolved)
     const focusStyleExt = initialFocus
       ? EditorView.theme({
           '.cm-content': { fontSize: '18px', lineHeight: '1.8', padding: '2rem 0' },
@@ -148,13 +147,13 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Dynamically switch CodeMirror theme when editor theme or focus mode changes
+  // Dynamically switch CodeMirror theme when dark/light mode or focus mode changes
   useEffect(() => {
     const view = viewRef.current
     if (!view) return
     const themeExt = focusMode
       ? (resolved === 'dark' ? focusDarkTheme : focusLightTheme)
-      : getThemeExtension(editorTheme)
+      : getThemeExtension(resolved)
     const focusStyleExt = focusMode
       ? EditorView.theme({
           '.cm-content': { fontSize: '18px', lineHeight: '1.8', padding: '2rem 0' },
@@ -167,7 +166,7 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
         focusStyleCompRef.current.reconfigure(focusStyleExt),
       ],
     })
-  }, [resolved, focusMode, editorTheme])
+  }, [resolved, focusMode])
 
   useEffect(() => {
     const view = viewRef.current
