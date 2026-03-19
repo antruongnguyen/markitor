@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo, useCallback } from 'react'
 import { Compartment, EditorState } from '@codemirror/state'
-import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
+import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter, scrollPastEnd } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { search, searchKeymap, highlightSelectionMatches, openSearchPanel } from '@codemirror/search'
@@ -191,7 +191,7 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
   // Typewriter mode: keep cursor line vertically centered
   useEffect(() => {
     const view = viewRef.current
-    if (!view || !focusMode || !typewriterMode) return
+    if (!view || !typewriterMode) return
 
     const scrollToCursor = () => {
       const pos = view.state.selection.main.head
@@ -212,13 +212,13 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
     })
 
     const comp = typewriterCompRef.current
-    view.dispatch({ effects: comp.reconfigure(handler) })
+    view.dispatch({ effects: comp.reconfigure([handler, scrollPastEnd()]) })
     return () => {
       if (viewRef.current) {
         viewRef.current.dispatch({ effects: comp.reconfigure([]) })
       }
     }
-  }, [focusMode, typewriterMode])
+  }, [typewriterMode])
 
   const getView = useCallback(() => viewRef.current, [])
 
@@ -227,6 +227,12 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
       {!focusMode && <Toolbar getView={getView} />}
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <div ref={containerRef} className="h-full w-full" />
+        {typewriterMode && (
+          <div
+            className="pointer-events-none absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-violet-400/15 dark:bg-violet-400/10"
+            aria-hidden="true"
+          />
+        )}
         {!focusMode && <TableToolbar getView={getView} />}
       </div>
     </div>

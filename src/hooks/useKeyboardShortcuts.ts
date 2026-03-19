@@ -20,6 +20,7 @@ import {
 import { useToastStore } from '../store/toastStore'
 import { useEditorStore } from '../store/editorStore'
 import { useEmojiPickerStore } from '../store/emojiPickerStore'
+import { useFocusModeStore } from '../store/focusModeStore'
 
 type ShortcutHandlers = {
   onSave?: () => void | Promise<void>
@@ -75,6 +76,13 @@ function makeShortcutBindings(handlers: ShortcutHandlers): KeyBinding[] {
       key: 'Mod-.',
       run: () => {
         useEmojiPickerStore.getState().toggle()
+        return true
+      },
+    },
+    {
+      key: 'Mod-Alt-t',
+      run: () => {
+        useFocusModeStore.getState().toggleTypewriter()
         return true
       },
     },

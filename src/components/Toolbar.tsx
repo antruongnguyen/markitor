@@ -35,6 +35,7 @@ import {
   IndentIncrease,
   IndentDecrease,
   ChevronDown,
+  MoveVertical,
 } from 'lucide-react'
 import {
   toggleBold,
@@ -61,6 +62,7 @@ import { useEditorStore } from '../store/editorStore'
 import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { useStatsStore } from '../store/statsStore'
 import { useSearchStore } from '../store/searchStore'
+import { useFocusModeStore } from '../store/focusModeStore'
 import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
 import { EmojiPicker } from './EmojiPicker'
@@ -186,6 +188,8 @@ export function Toolbar({ getView }: ToolbarProps) {
   const closeEmojiPicker = useEmojiPickerStore((s) => s.setOpen)
   const statsOpen = useStatsStore((s) => s.open)
   const toggleStats = useStatsStore((s) => s.toggle)
+  const typewriterMode = useFocusModeStore((s) => s.typewriterMode)
+  const toggleTypewriter = useFocusModeStore((s) => s.toggleTypewriter)
   const searchOpen = useSearchStore((s) => s.isOpen)
   const tableButtonRef = useRef<HTMLButtonElement>(null)
   const imageButtonRef = useRef<HTMLButtonElement>(null)
@@ -369,6 +373,23 @@ export function Toolbar({ getView }: ToolbarProps) {
         }}
       >
         <BarChart3 size={17} strokeWidth={1.5} />
+      </button>
+
+      {/* Typewriter mode toggle */}
+      <button
+        type="button"
+        title="Typewriter mode (Ctrl+Alt+T)"
+        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+          typewriterMode
+            ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+        }`}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          toggleTypewriter()
+        }}
+      >
+        <MoveVertical size={17} strokeWidth={1.5} />
       </button>
 
       {/* Spacer pushes theme picker to the right */}

@@ -381,7 +381,6 @@ export function insertFootnote(view: EditorView): boolean {
   const defInsert = `${defPrefix}${def}`
 
   // Apply both changes in one transaction
-  const defAnchor = docEnd + defPrefix.length + def.length
 
   view.dispatch({
     changes: [
