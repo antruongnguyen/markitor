@@ -13,7 +13,7 @@ function aiProxyPlugin(): Plugin {
   return {
     name: 'ai-proxy',
     configureServer(server) {
-      server.middlewares.use('/__ai_proxy', (async (req: Connect.IncomingMessage, res, next) => {
+      server.middlewares.use('/__ai_proxy', (async (req: Connect.IncomingMessage, res, _next) => {
         if (req.method === 'OPTIONS') {
           res.writeHead(204, {
             'Access-Control-Allow-Origin': '*',

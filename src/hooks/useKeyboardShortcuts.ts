@@ -13,6 +13,8 @@ import {
   toggleOrderedList,
   toggleTaskList,
   insertBlockquote,
+  indentLines,
+  outdentLines,
   formatDocument,
 } from '../utils/editorCommands'
 import { useToastStore } from '../store/toastStore'
@@ -42,6 +44,8 @@ function makeShortcutBindings(handlers: ShortcutHandlers): KeyBinding[] {
     { key: 'Mod-Shift-l', run: toggleOrderedList },
     { key: 'Mod-Shift-t', run: toggleTaskList },
     { key: 'Mod-Shift-q', run: insertBlockquote },
+    { key: 'Tab', run: indentLines },
+    { key: 'Shift-Tab', run: outdentLines },
     {
       key: 'Alt-Shift-f',
       run: (view) => {
