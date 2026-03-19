@@ -15,6 +15,8 @@ import {
   Columns2,
   Eye,
   BarChart3,
+  FolderOpen,
+  Save,
 } from 'lucide-react'
 import { AIPanel } from './components/AIPanel'
 import { CommandPalette } from './components/CommandPalette'
@@ -212,12 +214,11 @@ function ExportMenu() {
     <div className="relative" ref={menuRef} data-export-menu>
       <button
         type="button"
-        className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-150 hover:bg-gray-50 hover:shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+        className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
         onClick={() => setOpen((prev) => !prev)}
         title="Export document (Ctrl+Shift+E)"
       >
-        <Download size={15} strokeWidth={1.5} />
-        Export
+        <Download size={16} strokeWidth={1.5} />
       </button>
       {open && (
         <div className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-gray-800" style={{ animation: 'scaleIn 0.15s ease-out' }}>
@@ -538,17 +539,19 @@ function App() {
           <div className="mx-0.5 h-4 w-px bg-gray-200 dark:bg-gray-700" />
           <button
             type="button"
-            className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-150 hover:bg-gray-50 hover:shadow dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={handleOpen}
+            title="Open file (Ctrl+O)"
           >
-            Open
+            <FolderOpen size={16} strokeWidth={1.5} />
           </button>
           <button
             type="button"
-            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-blue-500 hover:shadow"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
             onClick={handleSave}
+            title="Save file (Ctrl+S)"
           >
-            Save
+            <Save size={16} strokeWidth={1.5} />
           </button>
           <ExportMenu />
         </div>
