@@ -18,7 +18,7 @@ import { useFocusModeStore } from '../store/focusModeStore'
 import { useThemeStore } from '../store/themeStore'
 import { useSearchStore } from '../store/searchStore'
 import { editorViewRef } from '../utils/editorViewRef'
-import { getThemeExtension } from '../utils/editorThemes'
+import { getThemeExtension, oneDarkSyntax } from '../utils/editorThemes'
 import { createSearchPanel } from '../utils/createSearchPanel'
 import { Toolbar } from './Toolbar'
 import { TableToolbar } from './TableToolbar'
@@ -88,7 +88,7 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
     const initialFocus = useFocusModeStore.getState().enabled
     const initialLint = useLintStore.getState().enabled
     const themeExt = initialFocus
-      ? (initialResolved === 'dark' ? focusDarkTheme : focusLightTheme)
+      ? (initialResolved === 'dark' ? [focusDarkTheme, oneDarkSyntax] : focusLightTheme)
       : getThemeExtension(initialResolved)
     const focusStyleExt = initialFocus
       ? EditorView.theme({
@@ -166,7 +166,7 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
     const view = viewRef.current
     if (!view) return
     const themeExt = focusMode
-      ? (resolved === 'dark' ? focusDarkTheme : focusLightTheme)
+      ? (resolved === 'dark' ? [focusDarkTheme, oneDarkSyntax] : focusLightTheme)
       : getThemeExtension(resolved)
     const focusStyleExt = focusMode
       ? EditorView.theme({

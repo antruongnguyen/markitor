@@ -35,6 +35,29 @@ const githubLightHighlight = HighlightStyle.define([
   { tag: tags.strong, fontWeight: 'bold' },
 ])
 
+// ── One Dark syntax highlight (standalone, for use with focus mode) ──
+
+const oneDarkHighlight = HighlightStyle.define([
+  { tag: tags.keyword, color: '#c678dd' },
+  { tag: tags.name, color: '#e06c75' },
+  { tag: tags.function(tags.variableName), color: '#61afef' },
+  { tag: tags.definition(tags.variableName), color: '#e06c75' },
+  { tag: tags.string, color: '#98c379' },
+  { tag: tags.comment, color: '#7f848e', fontStyle: 'italic' },
+  { tag: tags.number, color: '#d19a66' },
+  { tag: tags.bool, color: '#d19a66' },
+  { tag: tags.operator, color: '#56b6c2' },
+  { tag: tags.typeName, color: '#e5c07b' },
+  { tag: tags.meta, color: '#61afef' },
+  { tag: tags.link, color: '#61afef' },
+  { tag: tags.heading, color: '#e06c75', fontWeight: 'bold' },
+  { tag: tags.emphasis, fontStyle: 'italic', color: '#c8ccd4' },
+  { tag: tags.strong, fontWeight: 'bold', color: '#c8ccd4' },
+])
+
+/** Standalone One Dark syntax highlighting extension (no chrome/structural styles). */
+export const oneDarkSyntax: Extension = syntaxHighlighting(oneDarkHighlight)
+
 const lightTheme: Extension = [githubLightChrome, syntaxHighlighting(githubLightHighlight)]
 const darkTheme: Extension = oneDark
 

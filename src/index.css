@@ -413,13 +413,13 @@
 }
 
 .dark .preview-content code {
-  background: #1e293b;
+  background: #3e4451;
   color: #e2e8f0;
 }
 
 .dark .preview-content pre {
-  background: #0f172a;
-  border-color: #1e293b;
+  background: #21252b;
+  border-color: #3e4451;
 }
 
 .dark .preview-content pre code {
@@ -647,7 +647,7 @@
 [data-hljs-theme="one-dark"] .hljs-link { color: #61afef; }
 [data-hljs-theme="one-dark"] .hljs-params { color: #abb2bf; }
 [data-hljs-theme="one-dark"] .hljs-regexp { color: #56b6c2; }
-[data-hljs-theme="one-dark"] .preview-content pre { background: #282c34; border-color: #3e4451; }
+[data-hljs-theme="one-dark"] .preview-content pre { background: #21252b; border-color: #3e4451; }
 [data-hljs-theme="one-dark"] .preview-content pre code { color: #abb2bf; background: none; }
 [data-hljs-theme="one-dark"] .preview-content code { background: #3e4451; color: #abb2bf; }
 
