@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, Keyboard } from 'lucide-react'
 import { useAIStore, PROVIDER_PRESETS, getPreset, type ProviderId, type CustomFunction } from '../store/aiStore'
+import { useShortcutsStore } from '../store/shortcutsStore'
 
 function SettingsDialogInner({ onClose }: { onClose: () => void }) {
   const provider = useAIStore((s) => s.provider)
@@ -301,23 +302,36 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
         </div>
       )}
 
-      <div className="flex justify-end gap-2 border-t border-gray-200/80 px-5 py-3 dark:border-gray-700/60">
+      <div className="flex items-center justify-between border-t border-gray-200/80 px-5 py-3 dark:border-gray-700/60">
         <button
           type="button"
-          className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-all duration-150 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
-          onClick={onClose}
+          className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
+          onClick={() => {
+            onClose()
+            useShortcutsStore.getState().setOpen(true)
+          }}
         >
-          Cancel
+          <Keyboard size={14} strokeWidth={1.5} />
+          Keyboard Shortcuts
         </button>
-        {tab === 'provider' && (
+        <div className="flex gap-2">
           <button
             type="button"
-            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-blue-500"
-            onClick={handleSave}
+            className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition-all duration-150 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
+            onClick={onClose}
           >
-            Save
+            Cancel
           </button>
-        )}
+          {tab === 'provider' && (
+            <button
+              type="button"
+              className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-blue-500"
+              onClick={handleSave}
+            >
+              Save
+            </button>
+          )}
+        </div>
       </div>
     </dialog>
   )

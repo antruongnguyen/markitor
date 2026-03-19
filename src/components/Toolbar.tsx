@@ -63,6 +63,7 @@ import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { useStatsStore } from '../store/statsStore'
 import { useSearchStore } from '../store/searchStore'
 import { useFocusModeStore } from '../store/focusModeStore'
+import { tooltipWithShortcut, formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
 import { EmojiPicker } from './EmojiPicker'
@@ -70,7 +71,8 @@ import { ImageInsertDialog } from './ImageInsertDialog'
 
 type ToolbarButton = {
   icon: LucideIcon
-  title: string
+  label: string
+  shortcutId?: string
   action: (view: EditorView) => boolean
 }
 
@@ -80,40 +82,40 @@ const btnClass =
 const separatorClass = 'mx-1 h-4 w-px bg-gray-200 dark:bg-gray-700'
 
 const buttons: (ToolbarButton | 'separator')[] = [
-  { icon: Undo2, title: 'Undo (Ctrl+Z)', action: (v) => undo(v) },
-  { icon: Redo2, title: 'Redo (Ctrl+Shift+Z)', action: (v) => redo(v) },
+  { icon: Undo2, label: 'Undo', shortcutId: 'format.undo', action: (v) => undo(v) },
+  { icon: Redo2, label: 'Redo', shortcutId: 'format.redo', action: (v) => redo(v) },
   'separator',
-  { icon: Bold, title: 'Bold (Ctrl+B)', action: toggleBold },
-  { icon: Italic, title: 'Italic (Ctrl+I)', action: toggleItalic },
-  { icon: Strikethrough, title: 'Strikethrough (Ctrl+Shift+X)', action: toggleStrikethrough },
-  { icon: Code, title: 'Inline code (Ctrl+E)', action: toggleInlineCode },
-  { icon: Superscript, title: 'Superscript', action: toggleSuperscript },
-  { icon: Subscript, title: 'Subscript', action: toggleSubscript },
+  { icon: Bold, label: 'Bold', shortcutId: 'format.bold', action: toggleBold },
+  { icon: Italic, label: 'Italic', shortcutId: 'format.italic', action: toggleItalic },
+  { icon: Strikethrough, label: 'Strikethrough', shortcutId: 'format.strikethrough', action: toggleStrikethrough },
+  { icon: Code, label: 'Inline code', shortcutId: 'format.inline-code', action: toggleInlineCode },
+  { icon: Superscript, label: 'Superscript', action: toggleSuperscript },
+  { icon: Subscript, label: 'Subscript', action: toggleSubscript },
   'separator',
 ]
 
-const headingItems: { level: 1 | 2 | 3 | 4 | 5 | 6; icon: LucideIcon; label: string; shortcut: string }[] = [
-  { level: 1, icon: Heading1, label: 'Heading 1', shortcut: 'Ctrl+1' },
-  { level: 2, icon: Heading2, label: 'Heading 2', shortcut: 'Ctrl+2' },
-  { level: 3, icon: Heading3, label: 'Heading 3', shortcut: 'Ctrl+3' },
-  { level: 4, icon: Heading4, label: 'Heading 4', shortcut: 'Ctrl+4' },
-  { level: 5, icon: Heading5, label: 'Heading 5', shortcut: 'Ctrl+5' },
-  { level: 6, icon: Heading6, label: 'Heading 6', shortcut: 'Ctrl+6' },
+const headingItems: { level: 1 | 2 | 3 | 4 | 5 | 6; icon: LucideIcon; label: string; shortcutId: string }[] = [
+  { level: 1, icon: Heading1, label: 'Heading 1', shortcutId: 'format.h1' },
+  { level: 2, icon: Heading2, label: 'Heading 2', shortcutId: 'format.h2' },
+  { level: 3, icon: Heading3, label: 'Heading 3', shortcutId: 'format.h3' },
+  { level: 4, icon: Heading4, label: 'Heading 4', shortcutId: 'format.h4' },
+  { level: 5, icon: Heading5, label: 'Heading 5', shortcutId: 'format.h5' },
+  { level: 6, icon: Heading6, label: 'Heading 6', shortcutId: 'format.h6' },
 ]
 
 const listButtons: (ToolbarButton | 'separator')[] = [
-  { icon: List, title: 'Unordered list (Ctrl+L)', action: toggleUnorderedList },
-  { icon: ListOrdered, title: 'Ordered list (Ctrl+Shift+L)', action: toggleOrderedList },
-  { icon: ListChecks, title: 'Task list (Ctrl+Shift+T)', action: toggleTaskList },
-  { icon: Quote, title: 'Blockquote (Ctrl+Shift+Q)', action: insertBlockquote },
-  { icon: IndentIncrease, title: 'Indent', action: indentLines },
-  { icon: IndentDecrease, title: 'Outdent', action: outdentLines },
+  { icon: List, label: 'Unordered list', shortcutId: 'format.ul', action: toggleUnorderedList },
+  { icon: ListOrdered, label: 'Ordered list', shortcutId: 'format.ol', action: toggleOrderedList },
+  { icon: ListChecks, label: 'Task list', shortcutId: 'format.task-list', action: toggleTaskList },
+  { icon: Quote, label: 'Blockquote', shortcutId: 'format.blockquote', action: insertBlockquote },
+  { icon: IndentIncrease, label: 'Indent', action: indentLines },
+  { icon: IndentDecrease, label: 'Outdent', action: outdentLines },
   'separator',
-  { icon: Link, title: 'Link (Ctrl+K)', action: toggleLink },
-  { icon: FileCode, title: 'Code block (Ctrl+Shift+K)', action: toggleCodeBlock },
-  { icon: Minus, title: 'Horizontal rule', action: insertHorizontalRule },
+  { icon: Link, label: 'Link', shortcutId: 'format.link', action: toggleLink },
+  { icon: FileCode, label: 'Code block', shortcutId: 'format.code-block', action: toggleCodeBlock },
+  { icon: Minus, label: 'Horizontal rule', action: insertHorizontalRule },
   'separator',
-  { icon: AlignLeft, title: 'Format Document (Alt+Shift+F)', action: formatDocument },
+  { icon: AlignLeft, label: 'Format Document', shortcutId: 'format.document', action: formatDocument },
 ]
 
 type ToolbarProps = {
@@ -170,7 +172,12 @@ function HeadingDropdown({ getView }: { getView: () => EditorView | null }) {
               >
                 <Icon size={16} strokeWidth={1.5} />
                 <span className="flex-1">{item.label}</span>
-                <kbd className="text-[10px] text-gray-400 dark:text-gray-500">{item.shortcut}</kbd>
+                <kbd className="text-[10px] text-gray-400 dark:text-gray-500">
+                  {(() => {
+                    const s = getShortcutById(item.shortcutId)
+                    return s ? formatKeysInline(getEffectiveKeys(s)) : ''
+                  })()}
+                </kbd>
               </button>
             )
           })}
@@ -243,11 +250,14 @@ export function Toolbar({ getView }: ToolbarProps) {
       return <div key={`sep-${i}`} className={separatorClass} />
     }
     const Icon = item.icon
+    const title = item.shortcutId
+      ? tooltipWithShortcut(item.label, item.shortcutId)
+      : item.label
     return (
       <button
-        key={item.title}
+        key={title}
         type="button"
-        title={item.title}
+        title={title}
         className={btnClass}
         onMouseDown={(e) => {
           e.preventDefault()
@@ -316,7 +326,7 @@ export function Toolbar({ getView }: ToolbarProps) {
       <button
         ref={emojiButtonRef}
         type="button"
-        title="Insert emoji (Ctrl+.)"
+        title={tooltipWithShortcut('Insert emoji', 'format.emoji')}
         className={btnClass}
         onMouseDown={(e) => {
           e.preventDefault()
@@ -338,7 +348,7 @@ export function Toolbar({ getView }: ToolbarProps) {
       {/* Search toggle */}
       <button
         type="button"
-        title="Find & Replace (Ctrl+F)"
+        title={tooltipWithShortcut('Find & Replace', 'search.find')}
         className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           searchOpen
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
@@ -361,7 +371,7 @@ export function Toolbar({ getView }: ToolbarProps) {
       {/* Writing statistics toggle */}
       <button
         type="button"
-        title="Writing statistics (Ctrl+Shift+S)"
+        title={tooltipWithShortcut('Writing statistics', 'view.stats')}
         className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           statsOpen
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
@@ -378,7 +388,7 @@ export function Toolbar({ getView }: ToolbarProps) {
       {/* Typewriter mode toggle */}
       <button
         type="button"
-        title="Typewriter mode (Ctrl+Alt+T)"
+        title={tooltipWithShortcut('Typewriter mode', 'view.typewriter')}
         className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           typewriterMode
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'

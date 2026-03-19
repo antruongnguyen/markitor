@@ -16,7 +16,9 @@ import { useAutosaveStore } from '../store/autosaveStore'
 import { useStatsStore } from '../store/statsStore'
 import { useSearchStore } from '../store/searchStore'
 import { usePreviewStyleStore } from '../store/previewStyleStore'
+import { useShortcutsStore } from '../store/shortcutsStore'
 import { editorViewRef } from '../utils/editorViewRef'
+import { formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
 import { exportHTML, exportPDF } from '../utils/exportDocument'
 import {
@@ -51,12 +53,11 @@ type Command = {
   execute: () => void
 }
 
-function isMac() {
-  return navigator.platform.toUpperCase().indexOf('MAC') >= 0
-}
-
-function mod() {
-  return isMac() ? 'Cmd' : 'Ctrl'
+/** Look up the effective display shortcut for a registry ID */
+function shortcutFor(id: string): string | undefined {
+  const s = getShortcutById(id)
+  if (!s) return undefined
+  return formatKeysInline(getEffectiveKeys(s))
 }
 
 function buildCommands(handlers: {
@@ -93,7 +94,7 @@ function buildCommands(handlers: {
       id: 'file.close-tab',
       label: 'Close Tab',
       category: 'File',
-      shortcut: `${mod()}+W`,
+      shortcut: shortcutFor('file.close-tab'),
       execute: () => {
         const { activeTabId, closeTab } = useTabStore.getState()
         closeTab(activeTabId)
@@ -103,14 +104,14 @@ function buildCommands(handlers: {
       id: 'file.open',
       label: 'Open File',
       category: 'File',
-      shortcut: `${mod()}+O`,
+      shortcut: shortcutFor('file.open'),
       execute: handlers.onOpen,
     },
     {
       id: 'file.save',
       label: 'Save File',
       category: 'File',
-      shortcut: `${mod()}+S`,
+      shortcut: shortcutFor('file.save'),
       execute: handlers.onSave,
     },
     {
@@ -137,42 +138,42 @@ function buildCommands(handlers: {
       id: 'format.bold',
       label: 'Bold',
       category: 'Format',
-      shortcut: `${mod()}+B`,
+      shortcut: shortcutFor('format.bold'),
       execute: editorCmd(toggleBold),
     },
     {
       id: 'format.italic',
       label: 'Italic',
       category: 'Format',
-      shortcut: `${mod()}+I`,
+      shortcut: shortcutFor('format.italic'),
       execute: editorCmd(toggleItalic),
     },
     {
       id: 'format.strikethrough',
       label: 'Strikethrough',
       category: 'Format',
-      shortcut: `${mod()}+Shift+X`,
+      shortcut: shortcutFor('format.strikethrough'),
       execute: editorCmd(toggleStrikethrough),
     },
     {
       id: 'format.inline-code',
       label: 'Inline Code',
       category: 'Format',
-      shortcut: `${mod()}+E`,
+      shortcut: shortcutFor('format.inline-code'),
       execute: editorCmd(toggleInlineCode),
     },
     {
       id: 'format.code-block',
       label: 'Code Block',
       category: 'Format',
-      shortcut: `${mod()}+Shift+K`,
+      shortcut: shortcutFor('format.code-block'),
       execute: editorCmd(toggleCodeBlock),
     },
     {
       id: 'format.link',
       label: 'Insert Link',
       category: 'Format',
-      shortcut: `${mod()}+K`,
+      shortcut: shortcutFor('format.link'),
       execute: editorCmd(toggleLink),
     },
     {
@@ -185,70 +186,70 @@ function buildCommands(handlers: {
       id: 'format.blockquote',
       label: 'Blockquote',
       category: 'Format',
-      shortcut: `${mod()}+Shift+Q`,
+      shortcut: shortcutFor('format.blockquote'),
       execute: editorCmd(insertBlockquote),
     },
     {
       id: 'format.h1',
       label: 'Heading 1',
       category: 'Format',
-      shortcut: `${mod()}+1`,
+      shortcut: shortcutFor('format.h1'),
       execute: editorCmd((v) => toggleHeading(v, 1)),
     },
     {
       id: 'format.h2',
       label: 'Heading 2',
       category: 'Format',
-      shortcut: `${mod()}+2`,
+      shortcut: shortcutFor('format.h2'),
       execute: editorCmd((v) => toggleHeading(v, 2)),
     },
     {
       id: 'format.h3',
       label: 'Heading 3',
       category: 'Format',
-      shortcut: `${mod()}+3`,
+      shortcut: shortcutFor('format.h3'),
       execute: editorCmd((v) => toggleHeading(v, 3)),
     },
     {
       id: 'format.h4',
       label: 'Heading 4',
       category: 'Format',
-      shortcut: `${mod()}+4`,
+      shortcut: shortcutFor('format.h4'),
       execute: editorCmd((v) => toggleHeading(v, 4)),
     },
     {
       id: 'format.h5',
       label: 'Heading 5',
       category: 'Format',
-      shortcut: `${mod()}+5`,
+      shortcut: shortcutFor('format.h5'),
       execute: editorCmd((v) => toggleHeading(v, 5)),
     },
     {
       id: 'format.h6',
       label: 'Heading 6',
       category: 'Format',
-      shortcut: `${mod()}+6`,
+      shortcut: shortcutFor('format.h6'),
       execute: editorCmd((v) => toggleHeading(v, 6)),
     },
     {
       id: 'format.ul',
       label: 'Unordered List',
       category: 'Format',
-      shortcut: `${mod()}+L`,
+      shortcut: shortcutFor('format.ul'),
       execute: editorCmd(toggleUnorderedList),
     },
     {
       id: 'format.ol',
       label: 'Ordered List',
       category: 'Format',
-      shortcut: `${mod()}+Shift+L`,
+      shortcut: shortcutFor('format.ol'),
       execute: editorCmd(toggleOrderedList),
     },
     {
       id: 'format.task-list',
       label: 'Task List',
       category: 'Format',
-      shortcut: `${mod()}+Shift+T`,
+      shortcut: shortcutFor('format.task-list'),
       execute: editorCmd(toggleTaskList),
     },
     {
@@ -291,14 +292,14 @@ function buildCommands(handlers: {
       id: 'insert.emoji',
       label: 'Insert Emoji',
       category: 'Insert',
-      shortcut: `${mod()}+.`,
+      shortcut: shortcutFor('format.emoji'),
       execute: () => useEmojiPickerStore.getState().toggle(),
     },
     {
       id: 'format.document',
       label: 'Format Document',
       category: 'Format',
-      shortcut: 'Alt+Shift+F',
+      shortcut: shortcutFor('format.document'),
       execute: () => {
         const view = editorViewRef.current
         if (view) {
@@ -315,7 +316,7 @@ function buildCommands(handlers: {
       id: 'search.find',
       label: 'Find',
       category: 'Search',
-      shortcut: `${mod()}+F`,
+      shortcut: shortcutFor('search.find'),
       execute: () => {
         const view = editorViewRef.current
         if (view) openSearchPanel(view)
@@ -325,7 +326,7 @@ function buildCommands(handlers: {
       id: 'search.find-replace',
       label: 'Find and Replace',
       category: 'Search',
-      shortcut: `${mod()}+H`,
+      shortcut: shortcutFor('search.find-replace'),
       execute: () => {
         const view = editorViewRef.current
         if (view) {
@@ -388,14 +389,14 @@ function buildCommands(handlers: {
       id: 'view.toggle-focus',
       label: 'Toggle Focus Mode',
       category: 'View',
-      shortcut: `${mod()}+Shift+F`,
+      shortcut: shortcutFor('view.focus-mode'),
       execute: () => useFocusModeStore.getState().toggle(),
     },
     {
       id: 'view.toggle-typewriter',
       label: 'Toggle Typewriter Mode',
       category: 'View',
-      shortcut: `${mod()}+Alt+T`,
+      shortcut: shortcutFor('view.typewriter'),
       execute: () => useFocusModeStore.getState().toggleTypewriter(),
     },
     {
@@ -408,7 +409,7 @@ function buildCommands(handlers: {
       id: 'view.toggle-stats',
       label: 'Toggle Writing Statistics',
       category: 'View',
-      shortcut: `${mod()}+Shift+S`,
+      shortcut: shortcutFor('view.stats'),
       execute: () => useStatsStore.getState().toggle(),
     },
 
@@ -417,21 +418,21 @@ function buildCommands(handlers: {
       id: 'view.layout-editor',
       label: 'Editor Only',
       category: 'Layout',
-      shortcut: `${mod()}+Shift+1`,
+      shortcut: shortcutFor('layout.editor'),
       execute: () => useLayoutStore.getState().setMode('editor'),
     },
     {
       id: 'view.layout-split',
       label: 'Split View',
       category: 'Layout',
-      shortcut: `${mod()}+Shift+2`,
+      shortcut: shortcutFor('layout.split'),
       execute: () => useLayoutStore.getState().setMode('split'),
     },
     {
       id: 'view.layout-preview',
       label: 'Preview Only',
       category: 'Layout',
-      shortcut: `${mod()}+Shift+3`,
+      shortcut: shortcutFor('layout.preview'),
       execute: () => useLayoutStore.getState().setMode('preview'),
     },
 
@@ -476,6 +477,15 @@ function buildCommands(handlers: {
       label: 'Reset Preview CSS',
       category: 'View',
       execute: () => usePreviewStyleStore.getState().reset(),
+    },
+
+    // Keyboard shortcuts
+    {
+      id: 'view.keyboard-shortcuts',
+      label: 'Show Keyboard Shortcuts',
+      category: 'View',
+      shortcut: shortcutFor('view.shortcuts'),
+      execute: () => useShortcutsStore.getState().setOpen(true),
     },
   ]
 }

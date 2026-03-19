@@ -21,6 +21,7 @@ import { CommandPalette } from './components/CommandPalette'
 import { FocusModeOverlay } from './components/FocusModeOverlay'
 import { InstallBanner } from './components/InstallBanner'
 import { PreviewCSSEditorDialog } from './components/PreviewCSSEditor'
+import { KeyboardShortcutsDialog } from './components/KeyboardShortcutsDialog'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
@@ -39,6 +40,7 @@ import { useLayoutStore, type LayoutMode } from './store/layoutStore'
 import { usePWAStore } from './store/pwaStore'
 import { useAutosaveStore } from './store/autosaveStore'
 import { useStatsStore } from './store/statsStore'
+import { useShortcutsStore } from './store/shortcutsStore'
 import { StatsPanel } from './components/StatsPanel'
 import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
@@ -469,6 +471,18 @@ function App() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  // Keyboard shortcuts panel: Ctrl/Cmd+/
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === '/') {
+        e.preventDefault()
+        useShortcutsStore.getState().toggle()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   // Initialize PWA store (online/offline + install prompt listeners)
   useEffect(() => usePWAStore.getState()._init(), [])
 
@@ -488,6 +502,7 @@ function App() {
         <FocusModeOverlay />
         <CommandPalette onOpen={handleOpen} onSave={handleSave} />
         <SettingsDialog />
+        <KeyboardShortcutsDialog />
         <PreviewCSSEditorDialog />
         <ToastContainer />
       </div>
@@ -565,6 +580,7 @@ function App() {
       <StatusBar />
       <CommandPalette onOpen={handleOpen} onSave={handleSave} />
       <SettingsDialog />
+      <KeyboardShortcutsDialog />
       <PreviewCSSEditorDialog />
       <ToastContainer />
     </div>
