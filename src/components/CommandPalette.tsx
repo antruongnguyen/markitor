@@ -12,6 +12,9 @@ import { useLayoutStore } from '../store/layoutStore'
 import { usePWAStore } from '../store/pwaStore'
 import { useTemplateGalleryStore } from '../store/templateGalleryStore'
 import { useEmojiPickerStore } from '../store/emojiPickerStore'
+import { useAutosaveStore } from '../store/autosaveStore'
+import { useStatsStore } from '../store/statsStore'
+import { usePreviewStyleStore } from '../store/previewStyleStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { exportHTML, exportPDF } from '../utils/exportDocument'
 import {
@@ -297,6 +300,13 @@ function buildCommands(handlers: {
       category: 'View',
       execute: () => useAIStore.getState().setSettingsOpen(true),
     },
+    {
+      id: 'view.toggle-stats',
+      label: 'Toggle Writing Statistics',
+      category: 'View',
+      shortcut: `${mod()}+Shift+S`,
+      execute: () => useStatsStore.getState().toggle(),
+    },
 
     // Layout commands
     {
@@ -332,6 +342,43 @@ function buildCommands(handlers: {
           },
         ]
       : []),
+
+    // Auto-save commands
+    {
+      id: 'autosave.toggle',
+      label: useAutosaveStore.getState().enabled ? 'Disable Auto-Save' : 'Enable Auto-Save',
+      category: 'File',
+      execute: () => {
+        const store = useAutosaveStore.getState()
+        store.setEnabled(!store.enabled)
+      },
+    },
+    {
+      id: 'autosave.recover',
+      label: 'Recover Drafts',
+      category: 'File',
+      execute: () => useAutosaveStore.getState().checkForDrafts(),
+    },
+    {
+      id: 'autosave.save-now',
+      label: 'Save Draft Now',
+      category: 'File',
+      execute: () => useAutosaveStore.getState().saveNow(),
+    },
+
+    // Preview style commands
+    {
+      id: 'view.preview-css',
+      label: 'Edit Preview CSS',
+      category: 'View',
+      execute: () => usePreviewStyleStore.getState().setEditorOpen(true),
+    },
+    {
+      id: 'view.reset-preview-css',
+      label: 'Reset Preview CSS',
+      category: 'View',
+      execute: () => usePreviewStyleStore.getState().reset(),
+    },
   ]
 }
 

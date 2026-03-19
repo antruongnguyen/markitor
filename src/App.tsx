@@ -14,11 +14,14 @@ import {
   SquarePen,
   Columns2,
   Eye,
+  BarChart3,
 } from 'lucide-react'
 import { AIPanel } from './components/AIPanel'
 import { CommandPalette } from './components/CommandPalette'
+import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { FocusModeOverlay } from './components/FocusModeOverlay'
 import { InstallBanner } from './components/InstallBanner'
+import { PreviewCSSEditorDialog } from './components/PreviewCSSEditor'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SplitPane } from './components/SplitPane'
 import { StatusBar } from './components/StatusBar'
@@ -35,6 +38,9 @@ import { useTocStore } from './store/tocStore'
 import { useScrollSyncStore } from './store/scrollSyncStore'
 import { useLayoutStore, type LayoutMode } from './store/layoutStore'
 import { usePWAStore } from './store/pwaStore'
+import { useAutosaveStore } from './store/autosaveStore'
+import { useStatsStore } from './store/statsStore'
+import { StatsPanel } from './components/StatsPanel'
 import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
 
@@ -107,6 +113,26 @@ function AIToggle() {
       title={aiOpen ? 'Hide AI assistant' : 'Show AI assistant'}
     >
       <Sparkles size={16} strokeWidth={1.5} />
+    </button>
+  )
+}
+
+function StatsToggle() {
+  const statsOpen = useStatsStore((s) => s.open)
+  const toggle = useStatsStore((s) => s.toggle)
+
+  return (
+    <button
+      type="button"
+      className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150 ${
+        statsOpen
+          ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+      }`}
+      onClick={toggle}
+      title={statsOpen ? 'Hide writing statistics (Ctrl+Shift+S)' : 'Show writing statistics (Ctrl+Shift+S)'}
+    >
+      <BarChart3 size={16} strokeWidth={1.5} />
     </button>
   )
 }
@@ -298,6 +324,7 @@ function App() {
   const markSaved = useEditorStore((s) => s.markSaved)
   const tocOpen = useTocStore((s) => s.open)
   const aiOpen = useAIStore((s) => s.open)
+  const statsOpen = useStatsStore((s) => s.open)
   const focusMode = useFocusModeStore((s) => s.enabled)
   const exitFocus = useFocusModeStore((s) => s.exit)
   const toggleFocus = useFocusModeStore((s) => s.toggle)
@@ -348,6 +375,10 @@ function App() {
       fileHandle: result.fileHandle,
     })
     markSaved()
+
+    // Clear auto-save draft for the current tab after explicit save
+    const tabId = useTabStore.getState().activeTabId
+    useAutosaveStore.getState().clearDraftForTab(tabId)
   }, [markSaved, setFileMeta])
 
   useEffect(() => {
@@ -427,8 +458,23 @@ function App() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  // Writing statistics shortcut: Ctrl/Cmd+Shift+S
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        useStatsStore.getState().toggle()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   // Initialize PWA store (online/offline + install prompt listeners)
   useEffect(() => usePWAStore.getState()._init(), [])
+
+  // Initialize auto-save (timer, debounced save, beforeunload)
+  useEffect(() => useAutosaveStore.getState()._init(), [])
 
   if (focusMode) {
     return (
@@ -443,6 +489,8 @@ function App() {
         <FocusModeOverlay />
         <CommandPalette onOpen={handleOpen} onSave={handleSave} />
         <SettingsDialog />
+        <PreviewCSSEditorDialog />
+        <DraftRecoveryDialog />
         <ToastContainer />
       </div>
     )
@@ -471,6 +519,7 @@ function App() {
           <div className="mx-0.5 h-4 w-px bg-gray-200 dark:bg-gray-700" />
           <FocusModeToggle />
           <AIToggle />
+          <StatsToggle />
           <ScrollSyncToggle />
           <ThemeToggle />
           <div className="mx-0.5 h-4 w-px bg-gray-200 dark:bg-gray-700" />
@@ -512,11 +561,14 @@ function App() {
           />
         </div>
         {aiOpen && <AIPanel />}
+        {statsOpen && <StatsPanel />}
       </div>
 
       <StatusBar />
       <CommandPalette onOpen={handleOpen} onSave={handleSave} />
       <SettingsDialog />
+      <PreviewCSSEditorDialog />
+      <DraftRecoveryDialog />
       <ToastContainer />
     </div>
   )

@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { useThemeStore } from '../store/themeStore'
 import { useLayoutStore } from '../store/layoutStore'
+import { usePreviewStyleStore } from '../store/previewStyleStore'
 import { useScrollSync } from '../hooks/useScrollSync'
 import { md } from '../utils/markdown'
+import { injectPreviewCSS } from '../utils/previewStyles'
 import { initMermaid, updateMermaidTheme, renderMermaidDiagram } from '../utils/mermaidRenderer'
 
 // Initialize mermaid with the current theme on module load
@@ -14,11 +16,17 @@ export function Preview() {
   const resolved = useThemeStore((s) => s.resolved)
   const editorTheme = useThemeStore((s) => s.editorTheme)
   const layoutMode = useLayoutStore((s) => s.mode)
+  const customCSS = usePreviewStyleStore((s) => s.customCSS)
   const html = useMemo(() => md.render(content), [content])
   const containerRef = useRef<HTMLDivElement>(null)
   const articleRef = useRef<HTMLElement>(null)
 
   useScrollSync(containerRef)
+
+  // Inject custom preview CSS
+  useEffect(() => {
+    injectPreviewCSS(customCSS)
+  }, [customCSS])
 
   // Update mermaid theme when resolved theme changes
   useEffect(() => {

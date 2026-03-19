@@ -21,6 +21,7 @@ import {
   Table,
   AlignLeft,
   Smile,
+  BarChart3,
 } from 'lucide-react'
 import {
   toggleBold,
@@ -41,6 +42,7 @@ import {
 import { useToastStore } from '../store/toastStore'
 import { useEditorStore } from '../store/editorStore'
 import { useEmojiPickerStore } from '../store/emojiPickerStore'
+import { useStatsStore } from '../store/statsStore'
 import { TableGridPicker } from './TableGridPicker'
 import { ThemePicker } from './ThemePicker'
 import { EmojiPicker } from './EmojiPicker'
@@ -84,6 +86,8 @@ export function Toolbar({ getView }: ToolbarProps) {
   const showEmojiPicker = useEmojiPickerStore((s) => s.open)
   const toggleEmojiPicker = useEmojiPickerStore((s) => s.toggle)
   const closeEmojiPicker = useEmojiPickerStore((s) => s.setOpen)
+  const statsOpen = useStatsStore((s) => s.open)
+  const toggleStats = useStatsStore((s) => s.toggle)
   const tableButtonRef = useRef<HTMLButtonElement>(null)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
   const showToast = useToastStore((s) => s.show)
@@ -201,6 +205,25 @@ export function Toolbar({ getView }: ToolbarProps) {
           onClose={() => closeEmojiPicker(false)}
         />
       )}
+
+      <div className="mx-1 h-4 w-px bg-gray-200 dark:bg-gray-700" />
+
+      {/* Writing statistics toggle */}
+      <button
+        type="button"
+        title="Writing statistics (Ctrl+Shift+S)"
+        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+          statsOpen
+            ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+        }`}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          toggleStats()
+        }}
+      >
+        <BarChart3 size={17} strokeWidth={1.5} />
+      </button>
 
       {/* Spacer pushes theme picker to the right */}
       <div className="flex-1" />

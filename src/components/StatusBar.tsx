@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
-import { WifiOff } from 'lucide-react'
+import { WifiOff, CloudOff, Check, Loader2 } from 'lucide-react'
 import { useEditorStore } from '../store/editorStore'
 import { useLayoutStore } from '../store/layoutStore'
 import { usePWAStore } from '../store/pwaStore'
+import { useAutosaveStore } from '../store/autosaveStore'
 
 const layoutModeLabels = {
   editor: 'Editor',
@@ -25,6 +26,8 @@ export function StatusBar() {
   const layoutMode = useLayoutStore((s) => s.mode)
   const cycleMode = useLayoutStore((s) => s.cycleMode)
   const online = usePWAStore((s) => s.online)
+  const autosaveStatus = useAutosaveStore((s) => s.status)
+  const autosaveEnabled = useAutosaveStore((s) => s.enabled)
 
   const { words, characters, lines, readingTime } = useMemo(() => computeStats(content), [content])
 
@@ -40,6 +43,33 @@ export function StatusBar() {
         <span>{readingTime} min read</span>
       </div>
       <div className="flex items-center gap-2.5">
+        {autosaveEnabled && autosaveStatus === 'saving' && (
+          <>
+            <span className="flex items-center gap-1 text-blue-500 dark:text-blue-400" title="Auto-saving...">
+              <Loader2 size={11} strokeWidth={1.5} className="animate-spin" />
+              Saving
+            </span>
+            <span className="text-gray-300 dark:text-gray-600">·</span>
+          </>
+        )}
+        {autosaveEnabled && autosaveStatus === 'saved' && (
+          <>
+            <span className="flex items-center gap-1 text-green-600 dark:text-green-400" title="Auto-saved">
+              <Check size={11} strokeWidth={2} />
+              Saved
+            </span>
+            <span className="text-gray-300 dark:text-gray-600">·</span>
+          </>
+        )}
+        {!autosaveEnabled && (
+          <>
+            <span className="flex items-center gap-1 text-gray-400 dark:text-gray-500" title="Auto-save disabled">
+              <CloudOff size={11} strokeWidth={1.5} />
+              No auto-save
+            </span>
+            <span className="text-gray-300 dark:text-gray-600">·</span>
+          </>
+        )}
         {!online && (
           <>
             <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400" title="You are offline — AI features unavailable">

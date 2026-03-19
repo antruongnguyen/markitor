@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { useEditorStore } from './editorStore'
 import { editorViewRef } from '../utils/editorViewRef'
+import { useAutosaveStore } from './autosaveStore'
 
 export type Tab = {
   id: string
@@ -166,6 +167,9 @@ export const useTabStore = create<TabStore>((set, get) => ({
       loadTabIntoEditor(newTab)
     }
     _switching = false
+
+    // Trigger auto-save on tab switch
+    useAutosaveStore.getState().saveNow()
   },
 
   getActiveTab: () => {
