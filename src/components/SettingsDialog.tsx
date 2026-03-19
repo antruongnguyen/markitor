@@ -102,7 +102,7 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 z-50 m-auto w-[460px] rounded-xl border border-gray-200/80 bg-white p-0 shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm dark:border-gray-700/60 dark:bg-gray-800"
+      className="fixed inset-0 z-50 m-auto w-115 rounded-xl border border-gray-200/80 bg-white p-0 shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm dark:border-gray-700/60 dark:bg-gray-800"
       onClose={onClose}
     >
       {/* Header */}

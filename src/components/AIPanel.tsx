@@ -286,7 +286,7 @@ export function AIPanel() {
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize AI panel"
-        className="group relative h-full w-1 cursor-col-resize flex-shrink-0 bg-gray-200 transition-colors duration-150 hover:bg-blue-500 dark:bg-gray-700 dark:hover:bg-blue-400"
+        className="group relative h-full w-1 cursor-col-resize shrink-0 bg-gray-200 transition-colors duration-150 hover:bg-blue-500 dark:bg-gray-700 dark:hover:bg-blue-400"
         onMouseDown={onResizeMouseDown}
       >
         <div className="absolute inset-y-0 -left-0.5 -right-0.5" />
@@ -335,7 +335,7 @@ export function AIPanel() {
             <div key={cat.id}>
               <button
                 type="button"
-                className="flex w-full items-center justify-between px-3 py-1.5 text-left transition-colors duration-150 hover:bg-gray-100/50 dark:hover:bg-white/[0.03]"
+                className="flex w-full items-center justify-between px-3 py-1.5 text-left transition-colors duration-150 hover:bg-gray-100/50 dark:hover:bg-white/3"
                 onClick={() => toggleCategory(cat.id)}
               >
                 <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">
@@ -387,7 +387,7 @@ export function AIPanel() {
                   : 'bg-white text-gray-800 shadow-sm ring-1 ring-gray-200/50 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-700/50'
               }`}
             >
-              <pre className="whitespace-pre-wrap break-words font-sans">{msg.content}</pre>
+              <pre className="whitespace-pre-wrap wrap-break-word font-sans">{msg.content}</pre>
             </div>
             {msg.role === 'assistant' && !msg.content.startsWith('Error:') && (
               <div className="flex gap-1">
@@ -415,7 +415,7 @@ export function AIPanel() {
         {loading && streamingContent && (
           <div className="flex flex-col items-start gap-1">
             <div className="max-w-full rounded-lg bg-white px-3 py-2 text-xs leading-relaxed text-gray-800 shadow-sm ring-1 ring-gray-200/50 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-700/50">
-              <pre className="whitespace-pre-wrap break-words font-sans">{streamingContent}</pre>
+              <pre className="whitespace-pre-wrap wrap-break-word font-sans">{streamingContent}</pre>
             </div>
           </div>
         )}

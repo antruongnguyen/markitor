@@ -104,7 +104,7 @@ function SavedDocumentsInner() {
   )
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close} role="dialog" aria-modal="true" aria-label="Saved documents">
+    <div className="fixed inset-0 z-100 flex items-start justify-center pt-[15vh]" onClick={close} role="dialog" aria-modal="true" aria-label="Saved documents">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: 'fadeIn 0.15s ease-out' }} />
       <div
         ref={dialogRef}
@@ -134,7 +134,7 @@ function SavedDocumentsInner() {
         </div>
 
         {/* Body */}
-        <div className="custom-scrollbar max-h-[360px] overflow-y-auto">
+        <div className="custom-scrollbar max-h-90 overflow-y-auto">
           {loading ? (
             <div className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
               Loading...
@@ -148,7 +148,7 @@ function SavedDocumentsInner() {
               {drafts.map((draft) => (
                 <div
                   key={draft.tabId}
-                  className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.03]"
+                  className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-white/3"
                 >
                   <button
                     type="button"

@@ -157,14 +157,14 @@ function HeadingDropdown({ getView }: { getView: () => EditorView | null }) {
         <ChevronDown size={12} strokeWidth={1.5} />
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] overflow-hidden rounded-lg border border-gray-200/80 bg-white py-1 shadow-lg dark:border-gray-700/60 dark:bg-gray-800">
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-45 overflow-hidden rounded-lg border border-gray-200/80 bg-white py-1 shadow-lg dark:border-gray-700/60 dark:bg-gray-800">
           {headingItems.map((item) => {
             const Icon = item.icon
             return (
               <button
                 key={item.level}
                 type="button"
-                className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+                className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/3"
                 onMouseDown={(e) => {
                   e.preventDefault()
                   const view = getView()
@@ -365,7 +365,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         title={tooltipWithShortcut('Find & Replace', 'search.find')}
         aria-label="Find & Replace"
         aria-pressed={searchOpen}
-        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+        className={`flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           searchOpen
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
             : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
@@ -390,7 +390,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         title={tooltipWithShortcut('Writing statistics', 'view.stats')}
         aria-label="Writing statistics"
         aria-pressed={statsOpen}
-        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+        className={`flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           statsOpen
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
             : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
@@ -409,7 +409,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         title={tooltipWithShortcut('Typewriter mode', 'view.typewriter')}
         aria-label="Typewriter mode"
         aria-pressed={typewriterMode}
-        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+        className={`flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           typewriterMode
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
             : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
@@ -428,7 +428,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         title="Toggle markdown linting"
         aria-label="Toggle markdown linting"
         aria-pressed={lintEnabled}
-        className={`flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+        className={`flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           lintEnabled
             ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
             : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
@@ -447,7 +447,7 @@ export function Toolbar({ getView }: ToolbarProps) {
         title={tooltipWithShortcut('Toggle Frontmatter', 'view.frontmatter')}
         aria-label="Toggle Frontmatter"
         aria-pressed={frontmatterExpanded}
-        className={`relative flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+        className={`relative flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
           frontmatterExpanded
             ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
             : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'

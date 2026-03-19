@@ -34,7 +34,7 @@ function TabItem({
       type="button"
       draggable
       aria-current={isActive ? 'page' : undefined}
-      className={`group relative flex h-full max-w-[180px] items-center gap-1.5 px-3 text-xs transition-all duration-150 ${
+      className={`group relative flex h-full max-w-45 items-center gap-1.5 px-3 text-xs transition-all duration-150 ${
         isActive
           ? 'bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100'
           : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-300'

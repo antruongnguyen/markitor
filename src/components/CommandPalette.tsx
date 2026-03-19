@@ -645,7 +645,7 @@ function CommandPaletteInner({ onOpen, onSave, onSaveDisk }: CommandPaletteInner
   }, [selectedIndex])
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={close} role="dialog" aria-modal="true" aria-label="Command palette">
+    <div className="fixed inset-0 z-100 flex items-start justify-center pt-[15vh]" onClick={close} role="dialog" aria-modal="true" aria-label="Command palette">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: 'fadeIn 0.15s ease-out' }} />
       <div
         className="relative w-full max-w-lg overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-2xl dark:border-gray-700/60 dark:bg-gray-800"
@@ -668,7 +668,7 @@ function CommandPaletteInner({ onOpen, onSave, onSaveDisk }: CommandPaletteInner
         </div>
 
         {/* Command list */}
-        <div ref={listRef} className="custom-scrollbar max-h-[320px] overflow-y-auto py-1">
+        <div ref={listRef} className="custom-scrollbar max-h-80 overflow-y-auto py-1">
           {filtered.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
               No commands found
@@ -681,7 +681,7 @@ function CommandPaletteInner({ onOpen, onSave, onSaveDisk }: CommandPaletteInner
                 className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors duration-100 ${
                   i === selectedIndex
                     ? 'bg-blue-50 text-blue-900 dark:bg-blue-500/10 dark:text-blue-100'
-                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.03]'
+                    : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/3'
                 }`}
                 onClick={() => execute(cmd)}
                 onMouseEnter={() => setSelectedIndex(i)}

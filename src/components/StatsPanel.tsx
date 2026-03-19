@@ -100,7 +100,7 @@ export function StatsPanel() {
 
   return (
     <aside
-      className="flex h-full w-[280px] shrink-0 flex-col overflow-hidden border-l border-gray-200/80 bg-gray-50/80 transition-colors duration-200 dark:border-gray-700/60 dark:bg-gray-800/80"
+      className="flex h-full w-70 shrink-0 flex-col overflow-hidden border-l border-gray-200/80 bg-gray-50/80 transition-colors duration-200 dark:border-gray-700/60 dark:bg-gray-800/80"
       style={{ animation: 'slideInRight 0.2s ease-out' }}
     >
       {/* Header */}

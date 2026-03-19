@@ -16,7 +16,7 @@ import {
 
 function KeyBadge({ children }: { children: string }) {
   return (
-    <kbd className="inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-[4px] border border-gray-300 bg-gradient-to-b from-gray-50 to-gray-100 px-1.5 text-[11px] font-medium leading-none text-gray-600 shadow-[0_1px_0_1px_rgba(0,0,0,0.04)] dark:border-gray-600 dark:from-gray-700 dark:to-gray-750 dark:text-gray-300 dark:shadow-[0_1px_0_1px_rgba(0,0,0,0.2)]">
+    <kbd className="inline-flex h-5.5 min-w-5.5 items-center justify-center rounded-sm border border-gray-300 bg-linear-to-b from-gray-50 to-gray-100 px-1.5 text-[11px] font-medium leading-none text-gray-600 shadow-[0_1px_0_1px_rgba(0,0,0,0.04)] dark:border-gray-600 dark:from-gray-700 dark:to-gray-750 dark:text-gray-300 dark:shadow-[0_1px_0_1px_rgba(0,0,0,0.2)]">
       {children}
     </kbd>
   )
@@ -25,7 +25,7 @@ function KeyBadge({ children }: { children: string }) {
 export function KeyCombo({ keys }: { keys: string }) {
   const parts = toDisplayParts(keys)
   return (
-    <span className="inline-flex items-center gap-[3px]">
+    <span className="inline-flex items-center gap-0.75">
       {parts.map((part, i) => (
         <KeyBadge key={`${part}-${i}`}>{part}</KeyBadge>
       ))}
@@ -59,7 +59,7 @@ function ShortcutRow({
       className={`group flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
         isRecording
           ? 'bg-blue-50 ring-1 ring-blue-200 dark:bg-blue-500/10 dark:ring-blue-500/30'
-          : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]'
+          : 'hover:bg-gray-50 dark:hover:bg-white/3'
       }`}
     >
       {/* Name & description */}
@@ -280,7 +280,7 @@ function KeyboardShortcutsDialogInner({ onClose }: { onClose: () => void }) {
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 z-50 m-auto w-[560px] max-h-[80vh] rounded-xl border border-gray-200/80 bg-white p-0 shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm dark:border-gray-700/60 dark:bg-gray-800"
+      className="fixed inset-0 z-50 m-auto w-140 max-h-[80vh] rounded-xl border border-gray-200/80 bg-white p-0 shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm dark:border-gray-700/60 dark:bg-gray-800"
       onClose={onClose}
       onKeyDown={handleDialogKeyDown}
     >

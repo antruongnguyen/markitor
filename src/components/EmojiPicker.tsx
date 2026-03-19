@@ -124,7 +124,7 @@ export function EmojiPicker({ anchorRef, onSelect, onClose }: EmojiPickerProps) 
   return createPortal(
     <div
       ref={ref}
-      className="fixed z-50 flex w-[352px] flex-col overflow-hidden rounded-lg border border-gray-200/80 bg-white shadow-xl dark:border-gray-700/60 dark:bg-gray-800"
+      className="fixed z-50 flex w-88 flex-col overflow-hidden rounded-lg border border-gray-200/80 bg-white shadow-xl dark:border-gray-700/60 dark:bg-gray-800"
       style={{ top: `${pos.top}px`, left: `${pos.left}px`, height: '400px' }}
     >
       {/* Search */}

@@ -70,7 +70,7 @@ export function TemplateGallery({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh]"
+      className="fixed inset-0 z-100 flex items-start justify-center pt-[12vh]"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -101,7 +101,7 @@ export function TemplateGallery({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Template grid */}
-        <div className="custom-scrollbar grid max-h-[420px] grid-cols-2 gap-3 overflow-y-auto p-4">
+        <div className="custom-scrollbar grid max-h-105 grid-cols-2 gap-3 overflow-y-auto p-4">
           {templates.map((t) => (
             <TemplateCard key={t.id} template={t} onSelect={handleSelect} />
           ))}

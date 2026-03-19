@@ -40,7 +40,7 @@ function TagInput({
 
   return (
     <div
-      className="flex min-h-[30px] flex-wrap items-center gap-1 rounded border border-gray-200/80 bg-white px-1.5 py-1 dark:border-gray-600/60 dark:bg-gray-700/50"
+      className="flex min-h-7.5 flex-wrap items-center gap-1 rounded border border-gray-200/80 bg-white px-1.5 py-1 dark:border-gray-600/60 dark:bg-gray-700/50"
       onClick={() => inputRef.current?.focus()}
     >
       {tags.map((tag) => (
@@ -75,7 +75,7 @@ function TagInput({
         }}
         onBlur={addTag}
         placeholder={tags.length === 0 ? 'Add tags...' : ''}
-        className="min-w-[60px] flex-1 bg-transparent py-0.5 text-xs text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-500"
+        className="min-w-15 flex-1 bg-transparent py-0.5 text-xs text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-gray-500"
       />
     </div>
   )
@@ -119,7 +119,7 @@ function FieldRow({
             type="number"
             value={field.value as number}
             onChange={(e) => onUpdate({ ...field, value: Number(e.target.value) })}
-            className="h-[30px] w-full rounded border border-gray-200/80 bg-white px-2 text-xs text-gray-900 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-100 dark:focus:border-blue-500"
+            className="h-7.5 w-full rounded border border-gray-200/80 bg-white px-2 text-xs text-gray-900 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-100 dark:focus:border-blue-500"
           />
         )
       case 'date':
@@ -128,7 +128,7 @@ function FieldRow({
             type="date"
             value={String(field.value || '')}
             onChange={(e) => onUpdate({ ...field, value: e.target.value })}
-            className="h-[30px] w-full rounded border border-gray-200/80 bg-white px-2 text-xs text-gray-900 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-100 dark:focus:border-blue-500"
+            className="h-7.5 w-full rounded border border-gray-200/80 bg-white px-2 text-xs text-gray-900 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-100 dark:focus:border-blue-500"
           />
         )
       case 'array':
@@ -144,7 +144,7 @@ function FieldRow({
             type="text"
             value={String(field.value ?? '')}
             onChange={(e) => onUpdate({ ...field, value: e.target.value })}
-            className="h-[30px] w-full rounded border border-gray-200/80 bg-white px-2 text-xs text-gray-900 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-100 dark:focus:border-blue-500"
+            className="h-7.5 w-full rounded border border-gray-200/80 bg-white px-2 text-xs text-gray-900 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-100 dark:focus:border-blue-500"
           />
         )
     }
@@ -157,13 +157,13 @@ function FieldRow({
         value={field.key}
         onChange={(e) => onUpdate({ ...field, key: e.target.value })}
         placeholder="key"
-        className="h-[30px] w-28 shrink-0 rounded border border-gray-200/80 bg-white px-2 text-xs font-medium text-gray-700 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-300 dark:focus:border-blue-500"
+        className="h-7.5 w-28 shrink-0 rounded border border-gray-200/80 bg-white px-2 text-xs font-medium text-gray-700 outline-none focus:border-blue-400 dark:border-gray-600/60 dark:bg-gray-700/50 dark:text-gray-300 dark:focus:border-blue-500"
       />
       <div className="flex-1">{renderInput()}</div>
       <button
         type="button"
         onClick={onRemove}
-        className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+        className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:hover:bg-red-500/10 dark:hover:text-red-400"
         title="Remove field"
         aria-label="Remove field"
       >
