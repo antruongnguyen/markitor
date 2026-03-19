@@ -254,12 +254,6 @@ export function Editor({ onOpen, onSave, onSaveDisk, focusMode = false }: Editor
       {!focusMode && <FrontmatterEditor />}
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <div ref={containerRef} className="h-full w-full" />
-        {typewriterMode && (
-          <div
-            className="pointer-events-none absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-violet-400/15 dark:bg-violet-400/10"
-            aria-hidden="true"
-          />
-        )}
         {!focusMode && <TableToolbar getView={getView} />}
       </div>
     </div>
