@@ -90,7 +90,7 @@ function AboutDialogInner({ onClose }: { onClose: () => void }) {
         <InfoRow
           icon={<Mail size={14} strokeWidth={1.5} />}
           label="Author"
-          value={`${APP_INFO.author} <${APP_INFO.email}>`}
+          value={`${APP_INFO.author}`}
           href={`mailto:${APP_INFO.email}`}
         />
         <InfoRow
