@@ -4,6 +4,7 @@ import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLi
 import { markdown } from '@codemirror/lang-markdown'
 import { bracketMatching, indentOnInput, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { search, searchKeymap, highlightSelectionMatches, openSearchPanel } from '@codemirror/search'
+import { history, historyKeymap } from '@codemirror/commands'
 import { markdownAutocomplete } from '../utils/autocomplete'
 import { imageDropHandler } from '../utils/imageHandler'
 import { tableTabNavigation } from '../utils/tableTabNavigation'
@@ -95,6 +96,7 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
         lineNumbers(),
         highlightActiveLine(),
         highlightActiveLineGutter(),
+        history(),
         bracketMatching(),
         indentOnInput(),
         markdown(),
@@ -109,6 +111,7 @@ export function Editor({ onOpen, onSave, focusMode = false }: EditorProps) {
               return true
             },
           },
+          ...historyKeymap,
           ...searchKeymap,
         ]),
         tableTabNavigation(),
