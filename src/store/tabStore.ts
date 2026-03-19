@@ -23,6 +23,7 @@ type TabStore = {
   }) => string
   closeTab: (tabId: string) => void
   switchTab: (tabId: string) => void
+  reorderTabs: (fromIndex: number, toIndex: number) => void
   getActiveTab: () => Tab | undefined
   findTabByFileHandle: (handle: FileSystemFileHandle) => Tab | undefined
 }
@@ -170,6 +171,16 @@ export const useTabStore = create<TabStore>((set, get) => ({
 
     // Trigger auto-save on tab switch
     useAutosaveStore.getState().saveNow()
+  },
+
+  reorderTabs: (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) return
+    set((state) => {
+      const tabs = [...state.tabs]
+      const [moved] = tabs.splice(fromIndex, 1)
+      tabs.splice(toIndex, 0, moved)
+      return { tabs }
+    })
   },
 
   getActiveTab: () => {
