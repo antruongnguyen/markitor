@@ -18,7 +18,6 @@ import {
 } from 'lucide-react'
 import { AIPanel } from './components/AIPanel'
 import { CommandPalette } from './components/CommandPalette'
-import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { FocusModeOverlay } from './components/FocusModeOverlay'
 import { InstallBanner } from './components/InstallBanner'
 import { PreviewCSSEditorDialog } from './components/PreviewCSSEditor'
@@ -490,7 +489,6 @@ function App() {
         <CommandPalette onOpen={handleOpen} onSave={handleSave} />
         <SettingsDialog />
         <PreviewCSSEditorDialog />
-        <DraftRecoveryDialog />
         <ToastContainer />
       </div>
     )
@@ -568,7 +566,6 @@ function App() {
       <CommandPalette onOpen={handleOpen} onSave={handleSave} />
       <SettingsDialog />
       <PreviewCSSEditorDialog />
-      <DraftRecoveryDialog />
       <ToastContainer />
     </div>
   )

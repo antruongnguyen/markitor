@@ -1,6 +1,7 @@
 const DB_NAME = 'markitor-autosave'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'drafts'
+const META_STORE = 'meta'
 const EXPIRY_DAYS = 7
 
 export type Draft = {
@@ -22,6 +23,9 @@ function openDB(): Promise<IDBDatabase> {
       const db = req.result
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'tabId' })
+      }
+      if (!db.objectStoreNames.contains(META_STORE)) {
+        db.createObjectStore(META_STORE)
       }
     }
     req.onsuccess = () => resolve(req.result)
@@ -97,5 +101,27 @@ export async function expireOldDrafts(): Promise<void> {
     }
     transaction.oncomplete = () => resolve()
     transaction.onerror = () => reject(transaction.error)
+  })
+}
+
+export async function saveActiveTabId(tabId: string): Promise<void> {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(META_STORE, 'readwrite')
+    const store = transaction.objectStore(META_STORE)
+    store.put(tabId, 'activeTabId')
+    transaction.oncomplete = () => resolve()
+    transaction.onerror = () => reject(transaction.error)
+  })
+}
+
+export async function loadActiveTabId(): Promise<string | null> {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(META_STORE, 'readonly')
+    const store = transaction.objectStore(META_STORE)
+    const req = store.get('activeTabId')
+    req.onsuccess = () => resolve((req.result as string) ?? null)
+    req.onerror = () => reject(req.error)
   })
 }

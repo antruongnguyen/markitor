@@ -6,8 +6,9 @@ import {
   saveDrafts,
   loadAllDrafts,
   deleteDraft,
-  clearAllDrafts,
   expireOldDrafts,
+  saveActiveTabId,
+  loadActiveTabId,
   type Draft,
 } from '../utils/autosave'
 
@@ -18,16 +19,11 @@ type AutosaveStore = {
   intervalSec: number
   status: AutosaveStatus
   lastSavedAt: number | null
-  pendingDrafts: Draft[] | null
-  showRecovery: boolean
 
   setEnabled: (v: boolean) => void
   setInterval: (sec: number) => void
 
   saveNow: () => Promise<void>
-  checkForDrafts: () => Promise<void>
-  recoverDrafts: (tabIds: string[]) => void
-  discardDrafts: () => Promise<void>
   clearDraftForTab: (tabId: string) => Promise<void>
 
   _init: () => (() => void)
@@ -53,13 +49,82 @@ function snapshotAllTabs(): Draft[] {
     })
 }
 
+async function restoreTabs(): Promise<void> {
+  try {
+    await expireOldDrafts()
+    const [drafts, savedActiveTabId] = await Promise.all([
+      loadAllDrafts(),
+      loadActiveTabId(),
+    ])
+    if (drafts.length === 0) return
+
+    const tabStore = useTabStore.getState()
+
+    // Replace the default empty tab with restored tabs
+    // First tab replaces the initial empty tab via editor store
+    const firstDraft = drafts[0]
+    const initialTab = tabStore.tabs[0]
+
+    // Load first draft into the existing tab
+    const es = useEditorStore.getState()
+    es.setContentFromFile(firstDraft.content)
+    es.setFileMeta({ fileName: firstDraft.fileName, fileHandle: null })
+
+    // Update the initial tab's stored state
+    useTabStore.setState((s) => ({
+      tabs: s.tabs.map((t) =>
+        t.id === initialTab.id
+          ? {
+              ...t,
+              content: firstDraft.content,
+              fileName: firstDraft.fileName,
+              cursorPos: firstDraft.cursorPos,
+              scrollTop: firstDraft.scrollTop,
+            }
+          : t,
+      ),
+    }))
+
+    // Restore cursor/scroll for first tab after CodeMirror processes content
+    requestAnimationFrame(() => {
+      const view = editorViewRef.current
+      if (!view) return
+      const pos = Math.min(firstDraft.cursorPos, view.state.doc.length)
+      view.dispatch({ selection: { anchor: pos, head: pos } })
+      view.scrollDOM.scrollTop = firstDraft.scrollTop
+    })
+
+    // Map old tabIds to new tabIds for active tab restoration
+    const tabIdMap = new Map<string, string>()
+    tabIdMap.set(firstDraft.tabId, initialTab.id)
+
+    // Add remaining drafts as new tabs (without switching to them)
+    for (let i = 1; i < drafts.length; i++) {
+      const draft = drafts[i]
+      const newId = tabStore.addTab({
+        fileName: draft.fileName,
+        content: draft.content,
+      })
+      tabIdMap.set(draft.tabId, newId)
+    }
+
+    // Switch to the previously active tab if it's not already active
+    if (savedActiveTabId) {
+      const mappedActiveId = tabIdMap.get(savedActiveTabId)
+      if (mappedActiveId && mappedActiveId !== initialTab.id) {
+        useTabStore.getState().switchTab(mappedActiveId)
+      }
+    }
+  } catch {
+    // IndexedDB unavailable — skip restore
+  }
+}
+
 export const useAutosaveStore = create<AutosaveStore>((set, get) => ({
   enabled: true,
   intervalSec: 30,
   status: 'idle',
   lastSavedAt: null,
-  pendingDrafts: null,
-  showRecovery: false,
 
   setEnabled: (v) => set({ enabled: v, status: v ? 'idle' : 'disabled' }),
   setInterval: (sec) => set({ intervalSec: Math.max(5, sec) }),
@@ -69,43 +134,15 @@ export const useAutosaveStore = create<AutosaveStore>((set, get) => ({
     set({ status: 'saving' })
     try {
       const drafts = snapshotAllTabs()
-      await saveDrafts(drafts)
+      const activeTabId = useTabStore.getState().activeTabId
+      await Promise.all([
+        saveDrafts(drafts),
+        saveActiveTabId(activeTabId),
+      ])
       set({ status: 'saved', lastSavedAt: Date.now() })
     } catch {
       set({ status: 'idle' })
     }
-  },
-
-  checkForDrafts: async () => {
-    try {
-      await expireOldDrafts()
-      const drafts = await loadAllDrafts()
-      if (drafts.length > 0) {
-        set({ pendingDrafts: drafts, showRecovery: true })
-      }
-    } catch {
-      // IndexedDB unavailable — skip
-    }
-  },
-
-  recoverDrafts: (tabIds) => {
-    const { pendingDrafts } = get()
-    if (!pendingDrafts) return
-    const toRecover = pendingDrafts.filter((d) => tabIds.includes(d.tabId))
-    const tabStore = useTabStore.getState()
-    for (const draft of toRecover) {
-      tabStore.addTab({
-        fileName: draft.fileName,
-        content: draft.content,
-      })
-    }
-    set({ pendingDrafts: null, showRecovery: false })
-    clearAllDrafts().catch(() => {})
-  },
-
-  discardDrafts: async () => {
-    set({ pendingDrafts: null, showRecovery: false })
-    await clearAllDrafts().catch(() => {})
   },
 
   clearDraftForTab: async (tabId) => {
@@ -113,10 +150,8 @@ export const useAutosaveStore = create<AutosaveStore>((set, get) => ({
   },
 
   _init: () => {
-    const state = get()
-
-    // Check for pending drafts on startup
-    state.checkForDrafts()
+    // Silently restore tabs from IndexedDB on startup
+    restoreTabs()
 
     // Periodic auto-save timer
     let timerId: ReturnType<typeof setInterval> | null = null
@@ -161,9 +196,9 @@ export const useAutosaveStore = create<AutosaveStore>((set, get) => ({
     const onBeforeUnload = () => {
       if (!get().enabled) return
       const drafts = snapshotAllTabs()
-      // Use synchronous-ish approach: navigator.sendBeacon isn't available for IndexedDB
-      // so we do a best-effort save
+      const activeTabId = useTabStore.getState().activeTabId
       saveDrafts(drafts).catch(() => {})
+      saveActiveTabId(activeTabId).catch(() => {})
     }
     window.addEventListener('beforeunload', onBeforeUnload)
 

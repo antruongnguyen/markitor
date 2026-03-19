@@ -450,12 +450,6 @@ function buildCommands(handlers: {
       },
     },
     {
-      id: 'autosave.recover',
-      label: 'Recover Drafts',
-      category: 'File',
-      execute: () => useAutosaveStore.getState().checkForDrafts(),
-    },
-    {
       id: 'autosave.save-now',
       label: 'Save Draft Now',
       category: 'File',
