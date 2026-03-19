@@ -19,8 +19,10 @@ import {
   Save,
   HardDrive,
   Archive,
+  Info,
 } from 'lucide-react'
 import { AIPanel } from './components/AIPanel'
+import { AboutDialog } from './components/AboutDialog'
 import { CommandPalette } from './components/CommandPalette'
 import { FocusModeOverlay } from './components/FocusModeOverlay'
 import { InstallBanner } from './components/InstallBanner'
@@ -49,6 +51,7 @@ import { useToastStore } from './store/toastStore'
 import { StatsPanel } from './components/StatsPanel'
 import { SavedDocumentsDialog } from './components/SavedDocumentsDialog'
 import { useSavedDocumentsStore } from './store/savedDocumentsStore'
+import { useAboutDialogStore } from './store/aboutDialogStore'
 import { exportHTML, exportPDF } from './utils/exportDocument'
 import { openFile, saveFile } from './utils/fileOps'
 
@@ -548,6 +551,7 @@ function App() {
         <SettingsDialog />
         <KeyboardShortcutsDialog />
         <PreviewCSSEditorDialog />
+        <AboutDialog />
         <ToastContainer />
       </div>
     )
@@ -618,6 +622,16 @@ function App() {
             <Save size={16} strokeWidth={1.5} />
           </button>
           <ExportMenu />
+          <div className="mx-0.5 h-4 w-px bg-gray-200 dark:bg-gray-700" />
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 transition-all duration-150 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
+            onClick={() => useAboutDialogStore.getState().toggle()}
+            title="About Markitor"
+            aria-label="About Markitor"
+          >
+            <Info size={16} strokeWidth={1.5} />
+          </button>
         </div>
       </header>
 
@@ -650,6 +664,7 @@ function App() {
       <SettingsDialog />
       <KeyboardShortcutsDialog />
       <PreviewCSSEditorDialog />
+      <AboutDialog />
       <ToastContainer />
     </div>
   )

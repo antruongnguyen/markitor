@@ -20,6 +20,7 @@ import { useShortcutsStore } from '../store/shortcutsStore'
 import { useLintStore } from '../store/lintStore'
 import { useFrontmatterStore } from '../store/frontmatterStore'
 import { useSavedDocumentsStore } from '../store/savedDocumentsStore'
+import { useAboutDialogStore } from '../store/aboutDialogStore'
 import { editorViewRef } from '../utils/editorViewRef'
 import { formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { openSearchPanel, closeSearchPanel } from '@codemirror/search'
@@ -464,6 +465,12 @@ function buildCommands(handlers: {
           },
         ]
       : []),
+    {
+      id: 'app.about',
+      label: 'About Markitor',
+      category: 'App',
+      execute: () => useAboutDialogStore.getState().setOpen(true),
+    },
 
     // Auto-save commands
     {
