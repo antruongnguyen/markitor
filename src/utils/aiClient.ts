@@ -138,17 +138,46 @@ export async function sendMessage(opts: {
   } catch (err: unknown) {
     if (err instanceof DOMException && err.name === 'AbortError') throw err
 
+    // Detect CORS / connection errors and give actionable guidance
+    const isConnectionError =
+      err instanceof Anthropic.APIConnectionError ||
+      err instanceof OpenAI.APIConnectionError ||
+      (err instanceof TypeError && /fetch|network/i.test(err.message))
+
+    if (isConnectionError) {
+      const base = opts.baseUrl
+      const isLocal = /localhost|127\.0\.0\.1/i.test(base)
+      const isProduction = !import.meta.env.DEV
+
+      let msg = `Connection failed to ${base}.`
+
+      if (isLocal) {
+        msg += ' Make sure the local server is running.'
+      }
+
+      if (isProduction && !base.includes('anthropic.com') && !base.includes('openai.com')) {
+        // In production, cross-origin requests to non-CORS APIs will fail
+        msg += '\n\nThis is likely a CORS issue. Your API server must send Access-Control-Allow-Origin headers to allow requests from this app.'
+
+        if (base.includes('litellm') || base.includes(':4000') || base.includes(':6655')) {
+          msg += '\n\nFor LiteLLM, start it with:\n  litellm --cors_allow_origin "*"'
+        } else if (opts.provider === 'ollama' || base.includes(':11434')) {
+          msg += '\n\nOllama supports CORS by default. Make sure Ollama is running and accessible.'
+        } else {
+          msg += '\n\nOptions:\n• Configure your API server to allow CORS\n• Use Anthropic or OpenAI (they support browser requests)\n• Use a reverse proxy (e.g. nginx) that adds CORS headers'
+        }
+      }
+
+      throw new Error(msg)
+    }
+
     // Surface SDK error messages clearly
     const msg =
-      err instanceof Anthropic.APIConnectionError || err instanceof OpenAI.APIConnectionError
-        ? `Connection failed to ${opts.baseUrl}. ${/localhost|127\.0\.0\.1/i.test(opts.baseUrl) ? 'Make sure the local server (e.g. Ollama) is running.' : 'This may be a CORS issue — use Anthropic (supports browser access) or a local provider like Ollama.'}`
-        : err instanceof Anthropic.APIError
-          ? `Anthropic API error ${err.status}: ${err.message}`
-          : err instanceof OpenAI.APIError
-            ? `API error ${err.status}: ${err.message}`
-            : err instanceof TypeError && /fetch|network/i.test(err.message)
-              ? `Network error connecting to ${opts.baseUrl}. Check your connection and provider settings.`
-              : null
+      err instanceof Anthropic.APIError
+        ? `Anthropic API error ${err.status}: ${err.message}`
+        : err instanceof OpenAI.APIError
+          ? `API error ${err.status}: ${err.message}`
+          : null
 
     if (msg) throw new Error(msg)
     throw err

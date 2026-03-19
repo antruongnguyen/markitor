@@ -186,6 +186,16 @@ function SettingsDialogInner({ onClose }: { onClose: () => void }) {
                 ? 'Uses /v1/messages (Anthropic native). Change for proxy providers.'
                 : 'Uses /v1/chat/completions (OpenAI-compatible format).'}
             </span>
+            {localBaseUrl && /localhost|127\.0\.0\.1/i.test(localBaseUrl) && (
+              <span className="text-[11px] text-amber-600 dark:text-amber-400">
+                Local servers need CORS enabled for browser access.
+                {localBaseUrl.includes('litellm') || localBaseUrl.includes(':4000') || localBaseUrl.includes(':6655')
+                  ? ' For LiteLLM: litellm --cors_allow_origin "*"'
+                  : localProvider === 'ollama' || localBaseUrl.includes(':11434')
+                    ? ' Ollama supports CORS by default.'
+                    : ' Configure your server to send Access-Control-Allow-Origin headers.'}
+              </span>
+            )}
           </label>
 
           {/* Model with autocomplete */}
