@@ -72,6 +72,7 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'view.export', name: 'Export Menu', category: 'View', keys: 'Mod+Shift+E', description: 'Toggle the export menu' },
   { id: 'view.typewriter', name: 'Typewriter Mode', category: 'View', keys: 'Mod+Alt+T', description: 'Toggle typewriter mode (cursor stays centered)' },
   { id: 'view.shortcuts', name: 'Keyboard Shortcuts', category: 'View', keys: 'Mod+/', description: 'Show all keyboard shortcuts' },
+  { id: 'view.frontmatter', name: 'Toggle Frontmatter', category: 'View', keys: 'Mod+Alt+F', description: 'Show or hide the YAML frontmatter editor' },
 
   // ── Layout ────────────────────────────────────────────
   { id: 'layout.editor', name: 'Editor Only', category: 'Layout', keys: 'Mod+Shift+1', description: 'Switch to editor-only layout' },

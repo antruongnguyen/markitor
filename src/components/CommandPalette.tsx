@@ -518,6 +518,7 @@ function buildCommands(handlers: {
       id: 'view.toggle-frontmatter',
       label: 'Toggle Frontmatter Editor',
       category: 'View',
+      shortcut: shortcutFor('view.frontmatter'),
       execute: () => useFrontmatterStore.getState().toggle(),
     },
     {

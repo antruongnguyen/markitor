@@ -37,6 +37,7 @@ import {
   ChevronDown,
   MoveVertical,
   AlertTriangle,
+  FileText,
 } from 'lucide-react'
 import {
   toggleBold,
@@ -65,6 +66,7 @@ import { useStatsStore } from '../store/statsStore'
 import { useSearchStore } from '../store/searchStore'
 import { useFocusModeStore } from '../store/focusModeStore'
 import { useLintStore } from '../store/lintStore'
+import { useFrontmatterStore } from '../store/frontmatterStore'
 import { tooltipWithShortcut, formatKeysInline, getShortcutById, getEffectiveKeys } from '../utils/shortcuts'
 import { TableGridPicker } from './TableGridPicker'
 import { EmojiPicker } from './EmojiPicker'
@@ -200,6 +202,9 @@ export function Toolbar({ getView }: ToolbarProps) {
   const toggleTypewriter = useFocusModeStore((s) => s.toggleTypewriter)
   const lintEnabled = useLintStore((s) => s.enabled)
   const toggleLint = useLintStore((s) => s.toggle)
+  const frontmatterExpanded = useFrontmatterStore((s) => s.expanded)
+  const frontmatterExists = useFrontmatterStore((s) => s.hasFrontmatter)
+  const toggleFrontmatter = useFrontmatterStore((s) => s.toggle)
   const searchOpen = useSearchStore((s) => s.isOpen)
   const tableButtonRef = useRef<HTMLButtonElement>(null)
   const imageButtonRef = useRef<HTMLButtonElement>(null)
@@ -420,6 +425,26 @@ export function Toolbar({ getView }: ToolbarProps) {
         }}
       >
         <AlertTriangle size={17} strokeWidth={1.5} />
+      </button>
+
+      {/* Frontmatter toggle */}
+      <button
+        type="button"
+        title={tooltipWithShortcut('Toggle Frontmatter', 'view.frontmatter')}
+        className={`relative flex h-7 min-w-[28px] items-center justify-center rounded-md px-1.5 transition-all duration-150 active:scale-95 ${
+          frontmatterExpanded
+            ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+        }`}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          toggleFrontmatter()
+        }}
+      >
+        <FileText size={17} strokeWidth={1.5} />
+        {!frontmatterExpanded && frontmatterExists && (
+          <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-blue-500 dark:bg-blue-400" />
+        )}
       </button>
 
     </div>

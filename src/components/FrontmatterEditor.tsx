@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   ChevronDown,
-  ChevronRight,
   Plus,
   Trash2,
   X,
@@ -275,6 +274,7 @@ export function FrontmatterEditor() {
   const setContent = useEditorStore((s) => s.setContent)
   const expanded = useFrontmatterStore((s) => s.expanded)
   const toggle = useFrontmatterStore((s) => s.toggle)
+  const setStoreHasFrontmatter = useFrontmatterStore((s) => s.setHasFrontmatter)
 
   const [fields, setFields] = useState<FrontmatterField[]>([])
   const [hasFrontmatter, setHasFrontmatter] = useState(false)
@@ -286,10 +286,11 @@ export function FrontmatterEditor() {
     if (syncingRef.current) return
     const result = extractFrontmatter(content)
     setHasFrontmatter(result.found)
+    setStoreHasFrontmatter(result.found)
     if (result.found) {
       setFields(result.fields)
     }
-  }, [content])
+  }, [content, setStoreHasFrontmatter])
 
   // Sync from fields -> editor content (debounced)
   const syncToEditor = useCallback(
@@ -333,6 +334,7 @@ export function FrontmatterEditor() {
           const newContent = removeFrontmatter(content)
           setContent(newContent)
           setHasFrontmatter(false)
+          setStoreHasFrontmatter(false)
           requestAnimationFrame(() => {
             syncingRef.current = false
           })
@@ -361,6 +363,7 @@ export function FrontmatterEditor() {
           const newContent = replaceFrontmatter(content, yamlStr)
           setContent(newContent)
           setHasFrontmatter(true)
+          setStoreHasFrontmatter(true)
           requestAnimationFrame(() => {
             syncingRef.current = false
           })
@@ -378,6 +381,7 @@ export function FrontmatterEditor() {
       const newFields = template.fields.map((f) => ({ ...f }))
       setFields(newFields)
       setHasFrontmatter(true)
+      setStoreHasFrontmatter(true)
       syncingRef.current = true
       const yamlStr = buildFrontmatter(newFields)
       const newContent = replaceFrontmatter(content, yamlStr)
@@ -396,8 +400,8 @@ export function FrontmatterEditor() {
     }
   }, [])
 
-  // Don't render anything if no frontmatter and collapsed
-  if (!hasFrontmatter && !expanded) return null
+  // Don't render if panel is collapsed — toolbar button handles toggling back
+  if (!expanded) return null
 
   return (
     <div className="shrink-0 border-b border-gray-200/80 bg-gray-50/80 dark:border-gray-700/60 dark:bg-gray-800/60">
@@ -408,7 +412,7 @@ export function FrontmatterEditor() {
           onClick={toggle}
           className="flex items-center gap-1 rounded px-1 py-0.5 text-xs font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
         >
-          {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          <ChevronDown size={14} />
           Frontmatter
           {hasFrontmatter && (
             <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
@@ -417,9 +421,9 @@ export function FrontmatterEditor() {
           )}
         </button>
         <div className="flex items-center gap-1">
-          {expanded && <TemplatePicker onSelect={applyTemplate} />}
-          {expanded && <AddFieldButton onAdd={addField} />}
-          {!hasFrontmatter && expanded && (
+          <TemplatePicker onSelect={applyTemplate} />
+          <AddFieldButton onAdd={addField} />
+          {!hasFrontmatter && (
             <button
               type="button"
               onClick={() => addField('string')}
@@ -432,8 +436,8 @@ export function FrontmatterEditor() {
         </div>
       </div>
 
-      {/* Expandable field list */}
-      {expanded && hasFrontmatter && fields.length > 0 && (
+      {/* Field list */}
+      {hasFrontmatter && fields.length > 0 && (
         <div className="space-y-1.5 px-2 pb-2">
           {fields.map((field, i) => (
             <FieldRow
@@ -446,7 +450,7 @@ export function FrontmatterEditor() {
         </div>
       )}
 
-      {expanded && hasFrontmatter && fields.length === 0 && (
+      {hasFrontmatter && fields.length === 0 && (
         <div className="px-2 pb-2 text-xs text-gray-400 dark:text-gray-500">
           Frontmatter detected but could not parse fields. Edit the YAML directly in the editor.
         </div>

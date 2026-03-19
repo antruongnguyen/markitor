@@ -23,6 +23,7 @@ import { useToastStore } from '../store/toastStore'
 import { useEditorStore } from '../store/editorStore'
 import { useEmojiPickerStore } from '../store/emojiPickerStore'
 import { useFocusModeStore } from '../store/focusModeStore'
+import { useFrontmatterStore } from '../store/frontmatterStore'
 
 type ShortcutHandlers = {
   onSave?: () => void | Promise<void>
@@ -103,6 +104,13 @@ function makeShortcutBindings(
       key: key('view.typewriter', customBindings),
       run: () => {
         useFocusModeStore.getState().toggleTypewriter()
+        return true
+      },
+    },
+    {
+      key: key('view.frontmatter', customBindings),
+      run: () => {
+        useFrontmatterStore.getState().toggle()
         return true
       },
     },
