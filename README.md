@@ -72,7 +72,7 @@ Markitor is a fully client-side Progressive Web App. No backend, no accounts, no
 ### Install
 
 ```bash
-git clone https://github.com/user/markitor.git
+git clone https://github.com/antruongnguyen/markitor.git
 cd markitor
 npm install
 ```
